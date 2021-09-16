@@ -1,6 +1,6 @@
 {
   "role": {
-    "name": "hmpps-template-kotlin"
+    "name": "nomis-user-roles-api"
   },
   "customDimensions": {
     "service.version": "${BUILD_NUMBER}"
