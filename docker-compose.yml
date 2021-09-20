@@ -3,7 +3,6 @@ services:
   nomis-user-roles-api:
     build:
       context: .
-    network_mode: "host"
     container_name: nomis-user-roles-api
     ports:
       - "8081:8080"
