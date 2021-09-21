@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.reactive.function.client.WebClientException
 import org.springframework.web.reactive.function.client.WebClientResponseException
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserNotFoundException
 import javax.validation.ValidationException
 
 @RestControllerAdvice
@@ -57,6 +58,20 @@ class NomisUserRolesApiExceptionHandler {
       )
   }
 
+  @ExceptionHandler(UserNotFoundException::class)
+  fun handleRoleNotFoundException(e: UserNotFoundException): ResponseEntity<ErrorResponse?>? {
+    log.debug("User not found exception caught: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.NOT_FOUND)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.NOT_FOUND,
+          userMessage = "Unexpected error: ${e.message}",
+          developerMessage = e.message
+        )
+      )
+  }
+
   @ExceptionHandler(MissingServletRequestParameterException::class)
   fun handleValidationException(e: MissingServletRequestParameterException): ResponseEntity<ErrorResponse> {
     log.debug("Bad Request (400) returned", e)
@@ -88,15 +103,13 @@ data class ErrorResponse(
   val status: Int,
   val errorCode: Int? = null,
   val userMessage: String? = null,
-  val developerMessage: String? = null,
-  val moreInfo: String? = null
+  val developerMessage: String? = null
 ) {
   constructor(
     status: HttpStatus,
     errorCode: Int? = null,
     userMessage: String? = null,
-    developerMessage: String? = null,
-    moreInfo: String? = null
+    developerMessage: String? = null
   ) :
-    this(status.value(), errorCode, userMessage, developerMessage, moreInfo)
+    this(status.value(), errorCode, userMessage, developerMessage)
 }

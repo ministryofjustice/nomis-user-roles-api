@@ -6,7 +6,7 @@ CREATE TABLE "STAFF_USER_ACCOUNTS"
   "ID_SOURCE"                     VARCHAR2(12 CHAR)                 NOT NULL ,
   "WORKING_CASELOAD_ID"           VARCHAR2(6 CHAR),
   "CREATE_DATETIME"               TIMESTAMP(9) DEFAULT systimestamp NOT NULL ,
-  "CREATE_USER_ID"                VARCHAR2(32 CHAR) DEFAULT user()    NOT NULL ,
+  "CREATE_USER_ID"                VARCHAR2(32 CHAR) DEFAULT user()  NOT NULL ,
   "MODIFY_DATETIME"               TIMESTAMP(9),
   "MODIFY_USER_ID"                VARCHAR2(32 CHAR),
   "AUDIT_TIMESTAMP"               TIMESTAMP(9),

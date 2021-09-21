@@ -13,7 +13,7 @@ data class Staff(
   val staffId: Long,
 
   @Column(name = "FIRST_NAME", nullable = false)
-  private val firstName: String,
+  val firstName: String,
 
   @Column(name = "LAST_NAME", nullable = false)
   val lastName: String,

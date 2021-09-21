@@ -23,6 +23,15 @@ class UserControllerIntTest : IntegrationTestBase() {
   }
 
   @Test
+  fun `get user not found`() {
+
+    webTestClient.get().uri("/users/dummy")
+      .headers(setAuthorisation(roles = listOf("ROLE_USER_ADMIN")))
+      .exchange()
+      .expectStatus().isNotFound
+  }
+
+  @Test
   fun `get user`() {
 
     webTestClient.get().uri("/users/testuser1")
