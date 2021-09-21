@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.IntegrationTestBase
 
-
 class UserControllerIntTest : IntegrationTestBase() {
 
   @Test

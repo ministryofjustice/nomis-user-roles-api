@@ -23,5 +23,4 @@ class UserResourceTest {
       UserDetail("testuser1", 1, "John", "Smith")
     )
   }
-
 }

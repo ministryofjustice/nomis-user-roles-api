@@ -32,5 +32,4 @@ data class AccountDetail(
   }
 
   override fun hashCode(): Int = username.hashCode()
-
 }

@@ -65,7 +65,6 @@ class NomisUserRolesApiExceptionHandler {
       .body(ErrorResponse(status = (BAD_REQUEST.value()), developerMessage = (e.message)))
   }
 
-
   @ExceptionHandler(java.lang.Exception::class)
   fun handleException(e: java.lang.Exception): ResponseEntity<ErrorResponse?>? {
     log.error("Unexpected exception", e)
@@ -99,5 +98,5 @@ data class ErrorResponse(
     developerMessage: String? = null,
     moreInfo: String? = null
   ) :
-          this(status.value(), errorCode, userMessage, developerMessage, moreInfo)
+    this(status.value(), errorCode, userMessage, developerMessage, moreInfo)
 }

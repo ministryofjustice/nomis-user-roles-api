@@ -53,5 +53,4 @@ class NomisUserPersonDetails(
     this.type = type
     this.activeCaseLoadId = activeCaseLoadId
   }
-
 }

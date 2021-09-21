@@ -12,17 +12,17 @@ import org.springframework.context.annotation.Configuration
  */
 @Configuration
 class ApplicationInsightsConfiguration {
-    @Bean
-    @ConditionalOnExpression("T(org.apache.commons.lang3.StringUtils).isBlank('\${applicationinsights.connection.string:}')")
-    fun telemetryClient(): TelemetryClient {
-        log.warn("Application insights configuration missing, returning dummy bean instead")
+  @Bean
+  @ConditionalOnExpression("T(org.apache.commons.lang3.StringUtils).isBlank('\${applicationinsights.connection.string:}')")
+  fun telemetryClient(): TelemetryClient {
+    log.warn("Application insights configuration missing, returning dummy bean instead")
 
-        return TelemetryClient()
-    }
+    return TelemetryClient()
+  }
 
-    companion object {
-        private val log = LoggerFactory.getLogger(this::class.java)
-    }
+  companion object {
+    private val log = LoggerFactory.getLogger(this::class.java)
+  }
 }
 
 fun TelemetryClient.trackEvent(name: String, properties: Map<String, String>) = this.trackEvent(name, properties, null)
