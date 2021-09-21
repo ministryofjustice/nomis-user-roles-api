@@ -1,0 +1,24 @@
+spring:
+  flyway:
+    enabled: true
+
+  devtools:
+    add-properties: true
+
+  datasource:
+    url: 'jdbc:h2:mem:nomis-db;MODE=Oracle'
+
+  h2:
+    console:
+      enabled: true
+  jpa:
+    show-sql: true
+
+
+server:
+  shutdown: immediate
+
+api:
+  base:
+    url:
+      oauth: http://localhost:9090/auth

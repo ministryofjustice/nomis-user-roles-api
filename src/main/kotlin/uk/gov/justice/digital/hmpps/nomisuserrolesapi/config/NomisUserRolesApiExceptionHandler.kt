@@ -5,12 +5,44 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.reactive.function.client.WebClientException
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import javax.validation.ValidationException
 
 @RestControllerAdvice
 class NomisUserRolesApiExceptionHandler {
+  @ExceptionHandler(AccessDeniedException::class)
+  fun handleAccessDeniedException(e: AccessDeniedException): ResponseEntity<ErrorResponse> {
+    log.debug("Forbidden (403) returned with message {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.FORBIDDEN)
+      .body(ErrorResponse(status = (HttpStatus.FORBIDDEN.value())))
+  }
+
+  @ExceptionHandler(WebClientResponseException::class)
+  fun handleWebClientResponseException(e: WebClientResponseException): ResponseEntity<ByteArray> {
+    if (e.statusCode.is4xxClientError) {
+      log.info("Unexpected client exception with message {}", e.message)
+    } else {
+      log.error("Unexpected server exception", e)
+    }
+    return ResponseEntity
+      .status(e.rawStatusCode)
+      .body(e.responseBodyAsByteArray)
+  }
+
+  @ExceptionHandler(WebClientException::class)
+  fun handleWebClientException(e: WebClientException): ResponseEntity<ErrorResponse> {
+    log.error("Unexpected exception", e)
+    return ResponseEntity
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .body(ErrorResponse(status = (HttpStatus.INTERNAL_SERVER_ERROR.value()), developerMessage = (e.message)))
+  }
+
   @ExceptionHandler(ValidationException::class)
   fun handleValidationException(e: Exception): ResponseEntity<ErrorResponse> {
     log.info("Validation exception: {}", e.message)
@@ -24,6 +56,15 @@ class NomisUserRolesApiExceptionHandler {
         )
       )
   }
+
+  @ExceptionHandler(MissingServletRequestParameterException::class)
+  fun handleValidationException(e: MissingServletRequestParameterException): ResponseEntity<ErrorResponse> {
+    log.debug("Bad Request (400) returned", e)
+    return ResponseEntity
+      .status(BAD_REQUEST)
+      .body(ErrorResponse(status = (BAD_REQUEST.value()), developerMessage = (e.message)))
+  }
+
 
   @ExceptionHandler(java.lang.Exception::class)
   fun handleException(e: java.lang.Exception): ResponseEntity<ErrorResponse?>? {
@@ -58,5 +99,5 @@ data class ErrorResponse(
     developerMessage: String? = null,
     moreInfo: String? = null
   ) :
-    this(status.value(), errorCode, userMessage, developerMessage, moreInfo)
+          this(status.value(), errorCode, userMessage, developerMessage, moreInfo)
 }
