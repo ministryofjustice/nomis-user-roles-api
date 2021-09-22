@@ -5,9 +5,8 @@ generic-service:
   replicaCount: 4
 
   ingress:
-    host: nomis-user-roles-api-preprod.aks-live-1.studio-hosting.service.justice.gov.uk
+    host: nomis-user-roles-api.aks-live-1.studio-hosting.service.justice.gov.uk
 
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
-    API_BASE_URL_OAUTH: https://sign-in-preprod.hmpps.service.justice.gov.uk/auth
 
