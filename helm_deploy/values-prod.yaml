@@ -5,7 +5,7 @@ generic-service:
   replicaCount: 4
 
   ingress:
-    host: nomis-user-roles-api.aks-live-1.studio-hosting.service.justice.gov.uk
+    host: nomis-user.aks-live-1.studio-hosting.service.justice.gov.uk
 
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
