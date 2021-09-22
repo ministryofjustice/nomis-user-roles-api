@@ -24,7 +24,7 @@ class UserResource(
   private val userService: UserService
 ) {
 
-  @PreAuthorize("hasRole('ROLE_USER_ADMIN')")
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @GetMapping("/{username}")
   @Operation(
     summary = "Get specified user details",
