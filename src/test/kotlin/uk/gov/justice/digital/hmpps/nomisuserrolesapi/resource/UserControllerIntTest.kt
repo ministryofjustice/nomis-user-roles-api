@@ -23,10 +23,19 @@ class UserControllerIntTest : IntegrationTestBase() {
   }
 
   @Test
+  fun `get user forbidden with wrong role`() {
+
+    webTestClient.get().uri("/users/testuser1")
+      .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
+      .exchange()
+      .expectStatus().isForbidden
+  }
+
+  @Test
   fun `get user not found`() {
 
     webTestClient.get().uri("/users/dummy")
-      .headers(setAuthorisation(roles = listOf("ROLE_USER_ADMIN")))
+      .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
       .exchange()
       .expectStatus().isNotFound
   }
@@ -35,7 +44,7 @@ class UserControllerIntTest : IntegrationTestBase() {
   fun `get user`() {
 
     webTestClient.get().uri("/users/testuser1")
-      .headers(setAuthorisation(roles = listOf("ROLE_USER_ADMIN")))
+      .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
       .exchange()
       .expectStatus().isOk
       .expectBody().json(
