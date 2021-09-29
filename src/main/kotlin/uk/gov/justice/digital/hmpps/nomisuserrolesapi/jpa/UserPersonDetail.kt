@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
 import org.hibernate.Hibernate
+import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.FetchType
@@ -17,20 +18,31 @@ data class UserPersonDetail(
   @Column(name = "USERNAME", nullable = false)
   val username: String,
 
-  @ManyToOne
+  @ManyToOne(cascade = [CascadeType.ALL])
   @JoinColumn(name = "STAFF_ID")
   val staff: Staff,
 
   @OneToMany(fetch = FetchType.LAZY)
   @JoinColumn(name = "USERNAME")
-  val roles: List<UserCaseloadRole> = listOf()
-) {
+  val roles: List<UserCaseloadRole> = listOf(),
+
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
+  @JoinColumn(name = "USERNAME")
+  val administeredLinks: List<LAAGeneralUser> = listOf(),
+
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
+  @JoinColumn(name = "USERNAME")
+  val administratorLinks: List<LAAAdminUser> = listOf(),
 
   @Column(name = "STAFF_USER_TYPE", nullable = false)
-  var type: String? = null
+  val type: String,
 
   @Column(name = "WORKING_CASELOAD_ID")
-  var activeCaseLoadId: String? = null
+  var activeCaseLoadId: String? = null,
+
+  @Column(name = "ID_SOURCE")
+  var idSource: String = "USER",
+) {
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
