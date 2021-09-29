@@ -39,7 +39,7 @@ data class LocalAdminAuthority(
   @JoinColumn(name = "LOCAL_AUTHORITY_CODE")
   val administrators: List<LAAAdminUser> = listOf(),
 
-  ) {
+) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false

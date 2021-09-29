@@ -39,7 +39,7 @@ data class Staff(
     if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
     other as Staff
 
-    return staffId != null && staffId == other.staffId
+    return staffId == other.staffId
   }
 
   override fun hashCode(): Int = 0

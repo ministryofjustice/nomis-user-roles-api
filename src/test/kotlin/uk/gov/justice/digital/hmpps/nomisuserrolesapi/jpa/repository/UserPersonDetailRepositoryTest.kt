@@ -13,7 +13,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.generalUserEntityCr
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.localAdministratorEntityCreator
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.LAAAdminUser
 
-
 @DataJpaTest
 @ActiveProfiles("test")
 class UserPersonDetailRepositoryTest {

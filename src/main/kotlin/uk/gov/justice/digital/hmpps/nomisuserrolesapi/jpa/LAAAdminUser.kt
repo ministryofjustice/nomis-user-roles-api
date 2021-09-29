@@ -1,3 +1,5 @@
+@file:Suppress("DataClassEqualsAndHashCodeInspection")
+
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
 import org.hibernate.Hibernate
@@ -51,5 +53,4 @@ data class LAAAdminUser(
   override fun toString(): String {
     return this::class.simpleName + id.toString()
   }
-
 }

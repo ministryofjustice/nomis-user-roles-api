@@ -11,7 +11,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.LocalAdminA
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import java.time.LocalDate
 
-
 class GeneralUserBuilder(
   private val repository: UserPersonDetailRepository,
   private val localAdminRepository: LocalAdminAuthorityRepository,
@@ -117,7 +116,6 @@ fun localAdministratorEntityCreator(
 ): LocalAdministratorBuilder {
   return LocalAdministratorBuilder(repository, localAdminRepository, userPersonDetail, prisonCodes)
 }
-
 
 fun defaultPerson(): UserPersonDetail {
   return UserPersonDetail(
