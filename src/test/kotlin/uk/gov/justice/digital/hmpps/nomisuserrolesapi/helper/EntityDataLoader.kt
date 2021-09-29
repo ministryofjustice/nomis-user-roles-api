@@ -30,14 +30,28 @@ class GeneralUserBuilder(
     }
   }
 
-  fun save() {
-    repository.saveAndFlush(
+  fun build(): GeneralUserBuilder {
+    userPersonDetail =
       userPersonDetail.copy(
         administeredLinks = generalUsersOf(prisonCodes),
         type = "GENERAL",
         activeCaseLoadId = prisonCodes.first()
       )
-    )
+    return this
+  }
+
+  fun save() {
+    repository.saveAndFlush(userPersonDetail)
+  }
+
+  fun buildAndSave() {
+    build()
+    repository.saveAndFlush(userPersonDetail)
+  }
+
+  fun transform(transformer: (UserPersonDetail) -> UserPersonDetail): GeneralUserBuilder {
+    userPersonDetail = transformer(userPersonDetail)
+    return this
   }
 
   fun username(username: String): GeneralUserBuilder {
@@ -73,14 +87,28 @@ class LocalAdministratorBuilder(
     }
   }
 
-  fun save() {
-    repository.saveAndFlush(
+  fun build(): LocalAdministratorBuilder {
+    userPersonDetail =
       userPersonDetail.copy(
         administratorLinks = adminUsersOf(prisonCodes),
         type = "ADMIN",
         activeCaseLoadId = prisonCodes.first()
       )
-    )
+    return this
+  }
+
+  fun save() {
+    repository.saveAndFlush(userPersonDetail)
+  }
+
+  fun buildAndSave() {
+    build()
+    repository.saveAndFlush(userPersonDetail)
+  }
+
+  fun transform(transformer: (UserPersonDetail) -> UserPersonDetail): LocalAdministratorBuilder {
+    userPersonDetail = transformer(userPersonDetail)
+    return this
   }
 
   fun username(username: String): LocalAdministratorBuilder {

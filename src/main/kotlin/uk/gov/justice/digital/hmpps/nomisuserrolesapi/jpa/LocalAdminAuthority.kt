@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
 import org.hibernate.Hibernate
 import org.hibernate.annotations.Type
+import org.hibernate.annotations.Where
 import java.time.LocalDate
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -33,10 +34,20 @@ data class LocalAdminAuthority(
 
   @OneToMany(fetch = FetchType.LAZY)
   @JoinColumn(name = "LOCAL_AUTHORITY_CODE")
+  val allAdministeredUsers: List<LAAGeneralUser> = listOf(),
+
+  @OneToMany(fetch = FetchType.LAZY)
+  @JoinColumn(name = "LOCAL_AUTHORITY_CODE")
+  val allAdministrators: List<LAAAdminUser> = listOf(),
+
+  @OneToMany(fetch = FetchType.LAZY)
+  @JoinColumn(name = "LOCAL_AUTHORITY_CODE")
+  @Where(clause = "ACTIVE_FLAG = 'Y'")
   val administeredUsers: List<LAAGeneralUser> = listOf(),
 
   @OneToMany(fetch = FetchType.LAZY)
   @JoinColumn(name = "LOCAL_AUTHORITY_CODE")
+  @Where(clause = "ACTIVE_FLAG = 'Y'")
   val administrators: List<LAAAdminUser> = listOf(),
 
 ) {

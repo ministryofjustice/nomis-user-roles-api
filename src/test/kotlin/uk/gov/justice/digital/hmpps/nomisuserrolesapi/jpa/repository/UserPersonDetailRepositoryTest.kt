@@ -2,16 +2,18 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.context.ActiveProfiles
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.GeneralUserBuilder
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.LocalAdministratorBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.generalUserEntityCreator
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.localAdministratorEntityCreator
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.LAAAdminUser
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.LAAGeneralUser
+import java.time.LocalDate
+import javax.persistence.EntityManager
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -21,23 +23,20 @@ class UserPersonDetailRepositoryTest {
 
   @Autowired
   lateinit var localAdminAuthorityRepository: LocalAdminAuthorityRepository
-  lateinit var generalUserCreator: GeneralUserBuilder
-  lateinit var localAdministratorCreator: LocalAdministratorBuilder
 
-  @BeforeEach
-  internal fun setUp() {
-    generalUserCreator = generalUserEntityCreator(repository, localAdminAuthorityRepository)
-    localAdministratorCreator = localAdministratorEntityCreator(repository, localAdminAuthorityRepository)
-  }
+  @Autowired
+  lateinit var entityManager: EntityManager
 
   @Test
   internal fun `can read a user general user`() {
     assertThat(repository.findByIdOrNull("jim.bubbles")).isNull()
 
-    generalUserCreator
+    generalUserEntityCreator(repository, localAdminAuthorityRepository)
       .username("jim.bubbles")
       .atPrison("WWI")
-      .save()
+      .buildAndSave()
+
+    entityManager.clear()
 
     val user = repository.findByIdOrNull("jim.bubbles")!!
 
@@ -51,10 +50,12 @@ class UserPersonDetailRepositoryTest {
   internal fun `can read a local administrator user`() {
     assertThat(repository.findByIdOrNull("diane.bubbles")).isNull()
 
-    localAdministratorCreator
+    localAdministratorEntityCreator(repository, localAdminAuthorityRepository)
       .username("diane.bubbles")
       .atPrison("WWI")
-      .save()
+      .buildAndSave()
+
+    entityManager.clear()
 
     val user = repository.findByIdOrNull("diane.bubbles")!!
 
@@ -64,55 +65,124 @@ class UserPersonDetailRepositoryTest {
     assertThat(user.administeredLinks).isEmpty()
   }
 
-  @Test
-  internal fun `can read a local administrator user that administers general users`() {
-    localAdministratorCreator
-      .username("jane.bubbles.wwi.bxi")
-      .atPrisons(listOf("WWI", "BXI"))
-      .save()
+  @Nested
+  inner class LocalAdministrators {
+    @BeforeEach
+    internal fun setupGeneralUsers() {
+      generalUserEntityCreator(repository, localAdminAuthorityRepository)
+        .username("jane.wwi")
+        .atPrison("WWI")
+        .buildAndSave()
+      generalUserEntityCreator(repository, localAdminAuthorityRepository)
+        .username("simon.wwi")
+        .atPrison("WWI")
+        .buildAndSave()
+      generalUserEntityCreator(repository, localAdminAuthorityRepository)
+        .username("steve.wwi.bxi")
+        .atPrisons(listOf("WWI", "BXI"))
+        .buildAndSave()
+      generalUserEntityCreator(repository, localAdminAuthorityRepository)
+        .username("claire.bxi")
+        .atPrison("BXI")
+        .buildAndSave()
+      generalUserEntityCreator(repository, localAdminAuthorityRepository)
+        .username("raj.mdi")
+        .atPrison("MDI")
+        .buildAndSave()
+    }
 
-    localAdministratorCreator
-      .username("hina.bukhari.mdi")
-      .atPrison("MDI")
-      .save()
+    @Test
+    internal fun `can read a local administrator user that administers general users at multiple prisons`() {
+      localAdministratorEntityCreator(repository, localAdminAuthorityRepository)
+        .username("jane.bubbles.wwi.bxi")
+        .atPrisons(listOf("WWI", "BXI"))
+        .buildAndSave()
 
-    generalUserCreator
-      .username("jane.wwi")
-      .atPrison("WWI")
-      .save()
-    generalUserCreator
-      .username("simon.wwi")
-      .atPrison("WWI")
-      .save()
-    generalUserCreator
-      .username("steve.wwi.bxi")
-      .atPrisons(listOf("WWI", "BXI"))
-      .save()
-    generalUserCreator
-      .username("claire.bxi")
-      .atPrison("BXI")
-      .save()
-    generalUserCreator
-      .username("raj.mdi")
-      .atPrison("MDI")
-      .save()
+      localAdministratorEntityCreator(repository, localAdminAuthorityRepository)
+        .username("hina.bukhari.mdi")
+        .atPrison("MDI")
+        .buildAndSave()
 
-    val janeBubbles = repository.findByIdOrNull("jane.bubbles.wwi.bxi")!!
+      entityManager.clear()
 
-    assertThat(janeBubbles.administratorLinks).hasSize(2)
-    assertThat(janeBubbles.administratorLinks.authorityOf("WWI").administeredUsers)
-      .extracting<Pair<String, String>> { it.user.username to it.authority.localAuthorityCode }
-      .containsExactly("jane.wwi" to "WWI", "simon.wwi" to "WWI", "steve.wwi.bxi" to "WWI")
-    assertThat(janeBubbles.administratorLinks.authorityOf("BXI").administeredUsers)
-      .extracting<Pair<String, String>> { it.user.username to it.authority.localAuthorityCode }
-      .containsExactly("steve.wwi.bxi" to "BXI", "claire.bxi" to "BXI")
+      val janeBubbles = repository.findByIdOrNull("jane.bubbles.wwi.bxi")!!
 
-    val hinaBukhari = repository.findByIdOrNull("hina.bukhari.mdi")!!
+      assertThat(janeBubbles.administratorLinks).hasSize(2)
+      assertThat(janeBubbles.administratorLinks.authorityOf("WWI").administeredUsers)
+        .extracting<Pair<String, String>> { it.user.username to it.authority.localAuthorityCode }
+        .containsExactly("jane.wwi" to "WWI", "simon.wwi" to "WWI", "steve.wwi.bxi" to "WWI")
+      assertThat(janeBubbles.administratorLinks.authorityOf("BXI").administeredUsers)
+        .extracting<Pair<String, String>> { it.user.username to it.authority.localAuthorityCode }
+        .containsExactly("steve.wwi.bxi" to "BXI", "claire.bxi" to "BXI")
 
-    assertThat(hinaBukhari.administratorLinks).hasSize(1)
-    assertThat(hinaBukhari.administratorLinks.authorityOf("MDI").administeredUsers)
-      .extracting<String> { it.user.username }
-      .containsExactly("raj.mdi")
+      val hinaBukhari = repository.findByIdOrNull("hina.bukhari.mdi")!!
+
+      assertThat(hinaBukhari.administratorLinks).hasSize(1)
+      assertThat(hinaBukhari.administratorLinks.authorityOf("MDI").administeredUsers)
+        .extracting<String> { it.user.username }
+        .containsExactly("raj.mdi")
+    }
+
+    @Test
+    internal fun `will filter out local administered prisons where the link is no longer active`() {
+      val makeInactive: (link: LAAAdminUser) -> LAAAdminUser =
+        { it.copy(active = false, expiryDate = LocalDate.now().minusDays(1)) }
+      val makeWWIInactive: (link: LAAAdminUser) -> LAAAdminUser = {
+        if (it.authority.localAuthorityCode == "WWI") makeInactive(it) else it
+      }
+
+      localAdministratorEntityCreator(repository, localAdminAuthorityRepository)
+        .username("jane.bubbles.wwi.bxi")
+        .atPrisons(listOf("WWI", "BXI"))
+        .build()
+        .transform { user -> user.copy(administratorLinks = user.administratorLinks.map(makeWWIInactive)) }
+        .save()
+
+      entityManager.clear()
+
+      val janeBubbles = repository.findByIdOrNull("jane.bubbles.wwi.bxi")!!
+
+      assertThat(janeBubbles.allAdministratorLinks).hasSize(2)
+      assertThat(janeBubbles.administratorLinks).hasSize(1)
+      assertThat(janeBubbles.administratorLinks.authorityOf("BXI").administeredUsers)
+        .extracting<Pair<String, String>> { it.user.username to it.authority.localAuthorityCode }
+        .containsExactly("steve.wwi.bxi" to "BXI", "claire.bxi" to "BXI")
+    }
+
+    @Test
+    internal fun `will filter out users whose administration link is no longer active`() {
+      val makeInactive: (link: LAAGeneralUser) -> LAAGeneralUser =
+        { it.copy(active = false, expiryDate = LocalDate.now().minusDays(1)) }
+
+      localAdministratorEntityCreator(repository, localAdminAuthorityRepository)
+        .username("jane.bubbles.wli")
+        .atPrison("WLI")
+        .buildAndSave()
+
+      generalUserEntityCreator(repository, localAdminAuthorityRepository)
+        .username("steve.wli")
+        .atPrison("WLI")
+        .build()
+        .transform { user -> user.copy(administeredLinks = user.administeredLinks.map { makeInactive(it) }) }
+        .save()
+      generalUserEntityCreator(repository, localAdminAuthorityRepository)
+        .username("claire.wli")
+        .atPrison("WLI")
+        .buildAndSave()
+      generalUserEntityCreator(repository, localAdminAuthorityRepository)
+        .username("raj.wli")
+        .atPrison("WLI")
+        .buildAndSave()
+
+      entityManager.clear()
+
+      val janeBubbles = repository.findByIdOrNull("jane.bubbles.wli")!!
+
+      assertThat(janeBubbles.administratorLinks.authorityOf("WLI").allAdministeredUsers).hasSize(3)
+      assertThat(janeBubbles.administratorLinks.authorityOf("WLI").administeredUsers)
+        .extracting<String> { it.user.username }
+        .containsExactly("claire.wli", "raj.wli")
+    }
   }
 }
 
