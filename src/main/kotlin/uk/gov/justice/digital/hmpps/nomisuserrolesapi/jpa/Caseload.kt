@@ -11,9 +11,9 @@ import javax.persistence.Table
 data class Caseload(
   @Id
   @Column(name = "CASELOAD_ID", nullable = false)
-  private val id: String,
+  val id: String,
   @Column(name = "DESCRIPTION", nullable = false)
-  private val name: String
+  val name: String
 ) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

@@ -25,13 +25,16 @@ class UserPersonDetailRepositoryTest {
   lateinit var localAdminAuthorityRepository: LocalAdminAuthorityRepository
 
   @Autowired
+  lateinit var caseloadRepository: CaseloadRepository
+
+  @Autowired
   lateinit var entityManager: EntityManager
 
   @Test
   internal fun `can read a user general user`() {
     assertThat(repository.findByIdOrNull("jim.bubbles")).isNull()
 
-    generalUserEntityCreator(repository, localAdminAuthorityRepository)
+    generalUserEntityCreator(repository, localAdminAuthorityRepository, caseloadRepository)
       .username("jim.bubbles")
       .atPrison("WWI")
       .buildAndSave()
@@ -44,6 +47,7 @@ class UserPersonDetailRepositoryTest {
     assertThat(user.staff.staffId).isNotNull.isGreaterThan(99L)
     assertThat(user.administeredLinks).hasSize(1).allMatch { it.id.localAuthorityCode == "WWI" }
     assertThat(user.administratorLinks).isEmpty()
+    assertThat(user.caseloads).hasSize(1).extracting<String> { it.name }.containsExactly("WANDSWORTH (HMP)")
   }
 
   @Test
@@ -69,23 +73,23 @@ class UserPersonDetailRepositoryTest {
   inner class LocalAdministrators {
     @BeforeEach
     internal fun setupGeneralUsers() {
-      generalUserEntityCreator(repository, localAdminAuthorityRepository)
+      generalUserEntityCreator(repository, localAdminAuthorityRepository, caseloadRepository)
         .username("jane.wwi")
         .atPrison("WWI")
         .buildAndSave()
-      generalUserEntityCreator(repository, localAdminAuthorityRepository)
+      generalUserEntityCreator(repository, localAdminAuthorityRepository, caseloadRepository)
         .username("simon.wwi")
         .atPrison("WWI")
         .buildAndSave()
-      generalUserEntityCreator(repository, localAdminAuthorityRepository)
+      generalUserEntityCreator(repository, localAdminAuthorityRepository, caseloadRepository)
         .username("steve.wwi.bxi")
         .atPrisons(listOf("WWI", "BXI"))
         .buildAndSave()
-      generalUserEntityCreator(repository, localAdminAuthorityRepository)
+      generalUserEntityCreator(repository, localAdminAuthorityRepository, caseloadRepository)
         .username("claire.bxi")
         .atPrison("BXI")
         .buildAndSave()
-      generalUserEntityCreator(repository, localAdminAuthorityRepository)
+      generalUserEntityCreator(repository, localAdminAuthorityRepository, caseloadRepository)
         .username("raj.mdi")
         .atPrison("MDI")
         .buildAndSave()
@@ -159,17 +163,17 @@ class UserPersonDetailRepositoryTest {
         .atPrison("WLI")
         .buildAndSave()
 
-      generalUserEntityCreator(repository, localAdminAuthorityRepository)
+      generalUserEntityCreator(repository, localAdminAuthorityRepository, caseloadRepository)
         .username("steve.wli")
         .atPrison("WLI")
         .build()
         .transform { user -> user.copy(administeredLinks = user.administeredLinks.map { makeInactive(it) }) }
         .save()
-      generalUserEntityCreator(repository, localAdminAuthorityRepository)
+      generalUserEntityCreator(repository, localAdminAuthorityRepository, caseloadRepository)
         .username("claire.wli")
         .atPrison("WLI")
         .buildAndSave()
-      generalUserEntityCreator(repository, localAdminAuthorityRepository)
+      generalUserEntityCreator(repository, localAdminAuthorityRepository, caseloadRepository)
         .username("raj.wli")
         .atPrison("WLI")
         .buildAndSave()

@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.LAAGeneralUser
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.LAAGeneralUserPk
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.CaseloadRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.LocalAdminAuthorityRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import java.time.LocalDate
@@ -14,6 +15,7 @@ import java.time.LocalDate
 class GeneralUserBuilder(
   private val repository: UserPersonDetailRepository,
   private val localAdminRepository: LocalAdminAuthorityRepository,
+  private val caseloadRepository: CaseloadRepository,
   private var userPersonDetail: UserPersonDetail,
   private var prisonCodes: List<String>,
 ) {
@@ -35,7 +37,8 @@ class GeneralUserBuilder(
       userPersonDetail.copy(
         administeredLinks = generalUsersOf(prisonCodes),
         type = "GENERAL",
-        activeCaseLoadId = prisonCodes.first()
+        activeCaseLoadId = prisonCodes.first(),
+        caseloads = prisonCodes.map { caseloadRepository.findByIdOrNull(it)!! }
       )
     return this
   }
@@ -130,10 +133,11 @@ class LocalAdministratorBuilder(
 fun generalUserEntityCreator(
   repository: UserPersonDetailRepository,
   localAdminRepository: LocalAdminAuthorityRepository,
+  caseloadRepository: CaseloadRepository,
   userPersonDetail: UserPersonDetail = defaultPerson(),
   prisonCodes: List<String> = listOf("WWI"),
 ): GeneralUserBuilder {
-  return GeneralUserBuilder(repository, localAdminRepository, userPersonDetail, prisonCodes)
+  return GeneralUserBuilder(repository, localAdminRepository, caseloadRepository, userPersonDetail, prisonCodes)
 }
 
 fun localAdministratorEntityCreator(

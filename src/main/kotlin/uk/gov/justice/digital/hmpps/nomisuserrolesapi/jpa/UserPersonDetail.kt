@@ -8,6 +8,8 @@ import javax.persistence.Entity
 import javax.persistence.FetchType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
+import javax.persistence.JoinTable
+import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.Table
@@ -27,6 +29,10 @@ data class UserPersonDetail(
   @OneToMany(fetch = FetchType.LAZY)
   @JoinColumn(name = "USERNAME")
   val roles: List<UserCaseloadRole> = listOf(),
+
+  @ManyToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
+  @JoinTable(name = "USER_ACCESSIBLE_CASELOADS", joinColumns = [JoinColumn(name = "USERNAME", referencedColumnName = "USERNAME")], inverseJoinColumns = [JoinColumn(name = "CASELOAD_ID", referencedColumnName = "CASELOAD_ID")])
+  val caseloads: List<Caseload> = listOf(),
 
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
   @JoinColumn(name = "USERNAME")
