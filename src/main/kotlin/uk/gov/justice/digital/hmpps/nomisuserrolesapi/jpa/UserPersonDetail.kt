@@ -8,8 +8,6 @@ import javax.persistence.Entity
 import javax.persistence.FetchType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
-import javax.persistence.JoinTable
-import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.Table
@@ -30,33 +28,29 @@ data class UserPersonDetail(
   @JoinColumn(name = "USERNAME")
   val roles: List<UserCaseloadRole> = listOf(),
 
-  @ManyToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
-  @JoinTable(name = "USER_ACCESSIBLE_CASELOADS", joinColumns = [JoinColumn(name = "USERNAME", referencedColumnName = "USERNAME")], inverseJoinColumns = [JoinColumn(name = "CASELOAD_ID", referencedColumnName = "CASELOAD_ID")])
-  val caseloads: List<Caseload> = listOf(),
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], mappedBy = "user")
+  val caseloads: List<UserCaseload> = listOf(),
 
-  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
-  @JoinColumn(name = "USERNAME")
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+  val activeAndInactiveMemberOfUserGroups: List<UserGroupMember> = listOf(),
+
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   @Where(clause = "ACTIVE_FLAG = 'Y'")
-  val administeredLinks: List<LAAGeneralUser> = listOf(),
+  val memberOfUserGroups: List<UserGroupMember> = listOf(),
 
-  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
-  @JoinColumn(name = "USERNAME")
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+  val activeAndInactiveAdministratorOfUserGroups: List<UserGroupAdministrator> = listOf(),
+
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   @Where(clause = "ACTIVE_FLAG = 'Y'")
-  val administratorLinks: List<LAAAdminUser> = listOf(),
-
-  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
-  @JoinColumn(name = "USERNAME")
-  val allAdministeredLinks: List<LAAGeneralUser> = listOf(),
-
-  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
-  @JoinColumn(name = "USERNAME")
-  val allAdministratorLinks: List<LAAAdminUser> = listOf(),
+  val administratorOfUserGroups: List<UserGroupAdministrator> = listOf(),
 
   @Column(name = "STAFF_USER_TYPE", nullable = false)
   val type: String,
 
-  @Column(name = "WORKING_CASELOAD_ID")
-  var activeCaseLoadId: String? = null,
+  @JoinColumn(name = "WORKING_CASELOAD_ID", nullable = true, insertable = false, updatable = false)
+  @ManyToOne
+  var activeCaseLoad: Caseload? = null,
 
   @Column(name = "ID_SOURCE")
   var idSource: String = "USER",

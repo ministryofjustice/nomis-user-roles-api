@@ -5,12 +5,14 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
 
 class UserResourceTest {
 
   private val userService: UserService = mock()
-  private val userResource = UserResource(userService)
+  private val authenticationFacade: AuthenticationFacade = mock()
+  private val userResource = UserResource(userService, authenticationFacade)
 
   @Test
   fun `Get user details`() {
