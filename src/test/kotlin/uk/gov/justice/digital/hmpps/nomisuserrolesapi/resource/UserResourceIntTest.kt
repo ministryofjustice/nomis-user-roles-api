@@ -111,10 +111,9 @@ class UserResourceIntTest : IntegrationTestBase() {
       @BeforeEach
       internal fun createUsers() {
         with(dataBuilder) {
-          generalUser().username("abella.moulin").firstName("Abella").lastName("Moulin").atPrison("WWI")
-            .buildAndSave()
-          generalUser().username("marco.rossi").atPrisons(listOf("WWI", "BXI")).inactive().buildAndSave()
-          generalUser().username("mark.bowlan").atPrison("BXI").buildAndSave()
+          generalUser().username("abella.moulin").firstName("ABELLA").lastName("MOULIN").atPrison("WWI").buildAndSave()
+          generalUser().username("marco.rossi").firstName("MARCO").lastName("ROSSI").atPrisons(listOf("WWI", "BXI")).inactive().buildAndSave()
+          generalUser().username("mark.bowlan").firstName("MARK").lastName("BOWLAN").atPrison("BXI").buildAndSave()
         }
       }
 
@@ -122,7 +121,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       internal fun deleteUsers() = dataBuilder.deleteAllUsers()
 
       @Test
-      fun `a central admin user can call the endpoint with the ROLE_MAINTAIN_ACCESS_ROLES_ADMIN role`() {
+      fun `they can call the endpoint with the ROLE_MAINTAIN_ACCESS_ROLES_ADMIN role`() {
         webTestClient.get().uri("/users/")
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
           .exchange()
@@ -131,6 +130,17 @@ class UserResourceIntTest : IntegrationTestBase() {
           .jsonPath("$.numberOfElements").isEqualTo(3)
           .jsonPath(matchByUserName, "marco.rossi").exists()
           .jsonPath(matchByUserName, "abella.moulin").exists()
+          .jsonPath(matchByUserName, "mark.bowlan").exists()
+      }
+      @Test
+      fun `they can filter by user name`() {
+        webTestClient.get().uri { it.path("/users/").queryParam("nameFilter", "mar").build() }
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+          .exchange()
+          .expectStatus().isOk
+          .expectBody()
+          .jsonPath("$.numberOfElements").isEqualTo(2)
+          .jsonPath(matchByUserName, "marco.rossi").exists()
           .jsonPath(matchByUserName, "mark.bowlan").exists()
       }
     }
@@ -143,10 +153,9 @@ class UserResourceIntTest : IntegrationTestBase() {
         with(dataBuilder) {
           localAdministrator().username("jane.lsa.wwi").atPrison("WWI").buildAndSave()
 
-          generalUser().username("abella.moulin").firstName("Abella").lastName("Moulin").atPrison("WWI")
-            .buildAndSave()
-          generalUser().username("marco.rossi").atPrisons(listOf("WWI", "BXI")).inactive().buildAndSave()
-          generalUser().username("mark.bowlan").atPrison("BXI").buildAndSave()
+          generalUser().username("abella.moulin").firstName("ABELLA").lastName("MOULIN").atPrison("WWI").buildAndSave()
+          generalUser().username("marco.rossi").firstName("MARCO").lastName("ROSSI").atPrisons(listOf("WWI", "BXI")).inactive().buildAndSave()
+          generalUser().username("mark.bowlan").firstName("MARK").lastName("BOWLAN").atPrison("BXI").buildAndSave()
         }
       }
 
@@ -154,7 +163,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       internal fun deleteUsers() = dataBuilder.deleteAllUsers()
 
       @Test
-      fun `a local administrator user can call the endpoint with the ROLE_MAINTAIN_ACCESS_ROLES role`() {
+      fun `they can call the endpoint with the ROLE_MAINTAIN_ACCESS_ROLES role`() {
         webTestClient.get().uri("/users/")
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
           .exchange()
@@ -164,15 +173,15 @@ class UserResourceIntTest : IntegrationTestBase() {
           .jsonPath(matchByUserName, "marco.rossi").exists()
           .jsonPath(matchByUserName, "abella.moulin").exists()
           .jsonPath(matchByUserName + "active", "abella.moulin").isEqualTo(true)
-          .jsonPath(matchByUserName + "firstName", "abella.moulin").isEqualTo("Abella")
-          .jsonPath(matchByUserName + "lastName", "abella.moulin").isEqualTo("Moulin")
+          .jsonPath(matchByUserName + "firstName", "abella.moulin").isEqualTo("ABELLA")
+          .jsonPath(matchByUserName + "lastName", "abella.moulin").isEqualTo("MOULIN")
           .jsonPath(matchByUserName + "staffId", "abella.moulin").exists()
           .jsonPath(matchByUserName + "activeCaseload.id", "abella.moulin").isEqualTo("WWI")
           .jsonPath(matchByUserName + "activeCaseload.name", "abella.moulin").isEqualTo("WANDSWORTH (HMP)")
       }
 
       @Test
-      internal fun `a local administrator would see all users, including themselves,  if they have the nation admin role`() {
+      internal fun `they would see all users, including themselves,  if they have the nation admin role`() {
         webTestClient.get().uri("/users/")
           .headers(
             setAuthorisation(
@@ -188,6 +197,17 @@ class UserResourceIntTest : IntegrationTestBase() {
           .jsonPath(matchByUserName, "abella.moulin").exists()
           .jsonPath(matchByUserName, "mark.bowlan").exists()
           .jsonPath(matchByUserName, "jane.lsa.wwi").exists()
+      }
+
+      @Test
+      fun `they can filter by user name`() {
+        webTestClient.get().uri { it.path("/users/").queryParam("nameFilter", "mar").build() }
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
+          .exchange()
+          .expectStatus().isOk
+          .expectBody()
+          .jsonPath("$.numberOfElements").isEqualTo(1)
+          .jsonPath(matchByUserName, "marco.rossi").exists()
       }
     }
   }

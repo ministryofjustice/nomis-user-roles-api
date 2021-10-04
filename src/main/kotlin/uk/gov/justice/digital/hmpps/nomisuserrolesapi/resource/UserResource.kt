@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
 import UserFilter
+import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -28,6 +29,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
 import javax.validation.Valid
 import javax.validation.constraints.Size
@@ -201,7 +203,10 @@ class UserResource(
     @RequestParam(value = "caseload", required = false) caseload: String?,
   ): Page<UserSummary> = userService.findUsersByFilter(
     pageRequest,
-    UserFilter(localAdministratorUsername = localAdministratorUsernameWhenNotCentralAdministrator())
+    UserFilter(
+      localAdministratorUsername = localAdministratorUsernameWhenNotCentralAdministrator(),
+      name = if (nameFilter.isNullOrBlank()) null else nameFilter
+    )
   )
   fun localAdministratorUsernameWhenNotCentralAdministrator(): String? = if (AuthenticationFacade.hasRoles("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")) null else authenticationFacade.currentUsername
 }
