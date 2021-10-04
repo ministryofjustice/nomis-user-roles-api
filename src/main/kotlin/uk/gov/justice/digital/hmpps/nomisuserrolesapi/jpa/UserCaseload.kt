@@ -3,9 +3,9 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
 import org.hibernate.Hibernate
-import org.hibernate.annotations.Type
 import java.io.Serializable
 import java.time.LocalDate
+import java.util.Objects
 import javax.persistence.Column
 import javax.persistence.Embeddable
 import javax.persistence.EmbeddedId
@@ -15,42 +15,44 @@ import javax.persistence.ManyToOne
 import javax.persistence.Table
 
 @Embeddable
-data class LAAAdminUserPk(
-  @Column(name = "LOCAL_AUTHORITY_CODE", nullable = false)
-  var localAuthorityCode: String,
+data class UserCaseloadPk(
+  @Column(name = "CASELOAD_ID", nullable = false)
+  val caseloadId: String,
+
   @Column(name = "USERNAME", nullable = false)
-  var username: String,
+  val username: String,
 ) : Serializable
 
 @Entity
-@Table(name = "LAA_ADMINISTRATORS")
-data class LAAAdminUser(
-
+@Table(name = "USER_ACCESSIBLE_CASELOADS")
+data class UserCaseload(
   @EmbeddedId
-  val id: LAAAdminUserPk,
+  val id: UserCaseloadPk,
 
-  @Column(name = "ACTIVE_FLAG")
-  @Type(type = "yes_no")
-  val active: Boolean,
+  @ManyToOne
+  @JoinColumn(name = "CASELOAD_ID", updatable = false, insertable = false)
+  val caseload: Caseload,
 
-  @Column(name = "EXPIRY_DATE")
-  val expiryDate: LocalDate? = null,
+  @ManyToOne
+  @JoinColumn(name = "USERNAME", updatable = false, insertable = false)
+  val user: UserPersonDetail,
 
-  @ManyToOne(optional = false)
-  @JoinColumn(name = "LOCAL_AUTHORITY_CODE", nullable = false, updatable = false, insertable = false)
-  val authority: LocalAdminAuthority,
+  @JoinColumn(name = "START_DATE")
+  val startDate: LocalDate,
+
 ) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
-    other as LAAAdminUser
+    other as UserCaseload
 
     return id == other.id
   }
 
-  override fun hashCode(): Int = id.hashCode()
+  override fun hashCode(): Int = Objects.hash(id)
 
+  @Override
   override fun toString(): String {
-    return this::class.simpleName + id.toString()
+    return this::class.simpleName + "(EmbeddedId = $id )"
   }
 }

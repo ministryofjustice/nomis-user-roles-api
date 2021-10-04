@@ -42,7 +42,7 @@ data class Staff(
     return staffId == other.staffId
   }
 
-  override fun hashCode(): Int = 0
+  override fun hashCode(): Int = staffId.hashCode()
 
   @Override
   override fun toString(): String {

@@ -14,10 +14,10 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "LOCAL_ADMIN_AUTHORITIES")
-data class LocalAdminAuthority(
+data class UserGroup(
   @Id
   @Column(name = "LOCAL_AUTHORITY_CODE", nullable = false)
-  val localAuthorityCode: String,
+  val id: String,
 
   @Column(name = "DESCRIPTION", nullable = false)
   val description: String,
@@ -34,34 +34,34 @@ data class LocalAdminAuthority(
 
   @OneToMany(fetch = FetchType.LAZY)
   @JoinColumn(name = "LOCAL_AUTHORITY_CODE")
-  val allAdministeredUsers: List<LAAGeneralUser> = listOf(),
+  val activeAndInactiveMembers: List<UserGroupMember> = listOf(),
 
   @OneToMany(fetch = FetchType.LAZY)
   @JoinColumn(name = "LOCAL_AUTHORITY_CODE")
-  val allAdministrators: List<LAAAdminUser> = listOf(),
-
-  @OneToMany(fetch = FetchType.LAZY)
-  @JoinColumn(name = "LOCAL_AUTHORITY_CODE")
-  @Where(clause = "ACTIVE_FLAG = 'Y'")
-  val administeredUsers: List<LAAGeneralUser> = listOf(),
+  val activeAndInactiveAdministrators: List<UserGroupAdministrator> = listOf(),
 
   @OneToMany(fetch = FetchType.LAZY)
   @JoinColumn(name = "LOCAL_AUTHORITY_CODE")
   @Where(clause = "ACTIVE_FLAG = 'Y'")
-  val administrators: List<LAAAdminUser> = listOf(),
+  val members: List<UserGroupMember> = listOf(),
+
+  @OneToMany(fetch = FetchType.LAZY)
+  @JoinColumn(name = "LOCAL_AUTHORITY_CODE")
+  @Where(clause = "ACTIVE_FLAG = 'Y'")
+  val administrators: List<UserGroupAdministrator> = listOf(),
 
 ) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
-    other as LocalAdminAuthority
+    other as UserGroup
 
-    return localAuthorityCode == other.localAuthorityCode
+    return id == other.id
   }
 
-  override fun hashCode(): Int = localAuthorityCode.hashCode()
+  override fun hashCode(): Int = id.hashCode()
 
   override fun toString(): String {
-    return this::class.simpleName + "(code = $localAuthorityCode )"
+    return this::class.simpleName + "(code = $id )"
   }
 }
