@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper
 
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadPk
@@ -53,7 +52,7 @@ class GeneralUserBuilder(
               username = userPersonDetail.username
             ),
             startDate = LocalDate.now().minusDays(1),
-            caseload = Caseload(it, ""),
+            caseload = caseloadRepository.findByIdOrNull(it)!!,
             user = userPersonDetail
           )
         }
