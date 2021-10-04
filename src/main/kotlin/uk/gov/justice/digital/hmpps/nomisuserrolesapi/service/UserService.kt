@@ -22,7 +22,7 @@ class UserService(
       .map { u -> UserDetail(u.username, u.staff.staffId, u.staff.firstName, u.staff.lastName) }
       .orElseThrow(UserNotFoundException("User $username not found"))
 
-  fun getLocalUsers(pageRequest: Pageable, filter: UserFilter): Page<UserSummary> =
+  fun findUsersByFilter(pageRequest: Pageable, filter: UserFilter): Page<UserSummary> =
     userPersonDetailRepository.findAll(UserSpecification(filter), pageRequest)
       .map { it.toUserSummary() }
 }

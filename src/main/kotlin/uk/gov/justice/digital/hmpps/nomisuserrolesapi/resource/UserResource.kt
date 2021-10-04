@@ -112,7 +112,7 @@ class UserResource(
       example = "MDI"
     )
     @RequestParam(value = "caseload", required = false) caseload: String?,
-  ): Page<UserSummary> = userService.getLocalUsers(
+  ): Page<UserSummary> = userService.findUsersByFilter(
     pageRequest,
     UserFilter(localAdministratorUsername = localAdministratorUsernameWhenNotCentralAdministrator())
   )
