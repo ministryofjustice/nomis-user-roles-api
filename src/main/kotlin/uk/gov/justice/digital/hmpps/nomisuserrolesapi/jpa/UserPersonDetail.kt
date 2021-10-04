@@ -48,7 +48,7 @@ data class UserPersonDetail(
   @Column(name = "STAFF_USER_TYPE", nullable = false)
   val type: String,
 
-  @JoinColumn(name = "WORKING_CASELOAD_ID", nullable = true, insertable = false, updatable = false)
+  @JoinColumn(name = "WORKING_CASELOAD_ID", nullable = true)
   @ManyToOne
   var activeCaseLoad: Caseload? = null,
 

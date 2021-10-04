@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
+import UserFilter
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -8,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.server.ResponseStatusException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
@@ -113,12 +112,11 @@ class UserResource(
       example = "MDI"
     )
     @RequestParam(value = "caseload", required = false) caseload: String?,
-  ): Page<UserSummary> {
-    return userService.getLocalUsers(
-      pageRequest,
-      authenticationFacade.currentUsername ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST)
-    )
-  }
+  ): Page<UserSummary> = userService.getLocalUsers(
+    pageRequest,
+    UserFilter(localAdministratorUsername = localAdministratorUsernameWhenNotCentralAdministrator())
+  )
+  fun localAdministratorUsernameWhenNotCentralAdministrator(): String? = if (AuthenticationFacade.hasRoles("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")) null else authenticationFacade.currentUsername
 }
 
 @JsonInclude(JsonInclude.Include.NON_NULL)

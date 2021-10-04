@@ -1,12 +1,16 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository
 
+import UserFilter
+import UserSpecification
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
@@ -184,6 +188,34 @@ class UserPersonDetailRepositoryTest {
       assertThat(janeBubbles.administratorOfUserGroups.userGroupOf("WLI").members)
         .extracting<String> { it.user.username }
         .containsExactly("claire.wli", "raj.wli")
+    }
+
+    @Nested
+    @DisplayName("with a filter specification")
+    inner class Specification {
+      @Test
+      internal fun `will return all users for a page when local administrator username not supplied`() {
+        val janeBubblesAdministeredUsers = repository.findAll(UserSpecification(UserFilter()), PageRequest.of(0, 10))
+        assertThat(janeBubblesAdministeredUsers.content).hasSize(5)
+      }
+
+      @Test
+      internal fun `will only return user in groups that the user manages`() {
+        dataBuilder.localAdministrator()
+          .username("jane.bubbles.wwi")
+          .atPrison("WWI")
+          .buildAndSave()
+
+        dataBuilder.localAdministrator()
+          .username("jim.hong.bxi")
+          .atPrison("BXI")
+          .buildAndSave()
+
+        val janeBubblesAdministeredUsers = repository.findAll(UserSpecification(UserFilter("jane.bubbles.wwi")), PageRequest.of(0, 10))
+        assertThat(janeBubblesAdministeredUsers.content).hasSize(3)
+        val jimHongAdministeredUsers = repository.findAll(UserSpecification(UserFilter("jim.hong.bxi")), PageRequest.of(0, 10))
+        assertThat(jimHongAdministeredUsers.content).hasSize(2)
+      }
     }
   }
 }

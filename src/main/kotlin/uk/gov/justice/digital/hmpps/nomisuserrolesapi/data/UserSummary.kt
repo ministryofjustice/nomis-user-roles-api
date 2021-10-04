@@ -12,7 +12,8 @@ data class UserSummary(
   val firstName: String,
   @Schema(description = "Last name of the user", example = "Usmani")
   val lastName: String,
-  @Schema(description = "Account status indicator", example = "trie")
+  @Schema(description = "Account status indicator", example = "true")
   val active: Boolean,
+  @Schema(description = "Caseload that is currently active, typically the prison the user is currently working at")
   val activeCaseload: PrisonCaseload?,
 )

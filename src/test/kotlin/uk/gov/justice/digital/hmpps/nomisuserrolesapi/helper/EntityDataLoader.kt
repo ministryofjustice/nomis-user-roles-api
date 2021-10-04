@@ -104,8 +104,8 @@ class DataBuilder(
 ) {
   fun generalUser() = generalUserEntityCreator(repository, userGroupRepository, caseloadRepository)
   fun localAdministrator() = localAdministratorEntityCreator(repository, userGroupRepository, caseloadRepository)
-  fun deleteUsers(vararg username: String) {
-    repository.deleteAllById(username.asIterable())
+  fun deleteAllUsers(vararg username: String) {
+    repository.deleteAll()
     repository.flush()
   }
 }
