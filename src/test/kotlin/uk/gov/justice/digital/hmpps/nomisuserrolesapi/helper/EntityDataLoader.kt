@@ -1,152 +1,132 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper
 
 import org.springframework.data.repository.findByIdOrNull
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.LAAAdminUser
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.LAAAdminUserPk
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.LAAGeneralUser
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.LAAGeneralUserPk
+import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseload
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadPk
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupAdministrator
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupAdministratorPk
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupMember
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupMemberPk
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.CaseloadRepository
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.LocalAdminAuthorityRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserGroupRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import java.time.LocalDate
 
 class GeneralUserBuilder(
-  private val repository: UserPersonDetailRepository,
-  private val localAdminRepository: LocalAdminAuthorityRepository,
+  repository: UserPersonDetailRepository,
+  private val userGroupRepository: UserGroupRepository,
   private val caseloadRepository: CaseloadRepository,
-  private var userPersonDetail: UserPersonDetail,
-  private var prisonCodes: List<String>,
+  userPersonDetail: UserPersonDetail,
+  prisonCodes: List<String>,
+) : UserBuilder<GeneralUserBuilder>(
+  repository = repository,
+  userPersonDetail = userPersonDetail,
+  prisonCodes = prisonCodes
 ) {
 
-  private fun generalUsersOf(prisonCodes: List<String>): List<LAAGeneralUser> {
+  private fun generalUsersOf(prisonCodes: List<String>): List<UserGroupMember> {
     return prisonCodes.map {
-      LAAGeneralUser(
-        LAAGeneralUserPk(it, this.userPersonDetail.username),
+      UserGroupMember(
+        UserGroupMemberPk(it, this.userPersonDetail.username),
         active = true,
         startDate = LocalDate.now().minusDays(1),
-        authority = localAdminRepository.findByIdOrNull(it)!!,
+        userGroup = userGroupRepository.findByIdOrNull(it)!!,
         user = this.userPersonDetail
       )
     }
   }
 
-  fun build(): GeneralUserBuilder {
+  override fun build(): GeneralUserBuilder {
     userPersonDetail =
       userPersonDetail.copy(
-        administeredLinks = generalUsersOf(prisonCodes),
+        activeAndInactiveMemberOfUserGroups = generalUsersOf(prisonCodes),
         type = "GENERAL",
-        activeCaseLoadId = prisonCodes.first(),
-        caseloads = prisonCodes.map { caseloadRepository.findByIdOrNull(it)!! }
+        activeCaseLoad = prisonCodes.firstOrNull()?.let { caseloadRepository.findByIdOrNull(it) },
+        caseloads = prisonCodes.map {
+          UserCaseload(
+            UserCaseloadPk(
+              caseloadId = it,
+              username = userPersonDetail.username
+            ),
+            startDate = LocalDate.now().minusDays(1),
+            caseload = caseloadRepository.findByIdOrNull(it)!!,
+            user = userPersonDetail
+          )
+        }
       )
-    return this
-  }
-
-  fun save() {
-    repository.saveAndFlush(userPersonDetail)
-  }
-
-  fun buildAndSave() {
-    build()
-    repository.saveAndFlush(userPersonDetail)
-  }
-
-  fun transform(transformer: (UserPersonDetail) -> UserPersonDetail): GeneralUserBuilder {
-    userPersonDetail = transformer(userPersonDetail)
-    return this
-  }
-
-  fun username(username: String): GeneralUserBuilder {
-    this.userPersonDetail = userPersonDetail.copy(username = username)
-    return this
-  }
-
-  fun atPrisons(prisonCodes: List<String>): GeneralUserBuilder {
-    this.prisonCodes = prisonCodes
-    return this
-  }
-
-  fun atPrison(prisonCode: String): GeneralUserBuilder {
-    this.prisonCodes = listOf(prisonCode)
     return this
   }
 }
 
 class LocalAdministratorBuilder(
-  private val repository: UserPersonDetailRepository,
-  private val localAdminRepository: LocalAdminAuthorityRepository,
-  private var userPersonDetail: UserPersonDetail,
-  private var prisonCodes: List<String>,
+  repository: UserPersonDetailRepository,
+  private val userGroupRepository: UserGroupRepository,
+  private val caseloadRepository: CaseloadRepository,
+  userPersonDetail: UserPersonDetail,
+  prisonCodes: List<String>,
+) : UserBuilder<LocalAdministratorBuilder>(
+  repository = repository,
+  userPersonDetail = userPersonDetail,
+  prisonCodes = prisonCodes
 ) {
 
-  private fun adminUsersOf(prisonCodes: List<String>): List<LAAAdminUser> {
+  private fun adminUsersOf(prisonCodes: List<String>): List<UserGroupAdministrator> {
     return prisonCodes.map {
-      LAAAdminUser(
-        LAAAdminUserPk(it, this.userPersonDetail.username),
+      UserGroupAdministrator(
+        UserGroupAdministratorPk(it, this.userPersonDetail.username),
         active = true,
-        authority = localAdminRepository.findByIdOrNull(it)!!
+        userGroup = userGroupRepository.findByIdOrNull(it)!!,
+        user = this.userPersonDetail,
       )
     }
   }
 
-  fun build(): LocalAdministratorBuilder {
+  override fun build(): LocalAdministratorBuilder {
     userPersonDetail =
       userPersonDetail.copy(
-        administratorLinks = adminUsersOf(prisonCodes),
+        activeAndInactiveAdministratorOfUserGroups = adminUsersOf(prisonCodes),
         type = "ADMIN",
-        activeCaseLoadId = prisonCodes.first()
+        activeCaseLoad = prisonCodes.firstOrNull()?.let { caseloadRepository.findByIdOrNull(it) },
       )
     return this
   }
+}
 
-  fun save() {
-    repository.saveAndFlush(userPersonDetail)
-  }
-
-  fun buildAndSave() {
-    build()
-    repository.saveAndFlush(userPersonDetail)
-  }
-
-  fun transform(transformer: (UserPersonDetail) -> UserPersonDetail): LocalAdministratorBuilder {
-    userPersonDetail = transformer(userPersonDetail)
-    return this
-  }
-
-  fun username(username: String): LocalAdministratorBuilder {
-    this.userPersonDetail = userPersonDetail.copy(username = username)
-    return this
-  }
-
-  fun atPrisons(prisonCodes: List<String>): LocalAdministratorBuilder {
-    this.prisonCodes = prisonCodes
-    return this
-  }
-
-  fun atPrison(prisonCode: String): LocalAdministratorBuilder {
-    this.prisonCodes = listOf(prisonCode)
-    return this
+@Component
+class DataBuilder(
+  private val repository: UserPersonDetailRepository,
+  private val userGroupRepository: UserGroupRepository,
+  private val caseloadRepository: CaseloadRepository,
+) {
+  fun generalUser() = generalUserEntityCreator(repository, userGroupRepository, caseloadRepository)
+  fun localAdministrator() = localAdministratorEntityCreator(repository, userGroupRepository, caseloadRepository)
+  fun deleteAllUsers(vararg username: String) {
+    repository.deleteAll()
+    repository.flush()
   }
 }
 
 fun generalUserEntityCreator(
   repository: UserPersonDetailRepository,
-  localAdminRepository: LocalAdminAuthorityRepository,
+  userGroupRepository: UserGroupRepository,
   caseloadRepository: CaseloadRepository,
   userPersonDetail: UserPersonDetail = defaultPerson(),
   prisonCodes: List<String> = listOf("WWI"),
 ): GeneralUserBuilder {
-  return GeneralUserBuilder(repository, localAdminRepository, caseloadRepository, userPersonDetail, prisonCodes)
+  return GeneralUserBuilder(repository, userGroupRepository, caseloadRepository, userPersonDetail, prisonCodes)
 }
 
 fun localAdministratorEntityCreator(
   repository: UserPersonDetailRepository,
-  localAdminRepository: LocalAdminAuthorityRepository,
+  userGroupRepository: UserGroupRepository,
+  caseloadRepository: CaseloadRepository,
   userPersonDetail: UserPersonDetail = defaultPerson(),
   prisonCodes: List<String> = listOf("WWI"),
 ): LocalAdministratorBuilder {
-  return LocalAdministratorBuilder(repository, localAdminRepository, userPersonDetail, prisonCodes)
+  return LocalAdministratorBuilder(repository, userGroupRepository, caseloadRepository, userPersonDetail, prisonCodes)
 }
 
 fun defaultPerson(): UserPersonDetail {
@@ -155,4 +135,59 @@ fun defaultPerson(): UserPersonDetail {
     staff = Staff(firstName = "John", lastName = "Smith", status = "ACTIVE"),
     type = "GENERAL"
   )
+}
+
+abstract class UserBuilder<T>(
+  private val repository: UserPersonDetailRepository,
+  internal var userPersonDetail: UserPersonDetail,
+  internal var prisonCodes: List<String>,
+) {
+
+  fun save(): UserPersonDetail {
+    repository.saveAndFlush(userPersonDetail)
+    return userPersonDetail
+  }
+
+  abstract fun build(): UserBuilder<T>
+
+  fun buildAndSave(): UserPersonDetail {
+    build()
+    repository.saveAndFlush(userPersonDetail)
+    return userPersonDetail
+  }
+
+  fun transform(transformer: (UserPersonDetail) -> UserPersonDetail): UserBuilder<T> {
+    userPersonDetail = transformer(userPersonDetail)
+    return this
+  }
+
+  fun username(username: String): UserBuilder<T> {
+    this.userPersonDetail = userPersonDetail.copy(username = username)
+    return this
+  }
+
+  fun atPrisons(prisonCodes: List<String>): UserBuilder<T> {
+    this.prisonCodes = prisonCodes
+    return this
+  }
+
+  fun atPrison(prisonCode: String): UserBuilder<T> {
+    this.prisonCodes = listOf(prisonCode)
+    return this
+  }
+
+  fun firstName(firstName: String): UserBuilder<T> {
+    this.userPersonDetail = userPersonDetail.copy(staff = userPersonDetail.staff.copy(firstName = firstName))
+    return this
+  }
+
+  fun lastName(lastName: String): UserBuilder<T> {
+    this.userPersonDetail = userPersonDetail.copy(staff = userPersonDetail.staff.copy(lastName = lastName))
+    return this
+  }
+
+  fun inactive(): UserBuilder<T> {
+    this.userPersonDetail = userPersonDetail.copy(staff = userPersonDetail.staff.copy(status = "INACT"))
+    return this
+  }
 }

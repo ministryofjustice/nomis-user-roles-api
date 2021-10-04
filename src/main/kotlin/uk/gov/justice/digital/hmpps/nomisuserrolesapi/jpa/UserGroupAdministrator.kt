@@ -1,3 +1,5 @@
+@file:Suppress("DataClassEqualsAndHashCodeInspection")
+
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
 import org.hibernate.Hibernate
@@ -8,48 +10,46 @@ import javax.persistence.Column
 import javax.persistence.Embeddable
 import javax.persistence.EmbeddedId
 import javax.persistence.Entity
-import javax.persistence.FetchType.LAZY
+import javax.persistence.FetchType
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.Table
 
 @Embeddable
-data class LAAGeneralUserPk(
+data class UserGroupAdministratorPk(
   @Column(name = "LOCAL_AUTHORITY_CODE", nullable = false)
-  var localAuthorityCode: String,
+  var userGroupCode: String,
   @Column(name = "USERNAME", nullable = false)
   var username: String,
 ) : Serializable
 
 @Entity
-@Table(name = "LAA_GENERAL_USERS")
-data class LAAGeneralUser(
+@Table(name = "LAA_ADMINISTRATORS")
+data class UserGroupAdministrator(
 
   @EmbeddedId
-  val id: LAAGeneralUserPk,
+  val id: UserGroupAdministratorPk,
 
   @Column(name = "ACTIVE_FLAG")
   @Type(type = "yes_no")
   val active: Boolean,
 
-  @Column(name = "START_DATE")
-  val startDate: LocalDate,
-
   @Column(name = "EXPIRY_DATE")
   val expiryDate: LocalDate? = null,
 
-  @ManyToOne(optional = false)
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "LOCAL_AUTHORITY_CODE", nullable = false, updatable = false, insertable = false)
-  val authority: LocalAdminAuthority,
+  val userGroup: UserGroup,
 
-  @ManyToOne(fetch = LAZY)
+  @ManyToOne
   @JoinColumn(name = "USERNAME", nullable = false, updatable = false, insertable = false)
   val user: UserPersonDetail,
+
 ) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
-    other as LAAGeneralUser
+    other as UserGroupAdministrator
 
     return id == other.id
   }

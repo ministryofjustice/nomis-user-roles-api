@@ -1,11 +1,16 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
+import UserFilter
+import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.http.HttpStatus
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PageableDefault
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
@@ -15,11 +20,15 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.ResponseStatus
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.dto.CreateUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.dto.UserDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
 import javax.validation.Valid
 import javax.validation.constraints.Size
@@ -28,7 +37,8 @@ import javax.validation.constraints.Size
 @Validated
 @RequestMapping("/users", produces = [MediaType.APPLICATION_JSON_VALUE])
 class UserResource(
-  private val userService: UserService
+  private val userService: UserService,
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   @PreAuthorize("hasRole('ROLE_CREATE_USER')")
   @PostMapping("")
@@ -140,5 +150,61 @@ class UserResource(
     @PathVariable @Size(max = 30, min = 1, message = "username must be between 1 and 30") username: String
   ): UserDetail =
     userService.findByUsername(username)
+
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
+  @GetMapping
+  @Operation(
+    summary = "Get all users filtered has specified",
+    description = "Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES. <br/>Get all users with filter.<br/> For local administrators this will implicitly filter users in the prison's they administer, therefore username is expected in the authorisation token. <br/>For users with role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN this allows access to all staff.",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Pageable list of user summaries",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect filter supplied",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      )
+    ]
+  )
+  fun getUsers(
+    @PageableDefault
+    pageRequest: Pageable,
+    @RequestParam(value = "nameFilter", required = false)
+    @Schema(
+      description = "Filter results by first name and/or username and/or last name of staff member",
+      example = "Raj"
+    )
+    nameFilter: String?,
+    @RequestParam(value = "accessRoles", required = false)
+    @Schema(
+      description = "Filter will match users that have all DPS role specified",
+      example = "ADD_SENSITIVE_CASE_NOTES"
+    )
+    accessRoles: List<String>?,
+    @RequestParam(value = "status", required = false, defaultValue = "ALL")
+    @Schema(
+      description = "Limit to active / inactive / show all users.",
+      allowableValues = ["ACTIVE", "INACTIVE", "ALL"],
+      defaultValue = "ALL",
+      example = "INACTIVE"
+    )
+    status: UserStatus = UserStatus.ACTIVE,
+    @Schema(
+      description = "Filter results by user's currently active caseload i.e. the one they have currently selected",
+      example = "MDI"
+    )
+    @RequestParam(value = "activeCaseload", required = false) activeCaseload: String?,
+    @Schema(
+      description = "Filter results to include only those users that have access to the specified caseload (irrespective of whether it is currently active or not",
+      example = "MDI"
+    )
+    @RequestParam(value = "caseload", required = false) caseload: String?,
+  ): Page<UserSummary> = userService.getLocalUsers(
+    pageRequest,
+    UserFilter(localAdministratorUsername = localAdministratorUsernameWhenNotCentralAdministrator())
+  )
+  fun localAdministratorUsernameWhenNotCentralAdministrator(): String? = if (AuthenticationFacade.hasRoles("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")) null else authenticationFacade.currentUsername
 }
 
