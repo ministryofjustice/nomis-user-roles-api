@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.dto.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
 
 class UserResourceTest {
