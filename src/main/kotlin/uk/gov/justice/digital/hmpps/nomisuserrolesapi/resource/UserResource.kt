@@ -1,28 +1,35 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
 import UserFilter
-import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
-import javax.validation.constraints.NotBlank
+import javax.validation.Valid
 import javax.validation.constraints.Size
 
 @RestController
@@ -32,12 +39,87 @@ class UserResource(
   private val userService: UserService,
   private val authenticationFacade: AuthenticationFacade,
 ) {
+  @PreAuthorize("hasRole('ROLE_CREATE_USER')")
+  @PostMapping("")
+  @ResponseStatus(HttpStatus.CREATED)
+  @Operation(
+    summary = "Create user",
+    description = "Create user",
+    security = [SecurityRequirement(name = "CREATE_USER")],
+    requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
+      content = [
+        Content(
+          mediaType = "application/json",
+          schema = Schema(implementation = CreateUserRequest::class)
+        )
+      ]
+    ),
+    responses = [
+      ApiResponse(
+        responseCode = "201",
+        description = "User Information Returned",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = UserDetail::class))]
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to create user information",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to create a user",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      )
+    ]
+  )
+
+  fun createUser(
+    @RequestBody @Valid createUserRequest: CreateUserRequest
+  ): UserDetail =
+    userService.createUser(createUserRequest)
+
+  @PreAuthorize("hasRole('ROLE_CREATE_USER')")
+  @DeleteMapping("/{username}")
+  @Operation(
+    summary = "Delete user",
+    description = "Delete user",
+    security = [SecurityRequirement(name = "CREATE_USER")],
+    responses = [
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to delete user",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to delete a user",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      )
+    ]
+  )
+
+  fun deleteUser(
+    @Schema(description = "Username", example = "testuser1", required = true)
+    @PathVariable @Size(max = 30, min = 1, message = "username must be between 1 and 30") username: String
+  ) =
+    userService.deleteUser(username)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @GetMapping("/{username}")
   @Operation(
     summary = "Get specified user details",
     description = "Information on a specific user",
+    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
         responseCode = "200",
@@ -50,8 +132,13 @@ class UserResource(
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
       ),
       ApiResponse(
-        responseCode = "404",
-        description = "Username not found",
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to get a user",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
       )
     ]
@@ -118,24 +205,3 @@ class UserResource(
   )
   fun localAdministratorUsernameWhenNotCentralAdministrator(): String? = if (AuthenticationFacade.hasRoles("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")) null else authenticationFacade.currentUsername
 }
-
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(description = "User Information")
-data class UserDetail(
-  @Schema(description = "Username", example = "testuser1", required = true) @field:Size(
-    max = 30,
-    min = 1,
-    message = "username must be between 1 and 30"
-  ) @NotBlank val username: String,
-  @Schema(description = "Staff ID", example = "324323", required = true) @NotBlank val staffId: Long,
-  @Schema(description = "First name of the user", example = "John", required = false) @field:Size(
-    max = 35,
-    min = 1,
-    message = "First name must be between 1 and 35"
-  ) val firstName: String,
-  @Schema(description = "Last name of the user", example = "Smith", required = false) @field:Size(
-    max = 35,
-    min = 1,
-    message = "First name must be between 1 and 35"
-  ) val lastName: String,
-)

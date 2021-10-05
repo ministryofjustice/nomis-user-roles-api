@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
 import org.hibernate.Hibernate
 import org.hibernate.annotations.Where
+import java.time.LocalDate.now
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -29,7 +30,7 @@ data class UserPersonDetail(
   val roles: List<UserCaseloadRole> = listOf(),
 
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], mappedBy = "user")
-  val caseloads: List<UserCaseload> = listOf(),
+  var caseloads: List<UserCaseload> = listOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   val activeAndInactiveMemberOfUserGroups: List<UserGroupMember> = listOf(),
@@ -64,4 +65,12 @@ data class UserPersonDetail(
   }
 
   override fun hashCode(): Int = username.hashCode()
+
+  fun addCaseload(caseload: Caseload) {
+    val userCaseload = UserCaseload(
+      id = UserCaseloadPk(caseloadId = caseload.id, username = this.username),
+      caseload = caseload, user = this, startDate = now()
+    )
+    caseloads = caseloads + userCaseload
+  }
 }
