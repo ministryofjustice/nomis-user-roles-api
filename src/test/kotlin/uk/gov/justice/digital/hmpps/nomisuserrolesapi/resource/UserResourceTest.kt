@@ -6,7 +6,8 @@ import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.dto.UserDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
 
 class UserResourceTest {
@@ -17,13 +18,19 @@ class UserResourceTest {
 
   @Test
   fun `Get user details`() {
-    val user = UserDetail("testuser1", 1, "John", "Smith")
+    val user = UserDetail(
+      username = "testuser1",
+      staffId = 1,
+      firstName = "John",
+      lastName = "Smith",
+      active = true,
+      activeCaseloadId = "BXI",
+      accountStatus = AccountStatus.OPEN
+    )
 
     whenever(userService.findByUsername(any())).thenReturn(user)
 
     val userDetails = userResource.getUserDetails("testuser1")
-    assertThat(userDetails).isEqualTo(
-      UserDetail("testuser1", 1, "John", "Smith")
-    )
+    assertThat(userDetails).isEqualTo(user)
   }
 }

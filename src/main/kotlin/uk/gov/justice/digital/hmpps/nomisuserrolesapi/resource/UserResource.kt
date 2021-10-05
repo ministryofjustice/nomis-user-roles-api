@@ -1,16 +1,15 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
 import UserFilter
-import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
-import org.springframework.http.HttpStatus
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
@@ -21,12 +20,12 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.dto.CreateUserRequest
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.dto.UserDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
@@ -79,9 +78,10 @@ class UserResource(
     ]
   )
 
-  fun createUser(@RequestBody @Valid createUserRequest: CreateUserRequest
+  fun createUser(
+    @RequestBody @Valid createUserRequest: CreateUserRequest
   ): UserDetail =
-    userService.createUser(createUserRequest.username, createUserRequest.password, createUserRequest.firstName, createUserRequest.lastName)
+    userService.createUser(createUserRequest)
 
   @PreAuthorize("hasRole('ROLE_CREATE_USER')")
   @DeleteMapping("/{username}")
@@ -113,8 +113,6 @@ class UserResource(
     @PathVariable @Size(max = 30, min = 1, message = "username must be between 1 and 30") username: String
   ) =
     userService.deleteUser(username)
-
-
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @GetMapping("/{username}")
@@ -207,4 +205,3 @@ class UserResource(
   )
   fun localAdministratorUsernameWhenNotCentralAdministrator(): String? = if (AuthenticationFacade.hasRoles("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")) null else authenticationFacade.currentUsername
 }
-

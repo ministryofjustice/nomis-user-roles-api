@@ -6,9 +6,9 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import org.springframework.web.reactive.function.BodyInserters
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.dto.CreateUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.IntegrationTestBase
 
 class UserResourceIntTest : IntegrationTestBase() {
@@ -24,6 +24,7 @@ class UserResourceIntTest : IntegrationTestBase() {
         generalUser().username("marco.rossi").firstName("Marco").lastName("Rossi").buildAndSave()
       }
     }
+
     @AfterEach
     internal fun deleteUsers() = dataBuilder.deleteAllUsers()
 
@@ -80,6 +81,7 @@ class UserResourceIntTest : IntegrationTestBase() {
   @Nested
   inner class GetUser {
     val matchByUserName = "$.content[?(@.username == '%s')]"
+
     @Test
     fun `access forbidden when no authority`() {
       webTestClient.get().uri("/users")
@@ -109,11 +111,13 @@ class UserResourceIntTest : IntegrationTestBase() {
       @BeforeEach
       internal fun createUsers() {
         with(dataBuilder) {
-          generalUser().username("abella.moulin").firstName("Abella").lastName("Moulin").atPrison("WWI").buildAndSave()
+          generalUser().username("abella.moulin").firstName("Abella").lastName("Moulin").atPrison("WWI")
+            .buildAndSave()
           generalUser().username("marco.rossi").atPrisons(listOf("WWI", "BXI")).inactive().buildAndSave()
           generalUser().username("mark.bowlan").atPrison("BXI").buildAndSave()
         }
       }
+
       @AfterEach
       internal fun deleteUsers() = dataBuilder.deleteAllUsers()
 
@@ -139,7 +143,8 @@ class UserResourceIntTest : IntegrationTestBase() {
         with(dataBuilder) {
           localAdministrator().username("jane.lsa.wwi").atPrison("WWI").buildAndSave()
 
-          generalUser().username("abella.moulin").firstName("Abella").lastName("Moulin").atPrison("WWI").buildAndSave()
+          generalUser().username("abella.moulin").firstName("Abella").lastName("Moulin").atPrison("WWI")
+            .buildAndSave()
           generalUser().username("marco.rossi").atPrisons(listOf("WWI", "BXI")).inactive().buildAndSave()
           generalUser().username("mark.bowlan").atPrison("BXI").buildAndSave()
         }
@@ -170,7 +175,12 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       internal fun `a local administrator would see all users, including themselves,  if they have the nation admin role`() {
         webTestClient.get().uri("/users/")
-          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN"), user = "jane.lsa.wwi"))
+          .headers(
+            setAuthorisation(
+              roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN"),
+              user = "jane.lsa.wwi"
+            )
+          )
           .exchange()
           .expectStatus().isOk
           .expectBody()
@@ -181,13 +191,30 @@ class UserResourceIntTest : IntegrationTestBase() {
           .jsonPath(matchByUserName, "jane.lsa.wwi").exists()
       }
     }
+  }
+
+  @Nested
+  @DisplayName("POST /users")
+  inner class MaintainUsers {
 
     @Test
-    fun `create user`() {
+    fun `a database user can be created`() {
 
       webTestClient.post().uri("/users")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
-        .body(BodyInserters.fromValue(CreateUserRequest("testuser2", "password123", "Test", "User")))
+        .body(
+          BodyInserters.fromValue(
+            CreateUserRequest(
+              username = "testuser2",
+              password = "password123",
+              firstName = "Test",
+              lastName = "User",
+              defaultCaseloadId = "BXI",
+              email = "test@test.com",
+              adminUser = true
+            )
+          )
+        )
         .exchange()
         .expectStatus().isCreated
         .expectBody().json(
@@ -195,10 +222,66 @@ class UserResourceIntTest : IntegrationTestBase() {
           {
           "username": "testuser2",
           "firstName": "Test",
-          "lastName": "User"
+          "lastName": "User",
+          "activeCaseloadId" : "BXI",
+          "active": true,
+          "accountStatus": "OPEN"
           }
           """
         )
+
+      webTestClient.get().uri("/users/testuser2")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("username").isEqualTo("testuser2")
+        .jsonPath("firstName").isEqualTo("Test")
+        .jsonPath("lastName").isEqualTo("User")
+        .jsonPath("staffId").exists()
+    }
+  }
+
+  @Nested
+  @DisplayName("DELETE /users/{username}")
+  inner class DeleteUsers {
+
+    @Test
+    fun `can't drop a db user that doesn't exist`() {
+      webTestClient.delete().uri("/users/testuser3")
+        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
+        .exchange()
+        .expectStatus().isNotFound
+    }
+
+    @Test
+    fun `can drop a db user that does exist`() {
+      webTestClient.post().uri("/users")
+        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
+        .body(
+          BodyInserters.fromValue(
+            CreateUserRequest(
+              username = "testuser3",
+              password = "password123",
+              firstName = "Test",
+              lastName = "User",
+              defaultCaseloadId = "BXI",
+              email = "test@test.com"
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().isCreated
+
+      webTestClient.delete().uri("/users/testuser3")
+        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
+        .exchange()
+        .expectStatus().isOk
+
+      webTestClient.get().uri("/users/testuser3")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isNotFound
     }
   }
 }

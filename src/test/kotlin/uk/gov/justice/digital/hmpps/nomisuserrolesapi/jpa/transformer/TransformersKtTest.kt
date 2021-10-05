@@ -39,7 +39,7 @@ internal class TransformersKtTest {
       val entity = UserPersonDetail(
         username = "raj.maki",
         staff = Staff(staffId = 99, firstName = "Raj", lastName = "Maki", status = "ACTIVE"),
-        type = "GENERAL",
+        type = "GENERAL"
       )
 
       val data = entity.toUserSummary()
