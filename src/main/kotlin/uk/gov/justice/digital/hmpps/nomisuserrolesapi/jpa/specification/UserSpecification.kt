@@ -23,28 +23,22 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     criteriaBuilder: CriteriaBuilder
   ): Predicate? {
     val predicates = mutableListOf<Predicate>()
+    // these allow a fluent version based on the types being passed and rely on closure for criteria and root
     fun <PROP> Path<*>.get(prop: KProperty1<*, PROP>): Path<PROP> = this.get(prop.name)
     fun <PROP> Root<*>.get(prop: KProperty1<*, PROP>): Path<PROP> = this.get(prop.name)
     fun <PROP> get(prop: KProperty1<*, PROP>): Path<PROP> = root.get(prop)
+    fun <FROM, TO> join(prop: KProperty1<FROM, List<TO>>): Join<FROM, TO> = root.join(prop.name)
+    fun <FROM, TO, NEXT> Join<FROM, TO>.join(prop: KProperty1<*, NEXT>): Join<TO, NEXT> = this.join(prop.name)
     fun or(vararg predicates: Predicate) = criteriaBuilder.or(*predicates)
     fun and(vararg predicates: Predicate) = criteriaBuilder.and(*predicates)
     fun like(x: Expression<String>, pattern: String) = criteriaBuilder.like(x, pattern)
     fun equal(x: Expression<String>, pattern: String) = criteriaBuilder.equal(x, pattern)
 
-    fun joinToMemberOfUserGroups() =
-      root.join<UserPersonDetail, UserGroupMember>(UserPersonDetail::memberOfUserGroups.name)
-
-    fun Join<UserPersonDetail, UserGroupMember>.joinToUserGroup() =
-      this.join<UserGroupMember, UserGroup>(UserGroupMember::userGroup.name)
-
-    fun Join<UserGroupMember, UserGroup>.joinToAdministrators() =
-      this.join<UserGroup, UserGroupAdministrator>(UserGroup::administrators.name)
-
     fun administeredBy(localAdministratorUsername: String): Predicate {
       return equal(
-        joinToMemberOfUserGroups()
-          .joinToUserGroup()
-          .joinToAdministrators()
+        join(UserPersonDetail::memberOfUserGroups)
+          .join(UserGroupMember::userGroup)
+          .join(UserGroup::administrators)
           .get(UserGroupAdministrator::id)
           .get(UserGroupAdministratorPk::username),
         localAdministratorUsername
