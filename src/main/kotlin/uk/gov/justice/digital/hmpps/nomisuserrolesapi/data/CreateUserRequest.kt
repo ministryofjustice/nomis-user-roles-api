@@ -17,7 +17,7 @@ data class CreateUserRequest(
   @Schema(description = "Password", example = "password123", required = true) @field:Size(
     max = 30,
     min = 9,
-    message = "password must be between 9 and 30"
+    message = "Password must be at least 9 alpha-numeric characters in length (max 30). Please re-enter password."
   ) @NotBlank val password: String,
   @Schema(description = "First name of the user", example = "John", required = false) @field:Size(
     max = 35,

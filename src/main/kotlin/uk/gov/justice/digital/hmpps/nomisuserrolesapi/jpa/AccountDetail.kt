@@ -14,7 +14,7 @@ data class AccountDetail(
   val username: String,
 
   @Column(name = "ACCOUNT_STATUS", nullable = false)
-  val accountStatus: String = AccountStatus.EXPIRED_LOCKED.desc,
+  val accountStatus: String = AccountStatus.EXPIRED.desc,
 
   @Column(name = "PROFILE")
   val profile: String = AccountProfile.TAG_GENERAL.name,

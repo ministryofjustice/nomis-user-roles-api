@@ -29,3 +29,16 @@ void dropUser(Connection conn, String username) throws SQLException {
     statement.executeUpdate();
 }
 $$;
+
+CREATE ALIAS oms_utils.expire_password AS $$
+import java.sql.Connection;
+import java.sql.SQLException;
+@CODE
+void expirePassword(Connection conn, String username) throws SQLException {
+    final var lockSql = "UPDATE dba_users SET account_status = ? WHERE username = ?";
+    final var statement = conn.prepareStatement(lockSql);
+    statement.setString(1, "EXPIRED");
+    statement.setString(2, username);
+    statement.executeUpdate();
+}
+$$;

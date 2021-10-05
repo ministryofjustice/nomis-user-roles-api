@@ -19,6 +19,10 @@ interface UserPersonDetailRepository :
   fun createUser(username: String, password: String, profile: String = AccountProfile.TAG_GENERAL.name)
 
   @Modifying
+  @Query(value = "call oms_utils.expire_password(:username)", nativeQuery = true)
+  fun expirePassword(username: String)
+
+  @Modifying
   @Query(value = "call oms_utils.drop_user(:username)", nativeQuery = true)
   fun dropUser(username: String)
 }

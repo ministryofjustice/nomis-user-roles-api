@@ -55,7 +55,7 @@ class GeneralUserBuilder(
             caseload = caseloadRepository.findByIdOrNull(it)!!,
             user = userPersonDetail
           )
-        }
+        }.toMutableList()
       )
     return this
   }

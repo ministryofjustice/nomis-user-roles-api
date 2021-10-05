@@ -44,7 +44,7 @@ class UserResource(
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(
     summary = "Create user",
-    description = "Create user",
+    description = "Creates user and db schema and staff user information",
     security = [SecurityRequirement(name = "CREATE_USER")],
     requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
       content = [
@@ -57,8 +57,7 @@ class UserResource(
     responses = [
       ApiResponse(
         responseCode = "201",
-        description = "User Information Returned",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = UserDetail::class))]
+        description = "User Information Returned"
       ),
       ApiResponse(
         responseCode = "400",
@@ -80,8 +79,10 @@ class UserResource(
 
   fun createUser(
     @RequestBody @Valid createUserRequest: CreateUserRequest
-  ): UserDetail =
-    userService.createUser(createUserRequest)
+  ): UserDetail {
+    val user = userService.createUser(createUserRequest)
+    return userService.findByUsername(username = user.username)
+  }
 
   @PreAuthorize("hasRole('ROLE_CREATE_USER')")
   @DeleteMapping("/{username}")
