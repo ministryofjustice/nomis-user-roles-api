@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository
 
-import UserFilter
 import UserSpecification
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -13,9 +12,12 @@ import org.springframework.context.annotation.Import
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.context.ActiveProfiles
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupAdministrator
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupMember
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import java.time.LocalDate
 import javax.persistence.EntityManager
 
@@ -141,7 +143,13 @@ class UserPersonDetailRepositoryTest {
         .username("jane.bubbles.wwi.bxi")
         .atPrisons(listOf("WWI", "BXI"))
         .build()
-        .transform { user -> user.copy(activeAndInactiveAdministratorOfUserGroups = user.activeAndInactiveAdministratorOfUserGroups.map(makeWWIInactive)) }
+        .transform { user ->
+          user.copy(
+            activeAndInactiveAdministratorOfUserGroups = user.activeAndInactiveAdministratorOfUserGroups.map(
+              makeWWIInactive
+            )
+          )
+        }
         .save()
 
       entityManager.clear()
@@ -169,7 +177,15 @@ class UserPersonDetailRepositoryTest {
         .username("steve.wli")
         .atPrison("WLI")
         .build()
-        .transform { user -> user.copy(activeAndInactiveMemberOfUserGroups = user.activeAndInactiveMemberOfUserGroups.map { makeInactive(it) }) }
+        .transform { user ->
+          user.copy(
+            activeAndInactiveMemberOfUserGroups = user.activeAndInactiveMemberOfUserGroups.map {
+              makeInactive(
+                it
+              )
+            }
+          )
+        }
         .save()
       dataBuilder.generalUser()
         .username("claire.wli")
@@ -191,12 +207,12 @@ class UserPersonDetailRepositoryTest {
     }
 
     @Nested
-    @DisplayName("with a filter specification")
-    inner class Specification {
+    @DisplayName("with a filter specification containing lsa")
+    inner class LSASpecification {
       @Test
       internal fun `will return all users for a page when local administrator username not supplied`() {
-        val janeBubblesAdministeredUsers = repository.findAll(UserSpecification(UserFilter()), PageRequest.of(0, 10))
-        assertThat(janeBubblesAdministeredUsers.content).hasSize(5)
+        val users = repository.findAll(UserSpecification(UserFilter()), PageRequest.of(0, 10))
+        assertThat(users.content).hasSize(5)
       }
 
       @Test
@@ -211,10 +227,323 @@ class UserPersonDetailRepositoryTest {
           .atPrison("BXI")
           .buildAndSave()
 
-        val janeBubblesAdministeredUsers = repository.findAll(UserSpecification(UserFilter("jane.bubbles.wwi")), PageRequest.of(0, 10))
+        val janeBubblesAdministeredUsers =
+          repository.findAll(UserSpecification(UserFilter("jane.bubbles.wwi")), PageRequest.of(0, 10))
         assertThat(janeBubblesAdministeredUsers.content).hasSize(3)
-        val jimHongAdministeredUsers = repository.findAll(UserSpecification(UserFilter("jim.hong.bxi")), PageRequest.of(0, 10))
+        val jimHongAdministeredUsers =
+          repository.findAll(UserSpecification(UserFilter("jim.hong.bxi")), PageRequest.of(0, 10))
         assertThat(jimHongAdministeredUsers.content).hasSize(2)
+      }
+    }
+  }
+
+  @Nested
+  @DisplayName("find all users with a specification")
+  inner class FindUserSpecification {
+
+    @Nested
+    @DisplayName("with a name filter")
+    inner class NameFilter {
+      private val lsaAdministratorAtWandsworth = "riz.marshall"
+      private val lsaAdministratorAtBrixton = "bobbly.made"
+      private val lsaAdministratorAtBrixtonAndWandsworth = "micky.bishop"
+
+      private fun createUppercaseUserOf(firsName: String, lastName: String, prison: String = "WWI") =
+        dataBuilder.generalUser()
+          .username("$firsName.$lastName".uppercase())
+          .firstName(firsName.uppercase())
+          .lastName(lastName.uppercase())
+          .atPrison(prison)
+          .buildAndSave()
+
+      @BeforeEach
+      internal fun createUsers() {
+        dataBuilder.localAdministrator()
+          .username(lsaAdministratorAtWandsworth)
+          .atPrison("WWI")
+          .buildAndSave()
+
+        dataBuilder.localAdministrator()
+          .username(lsaAdministratorAtBrixton)
+          .atPrison("BXI")
+          .buildAndSave()
+
+        dataBuilder.localAdministrator()
+          .username(lsaAdministratorAtBrixtonAndWandsworth)
+          .atPrisons(listOf("BXI", "WWI"))
+          .buildAndSave()
+
+        listOf(
+          "Ibragim" to "Mihail",
+          "Marian" to "Chesed",
+          "Leopoldo" to "Chesed",
+          "Sawyl" to "Alycia",
+          "Sawyl" to "Elbert",
+          "Alexander" to "Marian",
+        ).forEach { createUppercaseUserOf(it.first, it.second) }
+
+        listOf(
+          "Saw" to "Micken",
+          "Bob" to "Saw",
+        ).forEach { createUppercaseUserOf(it.first, it.second, "BXI") }
+
+        dataBuilder.generalUser()
+          .username("JOHN.SMITH")
+          .firstName("XXXXX")
+          .lastName("XXXXX")
+          .atPrison("WWI")
+          .buildAndSave()
+      }
+
+      @Test
+      internal fun `will partial match on first name case insensitive`() {
+        val usersMatchingIbragi =
+          repository.findAll(UserSpecification(UserFilter(name = "IBraGI")), PageRequest.of(0, 10))
+        assertThat(usersMatchingIbragi.content).extracting<String>(UserPersonDetail::username).containsExactly(
+          "IBRAGIM.MIHAIL"
+        )
+
+        val usersMatchingSawyl =
+          repository.findAll(UserSpecification(UserFilter(name = "sawyl")), PageRequest.of(0, 10))
+        assertThat(usersMatchingSawyl.content).extracting<String>(UserPersonDetail::username).containsExactly(
+          "SAWYL.ALYCIA",
+          "SAWYL.ELBERT"
+        )
+      }
+
+      @Test
+      internal fun `will partial match on last name case insensitive`() {
+        val usersMatchingMiha = repository.findAll(UserSpecification(UserFilter(name = "Miha")), PageRequest.of(0, 10))
+        assertThat(usersMatchingMiha.content).extracting<String>(UserPersonDetail::username).containsExactly(
+          "IBRAGIM.MIHAIL"
+        )
+
+        val usersMatchingChes = repository.findAll(UserSpecification(UserFilter(name = "ches")), PageRequest.of(0, 10))
+        assertThat(usersMatchingChes.content).extracting<String>(UserPersonDetail::username).containsExactly(
+          "MARIAN.CHESED",
+          "LEOPOLDO.CHESED"
+        )
+      }
+
+      @Test
+      internal fun `will match both first and last name`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(name = "Marian")), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactly(
+          "MARIAN.CHESED",
+          "ALEXANDER.MARIAN"
+        )
+      }
+
+      @Test
+      internal fun `will match partial username`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(name = "john.sm")), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactly(
+          "JOHN.SMITH"
+        )
+      }
+
+      @Test
+      internal fun `will match both names both way around when full name detected`() {
+        val usersFirstNameFirst =
+          repository.findAll(UserSpecification(UserFilter(name = "Saw Alyc")), PageRequest.of(0, 10))
+        assertThat(usersFirstNameFirst.content).extracting<String>(UserPersonDetail::username).containsExactly(
+          "SAWYL.ALYCIA",
+        )
+
+        val usersLastNameFirst =
+          repository.findAll(UserSpecification(UserFilter(name = "Alyc Saw")), PageRequest.of(0, 10))
+        assertThat(usersLastNameFirst.content).extracting<String>(UserPersonDetail::username).containsExactly(
+          "SAWYL.ALYCIA",
+        )
+
+        val userCommaSeparatedName =
+          repository.findAll(UserSpecification(UserFilter(name = "ALYCIA,sawyl")), PageRequest.of(0, 10))
+        assertThat(userCommaSeparatedName.content).extracting<String>(UserPersonDetail::username).containsExactly(
+          "SAWYL.ALYCIA",
+        )
+      }
+
+      @Test
+      internal fun `can combine name and LSA filter`() {
+        val usersMatchingSaw =
+          repository.findAll(UserSpecification(UserFilter(name = "Saw")), PageRequest.of(0, 10))
+        assertThat(usersMatchingSaw.content).extracting<String>(UserPersonDetail::username).containsExactly(
+          "SAWYL.ALYCIA", "SAWYL.ELBERT", "SAW.MICKEN", "BOB.SAW",
+        )
+
+        val usersMatchingSawForLSAAtWandsworth =
+          repository.findAll(
+            UserSpecification(
+              UserFilter(
+                localAdministratorUsername = lsaAdministratorAtWandsworth,
+                name = "Saw"
+              )
+            ),
+            PageRequest.of(0, 10)
+          )
+        assertThat(usersMatchingSawForLSAAtWandsworth.content).extracting<String>(UserPersonDetail::username)
+          .containsExactly(
+            "SAWYL.ALYCIA", "SAWYL.ELBERT",
+          )
+
+        val usersMatchingSawForLSAAtBrixton =
+          repository.findAll(
+            UserSpecification(
+              UserFilter(
+                localAdministratorUsername = lsaAdministratorAtBrixton,
+                name = "Saw"
+              )
+            ),
+            PageRequest.of(0, 10)
+          )
+        assertThat(usersMatchingSawForLSAAtBrixton.content).extracting<String>(UserPersonDetail::username)
+          .containsExactly(
+            "SAW.MICKEN", "BOB.SAW",
+          )
+
+        val usersMatchingSawForLSAAtBrixtonAndWandsworth =
+          repository.findAll(
+            UserSpecification(
+              UserFilter(
+                localAdministratorUsername = lsaAdministratorAtBrixtonAndWandsworth,
+                name = "Saw"
+              )
+            ),
+            PageRequest.of(0, 10)
+          )
+        assertThat(usersMatchingSawForLSAAtBrixtonAndWandsworth.content).extracting<String>(UserPersonDetail::username)
+          .containsExactly(
+            "SAWYL.ALYCIA", "SAWYL.ELBERT", "SAW.MICKEN", "BOB.SAW",
+          )
+      }
+    }
+
+    @Nested
+    @DisplayName("with a status filter")
+    inner class StatusFilter {
+      private val lsaAdministratorAtWandsworth = "RIZ.MARSHALL"
+
+      private fun createUserOf(username: String, status: String = "ACTIVE", prison: String = "WWI") =
+        dataBuilder.generalUser()
+          .username(username.uppercase())
+          .firstName(username.split(".")[0].uppercase())
+          .lastName(username.split(".")[1].uppercase())
+          .atPrison(prison)
+          .status(status)
+          .buildAndSave()
+
+      @BeforeEach
+      internal fun createUsers() {
+        dataBuilder.localAdministrator()
+          .username(lsaAdministratorAtWandsworth)
+          .atPrison("WWI")
+          .buildAndSave()
+
+        listOf(
+          "IBRAGIM.MIHAIL" to "ACTIVE",
+          "MARIAN.CHESED" to "ACTIVE",
+          "LEOPOLDO.CHESED" to "INACT",
+          "SAWYL.ALYCIA" to "INACT",
+          "SAWYL.ELBERT" to "SICK",
+        ).forEach { createUserOf(username = it.first, status = it.second) }
+
+        listOf(
+          "SAW.MICKEN" to "ACTIVE",
+          "BOB.SAW" to "INACT",
+        ).forEach { createUserOf(username = it.first, status = it.second, "BXI") }
+      }
+
+      @Test
+      internal fun `will match all users regardless status not supplied`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(status = null)), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "IBRAGIM.MIHAIL",
+          "MARIAN.CHESED",
+          "LEOPOLDO.CHESED",
+          "SAWYL.ALYCIA",
+          "SAWYL.ELBERT",
+          "SAW.MICKEN",
+          "BOB.SAW",
+          "RIZ.MARSHALL",
+        )
+      }
+
+      @Test
+      internal fun `will match all users regardless status when filter is ALL`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(status = UserStatus.ALL)), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "IBRAGIM.MIHAIL",
+          "MARIAN.CHESED",
+          "LEOPOLDO.CHESED",
+          "SAWYL.ALYCIA",
+          "SAWYL.ELBERT",
+          "SAW.MICKEN",
+          "BOB.SAW",
+          "RIZ.MARSHALL",
+        )
+      }
+
+      @Test
+      internal fun `will match only active when filter is ACTIVE`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(status = UserStatus.ACTIVE)), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "IBRAGIM.MIHAIL",
+          "MARIAN.CHESED",
+          "SAW.MICKEN",
+          "RIZ.MARSHALL",
+        )
+      }
+
+      @Test
+      internal fun `will match only inactive when filter is INACTIVE`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(status = UserStatus.INACTIVE)), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "LEOPOLDO.CHESED",
+          "SAWYL.ALYCIA",
+          "BOB.SAW",
+        )
+      }
+
+      @Test
+      internal fun `can combine LSA and status filter`() {
+        val users =
+          repository.findAll(
+            UserSpecification(
+              UserFilter(
+                localAdministratorUsername = lsaAdministratorAtWandsworth,
+                status = UserStatus.ACTIVE
+              )
+            ),
+            PageRequest.of(0, 10)
+          )
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "IBRAGIM.MIHAIL",
+          "MARIAN.CHESED",
+        )
+      }
+
+      @Test
+      internal fun `there are some statuses eg SICK that can not be filtered`() {
+        val countAllUsersThatCanBeFiltered = repository.findAll(
+          UserSpecification(UserFilter(status = UserStatus.INACTIVE)),
+          PageRequest.of(0, 10)
+        ).totalElements +
+          repository.findAll(
+            UserSpecification(UserFilter(status = UserStatus.ACTIVE)),
+            PageRequest.of(0, 10)
+          ).totalElements
+        val countAllUsersRegardlessOfStatus = repository.findAll(
+          UserSpecification(UserFilter(status = UserStatus.ALL)),
+          PageRequest.of(0, 10)
+        ).totalElements
+
+        assertThat(countAllUsersRegardlessOfStatus).isGreaterThan(countAllUsersThatCanBeFiltered)
       }
     }
   }

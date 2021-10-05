@@ -186,8 +186,10 @@ abstract class UserBuilder<T>(
     return this
   }
 
-  fun inactive(): UserBuilder<T> {
-    this.userPersonDetail = userPersonDetail.copy(staff = userPersonDetail.staff.copy(status = "INACT"))
+  fun inactive(): UserBuilder<T> = status(status = "INACT")
+
+  fun status(status: String): UserBuilder<T> {
+    this.userPersonDetail = userPersonDetail.copy(staff = userPersonDetail.staff.copy(status = status))
     return this
   }
 }
