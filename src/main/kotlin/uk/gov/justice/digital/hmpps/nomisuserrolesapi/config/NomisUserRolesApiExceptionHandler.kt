@@ -113,7 +113,6 @@ class NomisUserRolesApiExceptionHandler {
       .body(ErrorResponse(status = (BAD_REQUEST.value()), userMessage = "Validation Error", developerMessage = (e.message)))
   }
 
-
   @ExceptionHandler(java.lang.Exception::class)
   fun handleException(e: java.lang.Exception): ResponseEntity<ErrorResponse?>? {
     log.error("Unexpected exception", e)
