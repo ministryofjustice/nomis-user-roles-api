@@ -161,6 +161,17 @@ class UserResourceIntTest : IntegrationTestBase() {
           .exchange()
           .expectStatus().isBadRequest
       }
+      @Test
+      fun `they can filter by active caseload`() {
+        webTestClient.get().uri { it.path("/users/").queryParam("activeCaseload", "WWI").build() }
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+          .exchange()
+          .expectStatus().isOk
+          .expectBody()
+          .jsonPath("$.numberOfElements").isEqualTo(2)
+          .jsonPath(matchByUserName, "marco.rossi").exists()
+          .jsonPath(matchByUserName, "abella.moulin").exists()
+      }
     }
 
     @Nested
@@ -172,7 +183,8 @@ class UserResourceIntTest : IntegrationTestBase() {
           localAdministrator().username("jane.lsa.wwi").atPrison("WWI").buildAndSave()
 
           generalUser().username("abella.moulin").firstName("ABELLA").lastName("MOULIN").atPrison("WWI").buildAndSave()
-          generalUser().username("marco.rossi").firstName("MARCO").lastName("ROSSI").atPrisons(listOf("WWI", "BXI")).inactive().buildAndSave()
+          // first prison is set to active caseload
+          generalUser().username("marco.rossi").firstName("MARCO").lastName("ROSSI").atPrisons(listOf("BXI", "WWI")).inactive().buildAndSave()
           generalUser().username("mark.bowlan").firstName("MARK").lastName("BOWLAN").atPrison("BXI").buildAndSave()
         }
       }
@@ -236,6 +248,17 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(1)
           .jsonPath(matchByUserName, "abella.moulin").exists()
+      }
+
+      @Test
+      fun `they can filter by active caseload`() {
+        webTestClient.get().uri { it.path("/users/").queryParam("activeCaseload", "BXI").build() }
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
+          .exchange()
+          .expectStatus().isOk
+          .expectBody()
+          .jsonPath("$.numberOfElements").isEqualTo(1)
+          .jsonPath(matchByUserName, "marco.rossi").exists()
       }
     }
   }

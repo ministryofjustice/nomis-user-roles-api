@@ -206,6 +206,7 @@ class UserResource(
       localAdministratorUsername = localAdministratorUsernameWhenNotCentralAdministrator(),
       name = if (nameFilter.isNullOrBlank()) null else nameFilter,
       status = status,
+      activeCaseloadId = activeCaseload,
     )
   )
 

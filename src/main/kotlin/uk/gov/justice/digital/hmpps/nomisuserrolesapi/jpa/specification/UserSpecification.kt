@@ -1,6 +1,7 @@
 import org.springframework.data.jpa.domain.Specification
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroup
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupAdministrator
@@ -89,6 +90,9 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     fun statusMatch(status: UserStatus): Predicate? =
       status.databaseStatus()?.let { equal(get(UserPersonDetail::staff).get(Staff::status), it) }
 
+    fun activeCaseload(caseloadId: String): Predicate =
+      equal(get(UserPersonDetail::activeCaseLoad).get(Caseload::id), caseloadId)
+
     filter.localAdministratorUsername?.run {
       predicates.add(administeredBy(this))
     }
@@ -99,6 +103,10 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
 
     filter.status?.run {
       statusMatch(this)?.run { predicates.add(this) }
+    }
+
+    filter.activeCaseloadId?.run {
+      predicates.add(activeCaseload(this))
     }
 
     return criteriaBuilder.and(*predicates.toTypedArray())
