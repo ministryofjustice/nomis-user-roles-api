@@ -356,6 +356,12 @@ class UserPersonDetailRepositoryTest {
         assertThat(usersLastNameFirst.content).extracting<String>(UserPersonDetail::username).containsExactly(
           "SAWYL.ALYCIA",
         )
+
+        val userCommaSeparatedName =
+          repository.findAll(UserSpecification(UserFilter(name = "ALYCIA,sawyl")), PageRequest.of(0, 10))
+        assertThat(userCommaSeparatedName.content).extracting<String>(UserPersonDetail::username).containsExactly(
+          "SAWYL.ALYCIA",
+        )
       }
 
       @Test

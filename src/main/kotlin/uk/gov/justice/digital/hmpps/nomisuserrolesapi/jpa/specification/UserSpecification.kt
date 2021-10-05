@@ -103,9 +103,10 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
   }
 }
 
-private fun String.isFullName() = this.split(" ").size > 1
-private fun String.firstWord() = if (isFullName()) this.split(" ")[0] else this
-private fun String.secondWord() =
-  if (isFullName()) this.split(" ")[1] else throw IllegalArgumentException("Term is not got two words")
+private fun String.spiltWords(): List<String> = this.split(",", " ")
+private fun String.isFullName() = this.spiltWords().size > 1
+private fun String.asFullName(): Pair<String, String> = this.spiltWords().let { it[0] to it[1] }
+private fun String.firstWord() = asFullName().first
+private fun String.secondWord() = asFullName().second
 
 private fun String.uppercaseLike() = "${this.uppercase()}%"
