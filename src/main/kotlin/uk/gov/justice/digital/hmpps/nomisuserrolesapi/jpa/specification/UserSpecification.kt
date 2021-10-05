@@ -30,16 +30,20 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     fun username() = root.get<String>(UserPersonDetail::username.name)
     fun joinToMemberOfUserGroups() =
       root.join<UserPersonDetail, UserGroupMember>(UserPersonDetail::memberOfUserGroups.name)
+
     fun Join<UserPersonDetail, UserGroupMember>.joinToUserGroup() =
       this.join<UserGroupMember, UserGroup>(UserGroupMember::userGroup.name)
+
     fun Join<UserGroupMember, UserGroup>.joinToAdministrators() =
       this.join<UserGroup, UserGroupAdministrator>(UserGroup::administrators.name)
+
     fun <PROP> Path<*>.get(prop: KProperty1<*, PROP>): Path<PROP> = this.get(prop.name)
 
     fun administeredBy(localAdministratorUsername: String): Predicate {
-      val administratorsJoin = joinToMemberOfUserGroups().joinToUserGroup().joinToAdministrators()
       return equal(
-        administratorsJoin
+        joinToMemberOfUserGroups()
+          .joinToUserGroup()
+          .joinToAdministrators()
           .get(UserGroupAdministrator::id)
           .get(UserGroupAdministratorPk::username),
         localAdministratorUsername
