@@ -37,6 +37,10 @@ class UserService(
 
   fun createUser(createUserRequest: CreateUserRequest): UserDetail {
 
+    if (createUserRequest.adminUser && createUserRequest.password.length < 14) {
+      throw PasswordTooShortException("Password must be at least 14 alpha-numeric characters in length. Please re-enter password.")
+    }
+
     val type = if (createUserRequest.adminUser) {
       "ADMIN"
     } else {
@@ -67,13 +71,8 @@ class UserService(
       AccountProfile.TAG_GENERAL
     }
     userPersonDetailRepository.createUser(createUserRequest.username, createUserRequest.password, profile.name)
+    userPersonDetailRepository.expirePassword(createUserRequest.username)
 
-    /**
-     * TODO: Handle these errors
-     * ORA-20999: ORA-01920: user name '<USERNAME>' conflicts with another user or role name
-     * (ADMIN) ORA-20001:  Password must be at least 14 alpha-numeric characters in length. Please re-enter password.
-     * (GENERAL) ORA-20001:  Password must be at least 9 alpha-numeric characters in length. Please re-enter password.
-     */
     val status = accountDetailRepository.findById(createUserRequest.username)
       .orElseThrow(UserNotFoundException("User $createUserRequest.username not found"))
 
@@ -102,5 +101,13 @@ class CaseloadNotFoundException(message: String?) :
   Supplier<CaseloadNotFoundException> {
   override fun get(): CaseloadNotFoundException {
     return CaseloadNotFoundException(message)
+  }
+}
+
+class PasswordTooShortException(message: String?) :
+  RuntimeException(message),
+  Supplier<PasswordTooShortException> {
+  override fun get(): PasswordTooShortException {
+    return PasswordTooShortException(message)
   }
 }

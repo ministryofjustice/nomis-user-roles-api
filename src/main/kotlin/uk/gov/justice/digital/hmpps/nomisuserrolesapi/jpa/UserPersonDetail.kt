@@ -30,7 +30,7 @@ data class UserPersonDetail(
   val roles: List<UserCaseloadRole> = listOf(),
 
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], mappedBy = "user")
-  var caseloads: List<UserCaseload> = listOf(),
+  val caseloads: MutableList<UserCaseload> = mutableListOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   val activeAndInactiveMemberOfUserGroups: List<UserGroupMember> = listOf(),
@@ -71,6 +71,6 @@ data class UserPersonDetail(
       id = UserCaseloadPk(caseloadId = caseload.id, username = this.username),
       caseload = caseload, user = this, startDate = now()
     )
-    caseloads = caseloads + userCaseload
+    caseloads.add(userCaseload)
   }
 }

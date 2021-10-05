@@ -245,6 +245,48 @@ class UserResourceIntTest : IntegrationTestBase() {
   inner class MaintainUsers {
 
     @Test
+    fun `a database user cannot be created without correct role`() {
+
+      webTestClient.post().uri("/users")
+        .headers(setAuthorisation(roles = listOf("ROLE_DUMMY")))
+        .body(
+          BodyInserters.fromValue(
+            CreateUserRequest(
+              username = "testuser2",
+              password = "password123",
+              firstName = "Test",
+              lastName = "User",
+              defaultCaseloadId = "BXI",
+              email = "test@test.com"
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `a database user cannot be created with invalid password`() {
+
+      webTestClient.post().uri("/users")
+        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
+        .body(
+          BodyInserters.fromValue(
+            CreateUserRequest(
+              username = "testuser2",
+              password = "password",
+              firstName = "Test",
+              lastName = "User",
+              defaultCaseloadId = "BXI",
+              email = "test@test.com"
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().is4xxClientError
+    }
+
+    @Test
     fun `a database user can be created`() {
 
       webTestClient.post().uri("/users")
@@ -253,7 +295,7 @@ class UserResourceIntTest : IntegrationTestBase() {
           BodyInserters.fromValue(
             CreateUserRequest(
               username = "testuser2",
-              password = "password123",
+              password = "password123456",
               firstName = "Test",
               lastName = "User",
               defaultCaseloadId = "BXI",
@@ -272,7 +314,7 @@ class UserResourceIntTest : IntegrationTestBase() {
           "lastName": "User",
           "activeCaseloadId" : "BXI",
           "active": true,
-          "accountStatus": "OPEN"
+          "accountStatus": "EXPIRED"
           }
           """
         )
@@ -299,6 +341,14 @@ class UserResourceIntTest : IntegrationTestBase() {
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .exchange()
         .expectStatus().isNotFound
+    }
+
+    @Test
+    fun `can't drop a db user without correct role`() {
+      webTestClient.delete().uri("/users/testuser3")
+        .headers(setAuthorisation(roles = listOf("ROLE_DUMMY")))
+        .exchange()
+        .expectStatus().isForbidden
     }
 
     @Test

@@ -7,11 +7,14 @@ import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.reactive.function.client.WebClientException
 import org.springframework.web.reactive.function.client.WebClientResponseException
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.CaseloadNotFoundException
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.PasswordTooShortException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserNotFoundException
 import javax.validation.ValidationException
 
@@ -74,7 +77,7 @@ class NomisUserRolesApiExceptionHandler {
   }
 
   @ExceptionHandler(UserNotFoundException::class)
-  fun handleRoleNotFoundException(e: UserNotFoundException): ResponseEntity<ErrorResponse?>? {
+  fun handleUserNotFoundException(e: UserNotFoundException): ResponseEntity<ErrorResponse?>? {
     log.debug("User not found exception caught: {}", e.message)
     return ResponseEntity
       .status(HttpStatus.NOT_FOUND)
@@ -87,12 +90,42 @@ class NomisUserRolesApiExceptionHandler {
       )
   }
 
+  @ExceptionHandler(CaseloadNotFoundException::class)
+  fun handleCaseloadNotFoundException(e: CaseloadNotFoundException): ResponseEntity<ErrorResponse?>? {
+    log.debug("Caseload not found exception caught: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.NOT_FOUND)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.NOT_FOUND,
+          userMessage = "Unexpected error: ${e.message}",
+          developerMessage = e.message
+        )
+      )
+  }
+
+  @ExceptionHandler(PasswordTooShortException::class)
+  fun handlePasswordTooShortException(e: PasswordTooShortException): ResponseEntity<ErrorResponse> {
+    log.debug("Password too short exception caught: {}", e)
+    return ResponseEntity
+      .status(BAD_REQUEST)
+      .body(ErrorResponse(status = (BAD_REQUEST.value()), userMessage = e.message, developerMessage = (e.message)))
+  }
+
   @ExceptionHandler(MissingServletRequestParameterException::class)
   fun handleValidationException(e: MissingServletRequestParameterException): ResponseEntity<ErrorResponse> {
     log.debug("Bad Request (400) returned", e)
     return ResponseEntity
       .status(BAD_REQUEST)
       .body(ErrorResponse(status = (BAD_REQUEST.value()), developerMessage = (e.message)))
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException::class)
+  fun handleValidationException(e: MethodArgumentNotValidException): ResponseEntity<ErrorResponse> {
+    log.debug("Validation error (400) returned", e)
+    return ResponseEntity
+      .status(BAD_REQUEST)
+      .body(ErrorResponse(status = (BAD_REQUEST.value()), userMessage = "Validation Error", developerMessage = (e.message)))
   }
 
   @ExceptionHandler(java.lang.Exception::class)
