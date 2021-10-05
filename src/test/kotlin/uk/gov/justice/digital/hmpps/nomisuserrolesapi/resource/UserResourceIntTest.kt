@@ -143,6 +143,24 @@ class UserResourceIntTest : IntegrationTestBase() {
           .jsonPath(matchByUserName, "marco.rossi").exists()
           .jsonPath(matchByUserName, "mark.bowlan").exists()
       }
+      @Test
+      fun `they can filter by account status`() {
+        webTestClient.get().uri { it.path("/users/").queryParam("status", "ACTIVE").build() }
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+          .exchange()
+          .expectStatus().isOk
+          .expectBody()
+          .jsonPath("$.numberOfElements").isEqualTo(2)
+          .jsonPath(matchByUserName, "abella.moulin").exists()
+          .jsonPath(matchByUserName, "mark.bowlan").exists()
+      }
+      @Test
+      fun `invalid account status filter is a bad request`() {
+        webTestClient.get().uri { it.path("/users/").queryParam("status", "INACT").build() }
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+          .exchange()
+          .expectStatus().isBadRequest
+      }
     }
 
     @Nested
@@ -208,6 +226,16 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(1)
           .jsonPath(matchByUserName, "marco.rossi").exists()
+      }
+      @Test
+      fun `they can filter by account status`() {
+        webTestClient.get().uri { it.path("/users/").queryParam("status", "ACTIVE").build() }
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
+          .exchange()
+          .expectStatus().isOk
+          .expectBody()
+          .jsonPath("$.numberOfElements").isEqualTo(1)
+          .jsonPath(matchByUserName, "abella.moulin").exists()
       }
     }
   }

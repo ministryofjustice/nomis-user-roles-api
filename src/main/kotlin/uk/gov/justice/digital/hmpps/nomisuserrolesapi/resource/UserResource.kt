@@ -203,7 +203,8 @@ class UserResource(
     pageRequest,
     UserFilter(
       localAdministratorUsername = localAdministratorUsernameWhenNotCentralAdministrator(),
-      name = if (nameFilter.isNullOrBlank()) null else nameFilter
+      name = if (nameFilter.isNullOrBlank()) null else nameFilter,
+      status = status,
     )
   )
 

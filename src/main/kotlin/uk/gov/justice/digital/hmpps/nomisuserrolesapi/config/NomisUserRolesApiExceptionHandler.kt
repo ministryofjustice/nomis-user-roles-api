@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.config
 
 import org.slf4j.LoggerFactory
+import org.springframework.beans.TypeMismatchException
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
@@ -45,7 +46,7 @@ class NomisUserRolesApiExceptionHandler {
   }
 
   @ExceptionHandler(ValidationException::class)
-  fun handleValidationException(e: Exception): ResponseEntity<ErrorResponse> {
+  fun handleValidationException(e: ValidationException): ResponseEntity<ErrorResponse> {
     log.info("Validation exception: {}", e.message)
     return ResponseEntity
       .status(BAD_REQUEST)
@@ -53,6 +54,20 @@ class NomisUserRolesApiExceptionHandler {
         ErrorResponse(
           status = BAD_REQUEST,
           userMessage = "Validation failure: ${e.message}",
+          developerMessage = e.message
+        )
+      )
+  }
+
+  @ExceptionHandler(TypeMismatchException::class)
+  fun handleValidationException(e: TypeMismatchException): ResponseEntity<ErrorResponse> {
+    log.info("Parameter conversion exception: {}", e.message)
+    return ResponseEntity
+      .status(BAD_REQUEST)
+      .body(
+        ErrorResponse(
+          status = BAD_REQUEST,
+          userMessage = "Parameter conversion failure: ${e.message}",
           developerMessage = e.message
         )
       )

@@ -1,4 +1,5 @@
 import org.springframework.data.jpa.domain.Specification
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroup
@@ -22,12 +23,14 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     criteriaBuilder: CriteriaBuilder
   ): Predicate? {
     val predicates = mutableListOf<Predicate>()
+    fun <PROP> Path<*>.get(prop: KProperty1<*, PROP>): Path<PROP> = this.get(prop.name)
+    fun <PROP> Root<*>.get(prop: KProperty1<*, PROP>): Path<PROP> = this.get(prop.name)
+    fun <PROP> get(prop: KProperty1<*, PROP>): Path<PROP> = root.get(prop)
     fun or(vararg predicates: Predicate) = criteriaBuilder.or(*predicates)
     fun and(vararg predicates: Predicate) = criteriaBuilder.and(*predicates)
     fun like(x: Expression<String>, pattern: String) = criteriaBuilder.like(x, pattern)
     fun equal(x: Expression<String>, pattern: String) = criteriaBuilder.equal(x, pattern)
-    fun staff() = root.get<Staff>(UserPersonDetail::staff.name)
-    fun username() = root.get<String>(UserPersonDetail::username.name)
+
     fun joinToMemberOfUserGroups() =
       root.join<UserPersonDetail, UserGroupMember>(UserPersonDetail::memberOfUserGroups.name)
 
@@ -36,8 +39,6 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
 
     fun Join<UserGroupMember, UserGroup>.joinToAdministrators() =
       this.join<UserGroup, UserGroupAdministrator>(UserGroup::administrators.name)
-
-    fun <PROP> Path<*>.get(prop: KProperty1<*, PROP>): Path<PROP> = this.get(prop.name)
 
     fun administeredBy(localAdministratorUsername: String): Predicate {
       return equal(
@@ -55,21 +56,21 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
         or(
           and(
             like(
-              staff().get(Staff::firstName),
+              get(UserPersonDetail::staff).get(Staff::firstName),
               name.firstWord().uppercaseLike()
             ),
             like(
-              staff().get(Staff::lastName),
+              get(UserPersonDetail::staff).get(Staff::lastName),
               name.secondWord().uppercaseLike()
             ),
           ),
           and(
             like(
-              staff().get(Staff::firstName),
+              get(UserPersonDetail::staff).get(Staff::firstName),
               name.secondWord().uppercaseLike()
             ),
             like(
-              staff().get(Staff::lastName),
+              get(UserPersonDetail::staff).get(Staff::lastName),
               name.firstWord().uppercaseLike()
             ),
           ),
@@ -77,19 +78,22 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       } else {
         or(
           like(
-            staff().get(Staff::firstName),
+            get(UserPersonDetail::staff).get(Staff::firstName),
             name.uppercaseLike()
           ),
           like(
-            staff().get(Staff::lastName),
+            get(UserPersonDetail::staff).get(Staff::lastName),
             name.uppercaseLike()
           ),
           like(
-            username(),
+            get(UserPersonDetail::username),
             name.uppercaseLike()
           ),
         )
       }
+
+    fun statusMatch(status: UserStatus): Predicate? =
+      status.databaseStatus()?.let { equal(get(UserPersonDetail::staff).get(Staff::status), it) }
 
     filter.localAdministratorUsername?.run {
       predicates.add(administeredBy(this))
@@ -99,8 +103,18 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       predicates.add(nameMatch(this))
     }
 
+    filter.status?.run {
+      statusMatch(this)?.run { predicates.add(this) }
+    }
+
     return criteriaBuilder.and(*predicates.toTypedArray())
   }
+}
+
+private fun UserStatus.databaseStatus(): String? = when (this) {
+  UserStatus.ALL -> null
+  UserStatus.ACTIVE -> "ACTIVE"
+  UserStatus.INACTIVE -> "INACT"
 }
 
 private fun String.spiltWords(): List<String> = this.split(",", " ")

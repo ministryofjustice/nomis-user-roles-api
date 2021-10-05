@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.context.ActiveProfiles
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupAdministrator
@@ -416,6 +417,133 @@ class UserPersonDetailRepositoryTest {
           .containsExactly(
             "SAWYL.ALYCIA", "SAWYL.ELBERT", "SAW.MICKEN", "BOB.SAW",
           )
+      }
+    }
+
+    @Nested
+    @DisplayName("with a status filter")
+    inner class StatusFilter {
+      private val lsaAdministratorAtWandsworth = "RIZ.MARSHALL"
+
+      private fun createUserOf(username: String, status: String = "ACTIVE", prison: String = "WWI") =
+        dataBuilder.generalUser()
+          .username(username.uppercase())
+          .firstName(username.split(".")[0].uppercase())
+          .lastName(username.split(".")[1].uppercase())
+          .atPrison(prison)
+          .status(status)
+          .buildAndSave()
+
+      @BeforeEach
+      internal fun createUsers() {
+        dataBuilder.localAdministrator()
+          .username(lsaAdministratorAtWandsworth)
+          .atPrison("WWI")
+          .buildAndSave()
+
+        listOf(
+          "IBRAGIM.MIHAIL" to "ACTIVE",
+          "MARIAN.CHESED" to "ACTIVE",
+          "LEOPOLDO.CHESED" to "INACT",
+          "SAWYL.ALYCIA" to "INACT",
+          "SAWYL.ELBERT" to "SICK",
+        ).forEach { createUserOf(username = it.first, status = it.second) }
+
+        listOf(
+          "SAW.MICKEN" to "ACTIVE",
+          "BOB.SAW" to "INACT",
+        ).forEach { createUserOf(username = it.first, status = it.second, "BXI") }
+      }
+
+      @Test
+      internal fun `will match all users regardless status not supplied`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(status = null)), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "IBRAGIM.MIHAIL",
+          "MARIAN.CHESED",
+          "LEOPOLDO.CHESED",
+          "SAWYL.ALYCIA",
+          "SAWYL.ELBERT",
+          "SAW.MICKEN",
+          "BOB.SAW",
+          "RIZ.MARSHALL",
+        )
+      }
+
+      @Test
+      internal fun `will match all users regardless status when filter is ALL`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(status = UserStatus.ALL)), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "IBRAGIM.MIHAIL",
+          "MARIAN.CHESED",
+          "LEOPOLDO.CHESED",
+          "SAWYL.ALYCIA",
+          "SAWYL.ELBERT",
+          "SAW.MICKEN",
+          "BOB.SAW",
+          "RIZ.MARSHALL",
+        )
+      }
+
+      @Test
+      internal fun `will match only active when filter is ACTIVE`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(status = UserStatus.ACTIVE)), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "IBRAGIM.MIHAIL",
+          "MARIAN.CHESED",
+          "SAW.MICKEN",
+          "RIZ.MARSHALL",
+        )
+      }
+
+      @Test
+      internal fun `will match only inactive when filter is INACTIVE`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(status = UserStatus.INACTIVE)), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "LEOPOLDO.CHESED",
+          "SAWYL.ALYCIA",
+          "BOB.SAW",
+        )
+      }
+
+      @Test
+      internal fun `can combine LSA and status filter`() {
+        val users =
+          repository.findAll(
+            UserSpecification(
+              UserFilter(
+                localAdministratorUsername = lsaAdministratorAtWandsworth,
+                status = UserStatus.ACTIVE
+              )
+            ),
+            PageRequest.of(0, 10)
+          )
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "IBRAGIM.MIHAIL",
+          "MARIAN.CHESED",
+        )
+      }
+
+      @Test
+      internal fun `there are some statuses eg SICK that can not be filtered`() {
+        val countAllUsersThatCanBeFiltered = repository.findAll(
+          UserSpecification(UserFilter(status = UserStatus.INACTIVE)),
+          PageRequest.of(0, 10)
+        ).totalElements +
+          repository.findAll(
+            UserSpecification(UserFilter(status = UserStatus.ACTIVE)),
+            PageRequest.of(0, 10)
+          ).totalElements
+        val countAllUsersRegardlessOfStatus = repository.findAll(
+          UserSpecification(UserFilter(status = UserStatus.ALL)),
+          PageRequest.of(0, 10)
+        ).totalElements
+
+        assertThat(countAllUsersRegardlessOfStatus).isGreaterThan(countAllUsersThatCanBeFiltered)
       }
     }
   }
