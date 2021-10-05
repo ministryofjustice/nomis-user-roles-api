@@ -1,7 +1,5 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
-import UserFilter
-import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -208,5 +206,7 @@ class UserResource(
       name = if (nameFilter.isNullOrBlank()) null else nameFilter
     )
   )
-  fun localAdministratorUsernameWhenNotCentralAdministrator(): String? = if (AuthenticationFacade.hasRoles("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")) null else authenticationFacade.currentUsername
+
+  fun localAdministratorUsernameWhenNotCentralAdministrator(): String? =
+    if (AuthenticationFacade.hasRoles("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")) null else authenticationFacade.currentUsername
 }
