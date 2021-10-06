@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
 import org.hibernate.Hibernate
 import org.hibernate.annotations.Where
-import java.time.LocalDate
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -39,11 +38,11 @@ data class Staff(
   var emails: List<EmailAddress> = listOf(),
 ) {
 
-  fun generalAccount() : UserPersonDetail? = users.firstOrNull { u -> "GENERAL" == u.type }
+  fun generalAccount(): UserPersonDetail? = users.firstOrNull { u -> "GENERAL" == u.type }
 
-  fun adminAccount() : UserPersonDetail? = users.firstOrNull { u -> "ADMIN" == u.type }
+  fun adminAccount(): UserPersonDetail? = users.firstOrNull { u -> "ADMIN" == u.type }
 
-  fun primaryEmail() : EmailAddress? = emails.firstOrNull { e -> e.email.contains("justice.gov.uk") }?:run { emails.firstOrNull() }
+  fun primaryEmail(): EmailAddress? = emails.firstOrNull { e -> e.email.contains("justice.gov.uk") } ?: run { emails.firstOrNull() }
 
   val isActive: Boolean
     get() = STAFF_STATUS_ACTIVE == status

@@ -19,7 +19,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffReposi
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserSummary
 import java.util.function.Supplier
-import javax.persistence.EntityExistsException
 import javax.transaction.Transactional
 
 @Service
@@ -54,7 +53,7 @@ class UserService(
     }
 
     val staffAccount = createUserRequest.linkedUsername?.let { userAccount ->
-      userPersonDetailRepository.findById(userAccount).map{it.staff}.orElseThrow{UserNotFoundException("Linked User Account $userAccount not found")}
+      userPersonDetailRepository.findById(userAccount).map { it.staff }.orElseThrow { UserNotFoundException("Linked User Account $userAccount not found") }
     } ?: run {
       val staff = Staff(firstName = createUserRequest.firstName.uppercase(), lastName = createUserRequest.lastName.uppercase(), status = "ACTIVE")
       staff.setEmail(createUserRequest.email)

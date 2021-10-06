@@ -124,9 +124,13 @@ class NomisUserRolesApiExceptionHandler {
     log.debug("Password too short exception caught: {}", e)
     return ResponseEntity
       .status(BAD_REQUEST)
-      .body(ErrorResponse(status = (BAD_REQUEST.value()),
-        userMessage = "Password too short: ${e.message}",
-        developerMessage = (e.message)))
+      .body(
+        ErrorResponse(
+          status = (BAD_REQUEST.value()),
+          userMessage = "Password too short: ${e.message}",
+          developerMessage = (e.message)
+        )
+      )
   }
 
   @ExceptionHandler(MissingServletRequestParameterException::class)
@@ -134,9 +138,13 @@ class NomisUserRolesApiExceptionHandler {
     log.debug("Bad Request (400) returned", e)
     return ResponseEntity
       .status(BAD_REQUEST)
-      .body(ErrorResponse(status = (BAD_REQUEST.value()),
-        userMessage = "Parameter Missing: ${e.message}",
-        developerMessage = (e.message)))
+      .body(
+        ErrorResponse(
+          status = (BAD_REQUEST.value()),
+          userMessage = "Parameter Missing: ${e.message}",
+          developerMessage = (e.message)
+        )
+      )
   }
 
   @ExceptionHandler(MethodArgumentNotValidException::class)
@@ -144,9 +152,13 @@ class NomisUserRolesApiExceptionHandler {
     log.debug("Validation error (400) returned", e)
     return ResponseEntity
       .status(BAD_REQUEST)
-      .body(ErrorResponse(status = (BAD_REQUEST.value()),
-        userMessage = "Validation failure: ${e.message}",
-        developerMessage = (e.message)))
+      .body(
+        ErrorResponse(
+          status = (BAD_REQUEST.value()),
+          userMessage = "Validation failure: ${e.message}",
+          developerMessage = (e.message)
+        )
+      )
   }
 
   @ExceptionHandler(java.lang.Exception::class)
