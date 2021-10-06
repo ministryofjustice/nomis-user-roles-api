@@ -309,25 +309,153 @@ class UserResourceIntTest : IntegrationTestBase() {
         .expectBody().json(
           """
           {
-          "username": "testuser2",
-          "firstName": "Test",
-          "lastName": "User",
+          "username": "TESTUSER2",
+          "firstName": "TEST",
+          "lastName": "USER",
           "activeCaseloadId" : "BXI",
           "active": true,
-          "accountStatus": "EXPIRED"
+          "accountStatus": "EXPIRED",
+          "primaryEmail": "test@test.com",
+          "accountType": "ADMIN"
           }
           """
         )
 
-      webTestClient.get().uri("/users/testuser2")
+      webTestClient.get().uri("/users/TESTUSER2")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("username").isEqualTo("testuser2")
-        .jsonPath("firstName").isEqualTo("Test")
-        .jsonPath("lastName").isEqualTo("User")
+        .jsonPath("username").isEqualTo("TESTUSER2")
+        .jsonPath("firstName").isEqualTo("TEST")
+        .jsonPath("lastName").isEqualTo("USER")
         .jsonPath("staffId").exists()
+    }
+
+    @Test
+    fun `a user can be link to an existing account`() {
+
+      webTestClient.post().uri("/users")
+        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
+        .body(
+          BodyInserters.fromValue(
+            CreateUserRequest(
+              username = "testuser4",
+              password = "password123456",
+              firstName = "Test",
+              lastName = "User",
+              defaultCaseloadId = "CADM_I",
+              email = "test@test.com",
+              adminUser = true
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().isCreated
+
+      webTestClient.post().uri("/users")
+        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
+        .body(
+          BodyInserters.fromValue(
+            CreateUserRequest(
+              username = "testuser5",
+              password = "password123",
+              firstName = "Test",
+              lastName = "User",
+              defaultCaseloadId = "BXI",
+              email = "test@test.com",
+              adminUser = false,
+              linkedUsername = "TESTUSER4"
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().isCreated
+
+      val responseSpec = webTestClient.get().uri("/users/TESTUSER4")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+    }
+
+    @Test
+    fun `a user cannot be link to an existing account of same ADMIN type`() {
+
+      webTestClient.post().uri("/users")
+        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
+        .body(
+          BodyInserters.fromValue(
+            CreateUserRequest(
+              username = "testuser6",
+              password = "password123456",
+              firstName = "Test",
+              lastName = "User",
+              defaultCaseloadId = "CADM_I",
+              email = "test@test.com",
+              adminUser = true
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().isCreated
+
+      webTestClient.post().uri("/users")
+        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
+        .body(
+          BodyInserters.fromValue(
+            CreateUserRequest(
+              username = "testuser5",
+              password = "password123456",
+              firstName = "Test",
+              lastName = "User",
+              defaultCaseloadId = "CADM_I",
+              email = "test@test.com",
+              adminUser = true,
+              linkedUsername = "TESTUSER6"
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().is4xxClientError
+    }
+
+    @Test
+    fun `a user cannot be link to an existing account of same GENERAL type`() {
+
+      webTestClient.post().uri("/users")
+        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
+        .body(
+          BodyInserters.fromValue(
+            CreateUserRequest(
+              username = "testuser7",
+              password = "password123",
+              firstName = "Test",
+              lastName = "User",
+              defaultCaseloadId = "BXI",
+              email = "test@test.com"
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().isCreated
+
+      webTestClient.post().uri("/users")
+        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
+        .body(
+          BodyInserters.fromValue(
+            CreateUserRequest(
+              username = "testuser8",
+              password = "password123",
+              firstName = "Test",
+              lastName = "User",
+              defaultCaseloadId = "BXI",
+              email = "test@test.com",
+              linkedUsername = "TESTUSER7"
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().is4xxClientError
     }
   }
 
@@ -337,7 +465,7 @@ class UserResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `can't drop a db user that doesn't exist`() {
-      webTestClient.delete().uri("/users/testuser3")
+      webTestClient.delete().uri("/users/TESTUSER3")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .exchange()
         .expectStatus().isNotFound
@@ -345,7 +473,7 @@ class UserResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `can't drop a db user without correct role`() {
-      webTestClient.delete().uri("/users/testuser3")
+      webTestClient.delete().uri("/users/TESTUSER3")
         .headers(setAuthorisation(roles = listOf("ROLE_DUMMY")))
         .exchange()
         .expectStatus().isForbidden
@@ -370,12 +498,12 @@ class UserResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isCreated
 
-      webTestClient.delete().uri("/users/testuser3")
+      webTestClient.delete().uri("/users/TESTUSER3")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .exchange()
         .expectStatus().isOk
 
-      webTestClient.get().uri("/users/testuser3")
+      webTestClient.get().uri("/users/TESTUSER3")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
         .expectStatus().isNotFound

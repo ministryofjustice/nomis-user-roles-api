@@ -41,5 +41,8 @@ data class CreateUserRequest(
   ) val email: String,
 
   @Schema(description = "Admin User?", example = "true", required = false, defaultValue = "false")
-  val adminUser: Boolean = false
+  val adminUser: Boolean = false,
+
+  @Schema(description = "Attach account to an existing staff record", example = "234323", required = false)
+  val linkedUsername: String? = null
 )

@@ -25,7 +25,8 @@ class UserResourceTest {
       lastName = "Smith",
       active = true,
       activeCaseloadId = "BXI",
-      accountStatus = AccountStatus.OPEN
+      accountStatus = AccountStatus.OPEN,
+      primaryEmail = "test@test.com"
     )
 
     whenever(userService.findByUsername(any())).thenReturn(user)

@@ -15,7 +15,9 @@ data class UserDetail(
   @Schema(description = "Last name of the user", example = "Smith", required = true) val lastName: String,
   @Schema(description = "Active Caseload of the user", example = "BXI", required = false) val activeCaseloadId: String?,
   @Schema(description = "Indicates that the user is active", example = "true", required = true) val active: Boolean,
-  @Schema(description = "Status of the user", example = "OPEN", required = true) val accountStatus: AccountStatus
+  @Schema(description = "Status of the user", example = "OPEN", required = true) val accountStatus: AccountStatus?,
+  @Schema(description = "Type of user account", example = "GENERAL", required = true, allowableValues = ["GENERAL", "ADMIN"]) val accountType: String = "GENERAL",
+  @Schema(description = "Email addresses of user", example = "test@test.com", required = false) val primaryEmail: String?
 ) {
   constructor(userPersonDetail: UserPersonDetail, accountDetail: AccountDetail) :
     this(
@@ -25,6 +27,8 @@ data class UserDetail(
       lastName = userPersonDetail.staff.lastName,
       activeCaseloadId = userPersonDetail.activeCaseLoad?.id,
       active = userPersonDetail.staff.isActive,
-      accountStatus = accountDetail.status
+      accountStatus = accountDetail.status,
+      accountType = userPersonDetail.type,
+      primaryEmail = userPersonDetail.staff.primaryEmail()?.email
     )
 }

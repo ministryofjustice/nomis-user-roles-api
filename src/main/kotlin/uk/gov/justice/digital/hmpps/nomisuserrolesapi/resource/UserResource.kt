@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
@@ -124,8 +125,7 @@ class UserResource(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "User Information Returned",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = UserDetail::class))]
+        description = "User Information Returned"
       ),
       ApiResponse(
         responseCode = "400",
@@ -149,6 +149,39 @@ class UserResource(
     @PathVariable @Size(max = 30, min = 1, message = "username must be between 1 and 30") username: String
   ): UserDetail =
     userService.findByUsername(username)
+
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
+  @GetMapping("/staff/{staffId}")
+  @Operation(
+    summary = "Get specified staff details",
+    description = "Information on a specific user",
+    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Staff Information Returned"
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to get staff information",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to get a staff user",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      )
+    ]
+  )
+  fun getUserDetailsByStaffId(
+    @Schema(description = "Staff ID", example = "234232", required = true) @PathVariable staffId: Long
+  ): StaffDetail =
+    userService.findByStaffId(staffId)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @GetMapping

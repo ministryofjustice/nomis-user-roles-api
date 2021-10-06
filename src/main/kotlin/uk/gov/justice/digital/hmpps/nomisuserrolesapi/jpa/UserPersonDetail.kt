@@ -29,8 +29,8 @@ data class UserPersonDetail(
   @JoinColumn(name = "USERNAME")
   val roles: List<UserCaseloadRole> = listOf(),
 
-  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], mappedBy = "user")
-  val caseloads: MutableList<UserCaseload> = mutableListOf(),
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], mappedBy = "user", orphanRemoval = true)
+  var caseloads: List<UserCaseload> = listOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   val activeAndInactiveMemberOfUserGroups: List<UserGroupMember> = listOf(),
@@ -71,6 +71,6 @@ data class UserPersonDetail(
       id = UserCaseloadPk(caseloadId = caseload.id, username = this.username),
       caseload = caseload, user = this, startDate = now()
     )
-    caseloads.add(userCaseload)
+    caseloads = caseloads + userCaseload
   }
 }
