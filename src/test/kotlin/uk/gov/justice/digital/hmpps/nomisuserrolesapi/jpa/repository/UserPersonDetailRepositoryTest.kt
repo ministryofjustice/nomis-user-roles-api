@@ -546,6 +546,157 @@ class UserPersonDetailRepositoryTest {
         assertThat(countAllUsersRegardlessOfStatus).isGreaterThan(countAllUsersThatCanBeFiltered)
       }
     }
+
+    @Nested
+    @DisplayName("with an active caseload filter")
+    inner class ActiveCaseloadFilter {
+      private val lsaAdministratorAtWandsworth = "RIZ.MARSHALL"
+
+      private fun createUserOf(username: String, prisons: List<String> = listOf("WWI")) =
+        dataBuilder.generalUser()
+          .username(username.uppercase())
+          .firstName(username.split(".")[0].uppercase())
+          .lastName(username.split(".")[1].uppercase())
+          .atPrisons(prisons)
+          .buildAndSave()
+
+      @BeforeEach
+      internal fun createUsers() {
+        dataBuilder.localAdministrator()
+          .username(lsaAdministratorAtWandsworth)
+          .atPrison("WWI")
+          .buildAndSave()
+
+        listOf(
+          "IBRAGIM.MIHAIL" to listOf("WWI"),
+          "MARIAN.CHESED" to listOf("WWI"),
+          "LEOPOLDO.CHESED" to listOf("WWI", "BXI"), // first in list is set to active caseload
+          "SAWYL.ALYCIA" to listOf("BXI", "WWI"),
+          "SAWYL.ELBERT" to listOf("BXI"),
+          "SAW.MICKEN" to listOf(),
+          "BOB.SAW" to listOf("MDI"),
+        ).forEach { createUserOf(username = it.first, prisons = it.second) }
+      }
+
+      @Test
+      internal fun `will match all users regardless of active caseload when not supplied`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(activeCaseloadId = null)), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "IBRAGIM.MIHAIL",
+          "MARIAN.CHESED",
+          "LEOPOLDO.CHESED",
+          "SAWYL.ALYCIA",
+          "SAWYL.ELBERT",
+          "SAW.MICKEN",
+          "BOB.SAW",
+          "RIZ.MARSHALL",
+        )
+      }
+
+      @Test
+      internal fun `will match only users that match the active caseload`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(activeCaseloadId = "BXI")), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "SAWYL.ALYCIA",
+          "SAWYL.ELBERT",
+        )
+      }
+
+      @Test
+      internal fun `can combine LSA and active caseload filter`() {
+        val users =
+          repository.findAll(
+            UserSpecification(
+              UserFilter(
+                localAdministratorUsername = lsaAdministratorAtWandsworth,
+                activeCaseloadId = "BXI"
+              )
+            ),
+            PageRequest.of(0, 10)
+          )
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "SAWYL.ALYCIA",
+        )
+      }
+    }
+    @Nested
+    @DisplayName("with a caseload filter")
+    inner class CaseloadFilter {
+      private val lsaAdministratorAtWandsworth = "RIZ.MARSHALL"
+
+      private fun createUserOf(username: String, prisons: List<String> = listOf("WWI")) =
+        dataBuilder.generalUser()
+          .username(username.uppercase())
+          .firstName(username.split(".")[0].uppercase())
+          .lastName(username.split(".")[1].uppercase())
+          .atPrisons(prisons)
+          .buildAndSave()
+
+      @BeforeEach
+      internal fun createUsers() {
+        dataBuilder.localAdministrator()
+          .username(lsaAdministratorAtWandsworth)
+          .atPrison("WWI")
+          .buildAndSave()
+
+        listOf(
+          "IBRAGIM.MIHAIL" to listOf("WWI"),
+          "MARIAN.CHESED" to listOf("WWI"),
+          "LEOPOLDO.CHESED" to listOf("WWI", "BXI"),
+          "SAWYL.ALYCIA" to listOf("BXI", "WWI"),
+          "SAWYL.ELBERT" to listOf("BXI"),
+          "SAW.MICKEN" to listOf(),
+          "BOB.SAW" to listOf("MDI"),
+        ).forEach { createUserOf(username = it.first, prisons = it.second) }
+      }
+
+      @Test
+      internal fun `will match all users regardless of caseload when not supplied`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(caseloadId = null)), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "IBRAGIM.MIHAIL",
+          "MARIAN.CHESED",
+          "LEOPOLDO.CHESED",
+          "SAWYL.ALYCIA",
+          "SAWYL.ELBERT",
+          "SAW.MICKEN",
+          "BOB.SAW",
+          "RIZ.MARSHALL",
+        )
+      }
+
+      @Test
+      internal fun `will match only users that match the caseload`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(caseloadId = "BXI")), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "SAWYL.ALYCIA",
+          "SAWYL.ELBERT",
+          "LEOPOLDO.CHESED",
+        )
+      }
+
+      @Test
+      internal fun `can combine LSA and caseload filter`() {
+        val users =
+          repository.findAll(
+            UserSpecification(
+              UserFilter(
+                localAdministratorUsername = lsaAdministratorAtWandsworth,
+                caseloadId = "BXI"
+              )
+            ),
+            PageRequest.of(0, 10)
+          )
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "SAWYL.ALYCIA",
+          "LEOPOLDO.CHESED",
+        )
+      }
+    }
   }
 }
 
