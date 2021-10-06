@@ -25,7 +25,7 @@ data class UserPersonDetail(
   @JoinColumn(name = "STAFF_ID")
   val staff: Staff,
 
-  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
+  @OneToMany(fetch = FetchType.LAZY)
   @JoinColumn(name = "USERNAME", updatable = false, insertable = false, nullable = false)
   @Where(clause = "CASELOAD_ID = 'NWEB'")
   val dpsRoles: List<UserCaseloadRole> = listOf(),

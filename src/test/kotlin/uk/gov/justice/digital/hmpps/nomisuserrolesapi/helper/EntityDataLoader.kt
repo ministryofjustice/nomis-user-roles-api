@@ -65,12 +65,7 @@ class GeneralUserBuilder(
             roles = listOf(),
           )
           // add after userCaseload is created due to back ref
-          userCaseload.copy(
-            roles = if (it == dpsCaseloadId) asDPSRoles(userCaseload, dpsRoles) else asNOMISRoles(
-              userCaseload,
-              nomsRoles
-            )
-          )
+          userCaseload.copy(roles = asRoles(userCaseload, if (it == dpsCaseloadId) dpsRoles else nomsRoles))
         }.toMutableList()
       )
     return this
@@ -248,10 +243,7 @@ abstract class UserBuilder<T>(
     return this
   }
 
-  internal fun asDPSRoles(userCaseload: UserCaseload, roleCodes: List<String>): List<UserCaseloadRole> =
-    roleCodes.map { userCaseloadRole(userCaseload, it) }
-
-  internal fun asNOMISRoles(userCaseload: UserCaseload, roleCodes: List<String>): List<UserCaseloadRole> =
+  internal fun asRoles(userCaseload: UserCaseload, roleCodes: List<String>): List<UserCaseloadRole> =
     roleCodes.map { userCaseloadRole(userCaseload, it) }
 
   private fun userCaseloadRole(userCaseload: UserCaseload, roleCode: String): UserCaseloadRole {
