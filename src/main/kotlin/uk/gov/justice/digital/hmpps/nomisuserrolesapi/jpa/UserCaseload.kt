@@ -6,12 +6,15 @@ import org.hibernate.Hibernate
 import java.io.Serializable
 import java.time.LocalDate
 import java.util.Objects
+import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Embeddable
 import javax.persistence.EmbeddedId
 import javax.persistence.Entity
+import javax.persistence.FetchType
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
+import javax.persistence.OneToMany
 import javax.persistence.Table
 
 @Embeddable
@@ -39,6 +42,9 @@ data class UserCaseload(
 
   @JoinColumn(name = "START_DATE")
   val startDate: LocalDate,
+
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], mappedBy = "userCaseload")
+  val roles: List<UserCaseloadRole>,
 
 ) {
   override fun equals(other: Any?): Boolean {

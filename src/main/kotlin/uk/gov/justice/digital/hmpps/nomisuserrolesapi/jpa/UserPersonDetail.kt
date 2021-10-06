@@ -25,9 +25,10 @@ data class UserPersonDetail(
   @JoinColumn(name = "STAFF_ID")
   val staff: Staff,
 
-  @OneToMany(fetch = FetchType.LAZY)
-  @JoinColumn(name = "USERNAME")
-  val roles: List<UserCaseloadRole> = listOf(),
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
+  @JoinColumn(name = "USERNAME", updatable = false, insertable = false, nullable = false)
+  @Where(clause = "CASELOAD_ID = 'NWEB'")
+  val dpsRoles: List<UserCaseloadRole> = listOf(),
 
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], mappedBy = "user", orphanRemoval = true)
   var caseloads: List<UserCaseload> = listOf(),
@@ -69,7 +70,8 @@ data class UserPersonDetail(
   fun addCaseload(caseload: Caseload) {
     val userCaseload = UserCaseload(
       id = UserCaseloadPk(caseloadId = caseload.id, username = this.username),
-      caseload = caseload, user = this, startDate = now()
+      caseload = caseload, user = this, startDate = now(),
+      roles = listOf(),
     )
     caseloads = caseloads + userCaseload
   }

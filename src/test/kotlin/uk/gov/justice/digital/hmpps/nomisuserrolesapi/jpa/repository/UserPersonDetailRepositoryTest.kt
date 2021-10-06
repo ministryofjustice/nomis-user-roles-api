@@ -51,7 +51,7 @@ class UserPersonDetailRepositoryTest {
     assertThat(user.staff.staffId).isNotNull.isGreaterThan(99L)
     assertThat(user.memberOfUserGroups).hasSize(1).allMatch { it.id.userGroupCode == "WWI" }
     assertThat(user.administratorOfUserGroups).isEmpty()
-    assertThat(user.caseloads).hasSize(1).extracting<String> { it.caseload.name }.containsExactly("WANDSWORTH (HMP)")
+    assertThat(user.caseloads).hasSize(2).extracting<String> { it.caseload.name }.containsExactly("WANDSWORTH (HMP)", "Nomis-Web Application")
   }
 
   @Test
@@ -621,6 +621,7 @@ class UserPersonDetailRepositoryTest {
         )
       }
     }
+
     @Nested
     @DisplayName("with a caseload filter")
     inner class CaseloadFilter {
@@ -697,8 +698,103 @@ class UserPersonDetailRepositoryTest {
         )
       }
     }
+
+    @Nested
+    @DisplayName("with a role filter")
+    inner class RoleFilter {
+      private val lsaAdministratorAtWandsworth = "RIZ.MARSHALL"
+
+      private fun createUserOf(user: UserWithRoles) =
+        dataBuilder.generalUser()
+          .username(user.username.uppercase())
+          .firstName(user.username.split(".")[0].uppercase())
+          .lastName(user.username.split(".")[1].uppercase())
+          .atPrisons(user.prisons)
+          .dpsRoles(user.dpsRoleCodes)
+          .nomisRoles(user.nomisRoleCodes)
+          .buildAndSave()
+
+      @BeforeEach
+      internal fun createUsers() {
+        dataBuilder.localAdministrator()
+          .username(lsaAdministratorAtWandsworth)
+          .atPrison("WWI")
+          .buildAndSave()
+
+        listOf(
+          UserWithRoles("IBRAGIM.MIHAIL", listOf("WWI"), dpsRoleCodes = listOf("GLOBAL_SEARCH", "CREATE_CATEGORISATION", "APPROVE_CATEGORISATION")),
+          UserWithRoles("MARIAN.CHESED", listOf("WWI"), dpsRoleCodes = listOf("GLOBAL_SEARCH", "APPROVE_CATEGORISATION")),
+          UserWithRoles("LEOPOLDO.CHESED", listOf("WWI", "BXI"), dpsRoleCodes = listOf("CREATE_CATEGORISATION", "APPROVE_CATEGORISATION")),
+          UserWithRoles("SAWYL.ALYCIA", listOf("BXI"), dpsRoleCodes = listOf("GLOBAL_SEARCH", "CREATE_CATEGORISATION", "APPROVE_CATEGORISATION")),
+          UserWithRoles("SAWYL.ELBERT", listOf("BXI"), dpsRoleCodes = listOf(), nomisRoleCodes = listOf()),
+          UserWithRoles("SAW.MICKEN", listOf("MDI"), dpsRoleCodes = listOf(), nomisRoleCodes = listOf("300", "GLOBAL_SEARCH")), // invalid data
+          UserWithRoles("BOB.SAW", listOf("MDI"), dpsRoleCodes = listOf("UPDATE_ALERT")),
+        ).forEach { createUserOf(it) }
+      }
+
+      @Test
+      internal fun `will match all users regardless of role when not supplied`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(roleCodes = listOf())), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "IBRAGIM.MIHAIL",
+          "MARIAN.CHESED",
+          "LEOPOLDO.CHESED",
+          "SAWYL.ALYCIA",
+          "SAWYL.ELBERT",
+          "SAW.MICKEN",
+          "BOB.SAW",
+          "RIZ.MARSHALL",
+        )
+      }
+
+      @Test
+      internal fun `will match only users that match the role belonging to DPS`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(roleCodes = listOf("GLOBAL_SEARCH"))), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "SAWYL.ALYCIA",
+          "IBRAGIM.MIHAIL",
+          "MARIAN.CHESED",
+        )
+      }
+      @Test
+      internal fun `will match only users that match the all roles in filter belonging to DPS`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(roleCodes = listOf("GLOBAL_SEARCH", "CREATE_CATEGORISATION"))), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "SAWYL.ALYCIA",
+          "IBRAGIM.MIHAIL",
+        )
+      }
+
+      @Test
+      internal fun `can combine LSA and caseload filter`() {
+        val users =
+          repository.findAll(
+            UserSpecification(
+              UserFilter(
+                localAdministratorUsername = lsaAdministratorAtWandsworth,
+                roleCodes = listOf("GLOBAL_SEARCH")
+              )
+            ),
+            PageRequest.of(0, 10)
+          )
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "IBRAGIM.MIHAIL",
+          "MARIAN.CHESED",
+        )
+      }
+    }
   }
 }
 
 fun List<UserGroupAdministrator>.userGroupOf(userGroupCode: String) =
   this.find { it.id.userGroupCode == userGroupCode }!!.userGroup
+
+data class UserWithRoles(
+  val username: String,
+  val prisons: List<String> = listOf("WWI"),
+  val dpsRoleCodes: List<String> = listOf("GLOBAL_SEARCH"),
+  val nomisRoleCodes: List<String> = listOf("300"),
+)
