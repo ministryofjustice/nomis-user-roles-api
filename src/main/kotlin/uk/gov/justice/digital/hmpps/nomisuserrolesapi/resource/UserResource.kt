@@ -204,12 +204,15 @@ class UserResource(
     pageRequest,
     UserFilter(
       localAdministratorUsername = localAdministratorUsernameWhenNotCentralAdministrator(),
-      name = if (nameFilter.isNullOrBlank()) null else nameFilter,
+      name = nameFilter.nonBlank(),
       status = status,
-      activeCaseloadId = activeCaseload,
+      activeCaseloadId = activeCaseload.nonBlank(),
+      caseloadId = caseload.nonBlank(),
     )
   )
 
   fun localAdministratorUsernameWhenNotCentralAdministrator(): String? =
     if (AuthenticationFacade.hasRoles("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")) null else authenticationFacade.currentUsername
 }
+
+private fun String?.nonBlank() = if (this.isNullOrBlank()) null else this

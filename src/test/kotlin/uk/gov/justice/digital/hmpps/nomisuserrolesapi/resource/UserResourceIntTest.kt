@@ -114,6 +114,7 @@ class UserResourceIntTest : IntegrationTestBase() {
           generalUser().username("abella.moulin").firstName("ABELLA").lastName("MOULIN").atPrison("WWI").buildAndSave()
           generalUser().username("marco.rossi").firstName("MARCO").lastName("ROSSI").atPrisons(listOf("WWI", "BXI")).inactive().buildAndSave()
           generalUser().username("mark.bowlan").firstName("MARK").lastName("BOWLAN").atPrison("BXI").buildAndSave()
+          generalUser().username("ella.dribble").firstName("ELLA").lastName("DRIBBLE").atPrisons(listOf("BXI", "WWI")).inactive().buildAndSave()
         }
       }
 
@@ -127,12 +128,32 @@ class UserResourceIntTest : IntegrationTestBase() {
           .exchange()
           .expectStatus().isOk
           .expectBody()
-          .jsonPath("$.numberOfElements").isEqualTo(3)
+          .jsonPath("$.numberOfElements").isEqualTo(4)
           .jsonPath(matchByUserName, "marco.rossi").exists()
           .jsonPath(matchByUserName, "abella.moulin").exists()
           .jsonPath(matchByUserName, "mark.bowlan").exists()
+          .jsonPath(matchByUserName, "ella.dribble").exists()
       }
       @Test
+      fun `blank filters are ignored`() {
+        webTestClient.get().uri {
+          it.path("/users/")
+            .queryParam("nameFilter", "")
+            .queryParam("caseload", "")
+            .queryParam("activeCaseload", "")
+            .queryParam("accessRoles", "")
+            .build()
+        }
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+          .exchange()
+          .expectStatus().isOk
+          .expectBody()
+          .jsonPath("$.numberOfElements").isEqualTo(4)
+          .jsonPath(matchByUserName, "marco.rossi").exists()
+          .jsonPath(matchByUserName, "abella.moulin").exists()
+          .jsonPath(matchByUserName, "mark.bowlan").exists()
+          .jsonPath(matchByUserName, "ella.dribble").exists()
+      } @Test
       fun `they can filter by user name`() {
         webTestClient.get().uri { it.path("/users/").queryParam("nameFilter", "mar").build() }
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
@@ -172,6 +193,18 @@ class UserResourceIntTest : IntegrationTestBase() {
           .jsonPath(matchByUserName, "marco.rossi").exists()
           .jsonPath(matchByUserName, "abella.moulin").exists()
       }
+      @Test
+      fun `they can filter by caseload`() {
+        webTestClient.get().uri { it.path("/users/").queryParam("caseload", "WWI").build() }
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+          .exchange()
+          .expectStatus().isOk
+          .expectBody()
+          .jsonPath("$.numberOfElements").isEqualTo(3)
+          .jsonPath(matchByUserName, "marco.rossi").exists()
+          .jsonPath(matchByUserName, "abella.moulin").exists()
+          .jsonPath(matchByUserName, "ella.dribble").exists()
+      }
     }
 
     @Nested
@@ -185,6 +218,7 @@ class UserResourceIntTest : IntegrationTestBase() {
           generalUser().username("abella.moulin").firstName("ABELLA").lastName("MOULIN").atPrison("WWI").buildAndSave()
           // first prison is set to active caseload
           generalUser().username("marco.rossi").firstName("MARCO").lastName("ROSSI").atPrisons(listOf("BXI", "WWI")).inactive().buildAndSave()
+          generalUser().username("ella.dribble").firstName("ELLA").lastName("DRIBBLE").atPrisons(listOf("WWI", "BXI")).inactive().buildAndSave()
           generalUser().username("mark.bowlan").firstName("MARK").lastName("BOWLAN").atPrison("BXI").buildAndSave()
         }
       }
@@ -199,9 +233,10 @@ class UserResourceIntTest : IntegrationTestBase() {
           .exchange()
           .expectStatus().isOk
           .expectBody()
-          .jsonPath("$.numberOfElements").isEqualTo(2)
+          .jsonPath("$.numberOfElements").isEqualTo(3)
           .jsonPath(matchByUserName, "marco.rossi").exists()
           .jsonPath(matchByUserName, "abella.moulin").exists()
+          .jsonPath(matchByUserName, "ella.dribble").exists()
           .jsonPath(matchByUserName + "active", "abella.moulin").isEqualTo(true)
           .jsonPath(matchByUserName + "firstName", "abella.moulin").isEqualTo("ABELLA")
           .jsonPath(matchByUserName + "lastName", "abella.moulin").isEqualTo("MOULIN")
@@ -222,11 +257,12 @@ class UserResourceIntTest : IntegrationTestBase() {
           .exchange()
           .expectStatus().isOk
           .expectBody()
-          .jsonPath("$.numberOfElements").isEqualTo(4)
+          .jsonPath("$.numberOfElements").isEqualTo(5)
           .jsonPath(matchByUserName, "marco.rossi").exists()
           .jsonPath(matchByUserName, "abella.moulin").exists()
           .jsonPath(matchByUserName, "mark.bowlan").exists()
           .jsonPath(matchByUserName, "jane.lsa.wwi").exists()
+          .jsonPath(matchByUserName, "ella.dribble").exists()
       }
 
       @Test
@@ -259,6 +295,17 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(1)
           .jsonPath(matchByUserName, "marco.rossi").exists()
+      }
+      @Test
+      fun `they can filter by caseload`() {
+        webTestClient.get().uri { it.path("/users/").queryParam("caseload", "BXI").build() }
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
+          .exchange()
+          .expectStatus().isOk
+          .expectBody()
+          .jsonPath("$.numberOfElements").isEqualTo(2)
+          .jsonPath(matchByUserName, "marco.rossi").exists()
+          .jsonPath(matchByUserName, "ella.dribble").exists()
       }
     }
   }

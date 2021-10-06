@@ -7,4 +7,5 @@ data class UserFilter(
   val name: String? = null,
   val status: UserStatus? = null,
   val activeCaseloadId: String? = null,
+  val caseloadId: String? = null,
 )
