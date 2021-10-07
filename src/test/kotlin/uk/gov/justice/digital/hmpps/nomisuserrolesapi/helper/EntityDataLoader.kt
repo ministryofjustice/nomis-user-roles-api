@@ -54,7 +54,7 @@ class GeneralUserBuilder(
         type = "GENERAL",
         activeCaseLoad = prisonCodes.firstOrNull()?.let { caseloadRepository.findByIdOrNull(it) },
         caseloads = (prisonCodes + dpsCaseloadId).map {
-          val userCaseload = UserCaseload(
+          UserCaseload(
             UserCaseloadPk(
               caseloadId = it,
               username = userPersonDetail.username
@@ -63,9 +63,7 @@ class GeneralUserBuilder(
             caseload = caseloadRepository.findByIdOrNull(it)!!,
             user = userPersonDetail,
             roles = listOf(),
-          )
-          // add after userCaseload is created due to back ref
-          userCaseload.copy(roles = asRoles(userCaseload, if (it == dpsCaseloadId) dpsRoles else nomsRoles))
+          ).let { userCaseload -> userCaseload.copy(roles = asRoles(userCaseload, if (it == dpsCaseloadId) dpsRoles else nomsRoles)) }
         }.toMutableList()
       )
     return this
