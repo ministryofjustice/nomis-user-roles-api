@@ -111,10 +111,34 @@ class UserResourceIntTest : IntegrationTestBase() {
       @BeforeEach
       internal fun createUsers() {
         with(dataBuilder) {
-          generalUser().username("abella.moulin").firstName("ABELLA").lastName("MOULIN").atPrison("WWI").buildAndSave()
-          generalUser().username("marco.rossi").firstName("MARCO").lastName("ROSSI").atPrisons(listOf("WWI", "BXI")).inactive().buildAndSave()
-          generalUser().username("mark.bowlan").firstName("MARK").lastName("BOWLAN").atPrison("BXI").buildAndSave()
-          generalUser().username("ella.dribble").firstName("ELLA").lastName("DRIBBLE").atPrisons(listOf("BXI", "WWI")).inactive().buildAndSave()
+          generalUser()
+            .username("abella.moulin")
+            .firstName("ABELLA")
+            .lastName("MOULIN")
+            .atPrison("WWI")
+            .dpsRoles(listOf("CREATE_CATEGORISATION", "GLOBAL_SEARCH"))
+            .buildAndSave()
+          generalUser()
+            .username("marco.rossi")
+            .firstName("MARCO")
+            .lastName("ROSSI")
+            .atPrisons(listOf("WWI", "BXI")).inactive()
+            .dpsRoles(listOf("APPROVE_CATEGORISATION", "GLOBAL_SEARCH"))
+            .buildAndSave()
+          generalUser()
+            .username("mark.bowlan")
+            .firstName("MARK")
+            .lastName("BOWLAN")
+            .atPrison("BXI")
+            .dpsRoles(listOf("APPROVE_CATEGORISATION", "CREATE_CATEGORISATION", "GLOBAL_SEARCH"))
+            .buildAndSave()
+          generalUser()
+            .username("ella.dribble")
+            .firstName("ELLA")
+            .lastName("DRIBBLE")
+            .atPrisons(listOf("BXI", "WWI"))
+            .inactive()
+            .dpsRoles(listOf()).buildAndSave()
         }
       }
 
@@ -204,6 +228,22 @@ class UserResourceIntTest : IntegrationTestBase() {
           .jsonPath(matchByUserName, "marco.rossi").exists()
           .jsonPath(matchByUserName, "abella.moulin").exists()
           .jsonPath(matchByUserName, "ella.dribble").exists()
+      }
+      @Test
+      fun `they can filter by role`() {
+        webTestClient.get().uri {
+          it.path("/users/")
+            .queryParam("accessRoles", "CREATE_CATEGORISATION")
+            .queryParam("accessRoles", "GLOBAL_SEARCH")
+            .build()
+        }
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+          .exchange()
+          .expectStatus().isOk
+          .expectBody()
+          .jsonPath("$.numberOfElements").isEqualTo(2)
+          .jsonPath(matchByUserName, "mark.bowlan").exists()
+          .jsonPath(matchByUserName, "abella.moulin").exists()
       }
     }
 

@@ -241,6 +241,7 @@ class UserResource(
       status = status,
       activeCaseloadId = activeCaseload.nonBlank(),
       caseloadId = caseload.nonBlank(),
+      roleCodes = accessRoles ?: listOf(),
     )
   )
 

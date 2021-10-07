@@ -2,8 +2,10 @@ import org.springframework.data.jpa.domain.Specification
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Role
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadPk
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadRole
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroup
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupAdministrator
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupAdministratorPk
@@ -25,6 +27,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     criteriaBuilder: CriteriaBuilder
   ): Predicate? {
     val predicates = mutableListOf<Predicate>()
+
     // these allow a fluent version based on the types being passed and rely on closure for criteria and root
     fun <PROP> Path<*>.get(prop: KProperty1<*, PROP>): Path<PROP> = this.get(prop.name)
     fun <PROP> Root<*>.get(prop: KProperty1<*, PROP>): Path<PROP> = this.get(prop.name)
@@ -97,6 +100,13 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     fun caseload(caseloadId: String): Predicate =
       equal(join(UserPersonDetail::caseloads).get(Caseload::id).get(UserCaseloadPk::caseloadId), caseloadId)
 
+    fun roles(roleCodes: List<String>): Predicate =
+      and(
+        * roleCodes.map {
+          equal(join(UserPersonDetail::dpsRoles).get(UserCaseloadRole::role).get(Role::code), it)
+        }.toTypedArray()
+      )
+
     filter.localAdministratorUsername?.run {
       predicates.add(administeredBy(this))
     }
@@ -115,6 +125,10 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
 
     filter.caseloadId?.run {
       predicates.add(caseload(this))
+    }
+
+    filter.roleCodes.takeIf { it.isEmpty().not() }?.run {
+      predicates.add(roles(this))
     }
 
     return criteriaBuilder.and(*predicates.toTypedArray())
