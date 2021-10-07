@@ -15,6 +15,7 @@ import org.springframework.web.reactive.function.client.WebClientException
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.CaseloadNotFoundException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.PasswordTooShortException
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserAlreadyExistsException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserNotFoundException
 import javax.validation.ValidationException
 
@@ -44,8 +45,8 @@ class NomisUserRolesApiExceptionHandler {
   fun handleWebClientException(e: WebClientException): ResponseEntity<ErrorResponse> {
     log.error("Unexpected exception", e)
     return ResponseEntity
-      .status(HttpStatus.INTERNAL_SERVER_ERROR)
-      .body(ErrorResponse(status = (HttpStatus.INTERNAL_SERVER_ERROR.value()), developerMessage = (e.message)))
+      .status(INTERNAL_SERVER_ERROR)
+      .body(ErrorResponse(status = (INTERNAL_SERVER_ERROR.value()), developerMessage = (e.message)))
   }
 
   @ExceptionHandler(ValidationException::class)
@@ -84,7 +85,21 @@ class NomisUserRolesApiExceptionHandler {
       .body(
         ErrorResponse(
           status = HttpStatus.NOT_FOUND,
-          userMessage = "Unexpected error: ${e.message}",
+          userMessage = "User not found: ${e.message}",
+          developerMessage = e.message
+        )
+      )
+  }
+
+  @ExceptionHandler(UserAlreadyExistsException::class)
+  fun handleUserAlreadyExistsException(e: UserAlreadyExistsException): ResponseEntity<ErrorResponse?>? {
+    log.debug("User already exists exception caught: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.CONFLICT)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.NOT_FOUND,
+          userMessage = "User already exists: ${e.message}",
           developerMessage = e.message
         )
       )
@@ -98,7 +113,7 @@ class NomisUserRolesApiExceptionHandler {
       .body(
         ErrorResponse(
           status = HttpStatus.NOT_FOUND,
-          userMessage = "Unexpected error: ${e.message}",
+          userMessage = "Caseload not found: ${e.message}",
           developerMessage = e.message
         )
       )
@@ -109,7 +124,13 @@ class NomisUserRolesApiExceptionHandler {
     log.debug("Password too short exception caught: {}", e)
     return ResponseEntity
       .status(BAD_REQUEST)
-      .body(ErrorResponse(status = (BAD_REQUEST.value()), userMessage = e.message, developerMessage = (e.message)))
+      .body(
+        ErrorResponse(
+          status = (BAD_REQUEST.value()),
+          userMessage = "Password too short: ${e.message}",
+          developerMessage = (e.message)
+        )
+      )
   }
 
   @ExceptionHandler(MissingServletRequestParameterException::class)
@@ -117,7 +138,13 @@ class NomisUserRolesApiExceptionHandler {
     log.debug("Bad Request (400) returned", e)
     return ResponseEntity
       .status(BAD_REQUEST)
-      .body(ErrorResponse(status = (BAD_REQUEST.value()), developerMessage = (e.message)))
+      .body(
+        ErrorResponse(
+          status = (BAD_REQUEST.value()),
+          userMessage = "Parameter Missing: ${e.message}",
+          developerMessage = (e.message)
+        )
+      )
   }
 
   @ExceptionHandler(MethodArgumentNotValidException::class)
@@ -125,7 +152,13 @@ class NomisUserRolesApiExceptionHandler {
     log.debug("Validation error (400) returned", e)
     return ResponseEntity
       .status(BAD_REQUEST)
-      .body(ErrorResponse(status = (BAD_REQUEST.value()), userMessage = "Validation Error", developerMessage = (e.message)))
+      .body(
+        ErrorResponse(
+          status = (BAD_REQUEST.value()),
+          userMessage = "Validation failure: ${e.message}",
+          developerMessage = (e.message)
+        )
+      )
   }
 
   @ExceptionHandler(java.lang.Exception::class)

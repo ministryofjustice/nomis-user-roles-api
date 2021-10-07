@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
@@ -14,6 +15,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.AccountDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.CaseloadRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserSummary
 import java.util.function.Supplier
@@ -24,7 +26,8 @@ import javax.transaction.Transactional
 class UserService(
   private val userPersonDetailRepository: UserPersonDetailRepository,
   private val caseloadRepository: CaseloadRepository,
-  private val accountDetailRepository: AccountDetailRepository
+  private val accountDetailRepository: AccountDetailRepository,
+  private val staffRepository: StaffRepository
 ) {
   fun findByUsername(username: String): UserDetail =
     userPersonDetailRepository.findById(username)
@@ -37,6 +40,8 @@ class UserService(
 
   fun createUser(createUserRequest: CreateUserRequest): UserDetail {
 
+    userPersonDetailRepository.findById(createUserRequest.username.uppercase()).ifPresent { throw UserAlreadyExistsException("User ${createUserRequest.username} already exists") }
+
     if (createUserRequest.adminUser && createUserRequest.password.length < 14) {
       throw PasswordTooShortException("Password must be at least 14 alpha-numeric characters in length. Please re-enter password.")
     }
@@ -47,9 +52,24 @@ class UserService(
       "GENERAL"
     }
 
+    val staffAccount = createUserRequest.linkedUsername?.let { userAccount ->
+      userPersonDetailRepository.findById(userAccount).map { it.staff }.orElseThrow { UserNotFoundException("Linked User Account $userAccount not found") }
+    } ?: run {
+      val staff = Staff(firstName = createUserRequest.firstName.uppercase(), lastName = createUserRequest.lastName.uppercase(), status = "ACTIVE")
+      staff.setEmail(createUserRequest.email)
+      staff
+    }
+
+    if (type == "GENERAL" && staffAccount.generalAccount() != null) {
+      throw UserAlreadyExistsException("General user already exists for this staff member")
+    }
+    if (type == "ADMIN" && staffAccount.adminAccount() != null) {
+      throw UserAlreadyExistsException("Admin user already exists for this staff member")
+    }
+
     val userPersonDetail = UserPersonDetail(
-      username = createUserRequest.username,
-      staff = Staff(firstName = createUserRequest.firstName, lastName = createUserRequest.lastName, status = "ACTIVE"),
+      username = createUserRequest.username.uppercase(),
+      staff = staffAccount,
       type = type
     )
     caseloadRepository.findById("NWEB")
@@ -62,7 +82,6 @@ class UserService(
     userPersonDetail.addCaseload(defaultCaseload)
 
     userPersonDetail.activeCaseLoad = defaultCaseload
-
     userPersonDetailRepository.saveAndFlush(userPersonDetail)
 
     val profile = if (createUserRequest.adminUser) {
@@ -86,6 +105,12 @@ class UserService(
     userPersonDetailRepository.delete(userPersonDetail)
     userPersonDetailRepository.dropUser(username)
   }
+
+  fun findByStaffId(staffId: Long): StaffDetail {
+    return staffRepository.findById(staffId)
+      .map { s -> StaffDetail(s) }
+      .orElseThrow(UserNotFoundException("Staff ID $staffId not found"))
+  }
 }
 
 class UserNotFoundException(message: String?) :
@@ -93,6 +118,14 @@ class UserNotFoundException(message: String?) :
   Supplier<UserNotFoundException> {
   override fun get(): UserNotFoundException {
     return UserNotFoundException(message)
+  }
+}
+
+class UserAlreadyExistsException(message: String?) :
+  RuntimeException(message),
+  Supplier<UserAlreadyExistsException> {
+  override fun get(): UserAlreadyExistsException {
+    return UserAlreadyExistsException(message)
   }
 }
 

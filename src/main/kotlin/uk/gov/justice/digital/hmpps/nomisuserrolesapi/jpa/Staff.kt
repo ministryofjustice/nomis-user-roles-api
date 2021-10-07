@@ -1,10 +1,14 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
 import org.hibernate.Hibernate
+import org.hibernate.annotations.Where
+import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
+import javax.persistence.OneToMany
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
@@ -25,13 +29,34 @@ data class Staff(
 
   @Column(name = "STATUS")
   val status: String,
+
+  @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+  var users: List<UserPersonDetail> = listOf(),
+
+  @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+  @Where(clause = "OWNER_CLASS = 'STF' AND INTERNET_ADDRESS_CLASS = 'EMAIL'")
+  var emails: List<EmailAddress> = listOf(),
 ) {
+
+  fun generalAccount(): UserPersonDetail? = users.firstOrNull { u -> "GENERAL" == u.type }
+
+  fun adminAccount(): UserPersonDetail? = users.firstOrNull { u -> "ADMIN" == u.type }
+
+  fun primaryEmail(): EmailAddress? = emails.firstOrNull { e -> e.email.contains("justice.gov.uk") } ?: run { emails.firstOrNull() }
 
   val isActive: Boolean
     get() = STAFF_STATUS_ACTIVE == status
 
   companion object {
     private const val STAFF_STATUS_ACTIVE = "ACTIVE"
+  }
+
+  fun setEmail(email: String) {
+    emails = listOf(EmailAddress(email = email, staff = this))
+  }
+
+  fun removeEmail(email: String) {
+    emails = emails - EmailAddress(email = email, staff = this)
   }
 
   override fun equals(other: Any?): Boolean {

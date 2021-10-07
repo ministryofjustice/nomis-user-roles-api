@@ -3,13 +3,17 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 import org.hibernate.Hibernate
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.GeneratedValue
 import javax.persistence.Id
+import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
 @Entity
 @Table(name = "OMS_ROLES")
 data class Role(
   @Id
+  @SequenceGenerator(name = "ROLE_ID", sequenceName = "ROLE_ID", allocationSize = 1)
+  @GeneratedValue(generator = "ROLE_ID")
   @Column(name = "ROLE_ID", nullable = false)
   val id: Long,
 
