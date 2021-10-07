@@ -2,7 +2,11 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.service
 
 import UserSpecification
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
+import org.springframework.data.domain.Sort.Order
+import org.springframework.data.domain.Sort.by
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
@@ -17,8 +21,10 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.AccountDeta
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.CaseloadRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.mapUserSummarySortProperties
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserSummary
 import java.util.function.Supplier
+import java.util.stream.Collectors
 import javax.transaction.Transactional
 
 @Service
@@ -35,12 +41,13 @@ class UserService(
       .orElseThrow(UserNotFoundException("User $username not found"))
 
   fun findUsersByFilter(pageRequest: Pageable, filter: UserFilter): Page<UserSummary> =
-    userPersonDetailRepository.findAll(UserSpecification(filter), pageRequest)
+    userPersonDetailRepository.findAll(UserSpecification(filter), pageRequest.withSort(::mapUserSummarySortProperties))
       .map { it.toUserSummary() }
 
   fun createUser(createUserRequest: CreateUserRequest): UserDetail {
 
-    userPersonDetailRepository.findById(createUserRequest.username.uppercase()).ifPresent { throw UserAlreadyExistsException("User ${createUserRequest.username} already exists") }
+    userPersonDetailRepository.findById(createUserRequest.username.uppercase())
+      .ifPresent { throw UserAlreadyExistsException("User ${createUserRequest.username} already exists") }
 
     if (createUserRequest.adminUser && createUserRequest.password.length < 14) {
       throw PasswordTooShortException("Password must be at least 14 alpha-numeric characters in length. Please re-enter password.")
@@ -53,9 +60,14 @@ class UserService(
     }
 
     val staffAccount = createUserRequest.linkedUsername?.let { userAccount ->
-      userPersonDetailRepository.findById(userAccount).map { it.staff }.orElseThrow { UserNotFoundException("Linked User Account $userAccount not found") }
+      userPersonDetailRepository.findById(userAccount).map { it.staff }
+        .orElseThrow { UserNotFoundException("Linked User Account $userAccount not found") }
     } ?: run {
-      val staff = Staff(firstName = createUserRequest.firstName.uppercase(), lastName = createUserRequest.lastName.uppercase(), status = "ACTIVE")
+      val staff = Staff(
+        firstName = createUserRequest.firstName.uppercase(),
+        lastName = createUserRequest.lastName.uppercase(),
+        status = "ACTIVE"
+      )
       staff.setEmail(createUserRequest.email)
       staff
     }
@@ -112,6 +124,21 @@ class UserService(
       .orElseThrow(UserNotFoundException("Staff ID $staffId not found"))
   }
 }
+
+private fun Pageable.withSort(sortMapper: (sortProperty: String) -> String): Pageable {
+  return PageRequest.of(this.pageNumber, this.pageSize, mapSortOrderProperties(this.sort, sortMapper))
+}
+
+private fun mapSortOrderProperties(sort: Sort, sortMapper: (sortProperty: String) -> String): Sort = by(
+  sort
+    .stream()
+    .map { order: Order ->
+      Order
+        .by(sortMapper(order.property))
+        .with(order.direction)
+    }
+    .collect(Collectors.toList())
+)
 
 class UserNotFoundException(message: String?) :
   RuntimeException(message),
