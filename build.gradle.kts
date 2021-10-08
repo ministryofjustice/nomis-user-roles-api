@@ -17,6 +17,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.apache.commons:commons-lang3:3.12.0")
+  implementation("org.apache.commons:commons-text:1.9")
 
   implementation("org.flywaydb:flyway-core:8.0.0")
   implementation("com.vladmihalcea:hibernate-types-52:2.12.1")
