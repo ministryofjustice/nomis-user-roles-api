@@ -17,3 +17,13 @@ fun UserPersonDetail.toUserSummary(): UserSummary = UserSummary(
     )
   },
 )
+
+val userSummaryToEntityPropertyMap = mapOf(
+  "firstName" to "staff.firstName",
+  "lastName" to "staff.lastName",
+  "status" to "staff.status",
+  "activeCaseload" to "activeCaseLoad.id",
+)
+
+internal fun mapUserSummarySortProperties(sort: String): String =
+  userSummaryToEntityPropertyMap[sort] ?: sort

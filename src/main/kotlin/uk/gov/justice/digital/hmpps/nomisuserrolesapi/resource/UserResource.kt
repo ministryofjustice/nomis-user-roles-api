@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -201,7 +202,7 @@ class UserResource(
     ]
   )
   fun getUsers(
-    @PageableDefault
+    @PageableDefault(sort = ["lastName", "firstName"], direction = Sort.Direction.ASC)
     pageRequest: Pageable,
     @RequestParam(value = "nameFilter", required = false)
     @Schema(
@@ -242,7 +243,7 @@ class UserResource(
       activeCaseloadId = activeCaseload.nonBlank(),
       caseloadId = caseload.nonBlank(),
       roleCodes = accessRoles ?: listOf(),
-    )
+    ),
   )
 
   fun localAdministratorUsernameWhenNotCentralAdministrator(): String? =
