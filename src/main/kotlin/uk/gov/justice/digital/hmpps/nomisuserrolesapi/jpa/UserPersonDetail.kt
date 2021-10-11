@@ -6,6 +6,8 @@ import java.time.LocalDate.now
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
 import javax.persistence.FetchType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
@@ -48,7 +50,8 @@ data class UserPersonDetail(
   val administratorOfUserGroups: List<UserGroupAdministrator> = listOf(),
 
   @Column(name = "STAFF_USER_TYPE", nullable = false)
-  val type: String,
+  @Enumerated(EnumType.STRING)
+  val type: AccountType,
 
   @JoinColumn(name = "WORKING_CASELOAD_ID", nullable = true)
   @ManyToOne
@@ -75,4 +78,8 @@ data class UserPersonDetail(
     )
     caseloads = caseloads + userCaseload
   }
+}
+
+enum class AccountType {
+  GENERAL, ADMIN;
 }

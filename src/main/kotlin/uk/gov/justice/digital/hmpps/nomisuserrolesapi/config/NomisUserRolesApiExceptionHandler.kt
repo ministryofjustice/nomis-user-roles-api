@@ -150,12 +150,13 @@ class NomisUserRolesApiExceptionHandler {
   @ExceptionHandler(MethodArgumentNotValidException::class)
   fun handleValidationException(e: MethodArgumentNotValidException): ResponseEntity<ErrorResponse> {
     log.debug("Validation error (400) returned", e)
+    val message = if (e.hasFieldErrors()) { e.fieldError.defaultMessage } else { e.message }
     return ResponseEntity
       .status(BAD_REQUEST)
       .body(
         ErrorResponse(
           status = (BAD_REQUEST.value()),
-          userMessage = "Validation failure: ${e.message}",
+          userMessage = "Validation failure: $message",
           developerMessage = (e.message)
         )
       )
