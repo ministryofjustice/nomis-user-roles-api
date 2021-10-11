@@ -156,7 +156,7 @@ class NomisUserRolesApiExceptionHandler {
       .body(
         ErrorResponse(
           status = (BAD_REQUEST.value()),
-          userMessage = "Validation failure: ${message}",
+          userMessage = "Validation failure: $message",
           developerMessage = (e.message)
         )
       )

@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.data
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
-import javax.annotation.RegEx
 import javax.validation.constraints.Email
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.Pattern
