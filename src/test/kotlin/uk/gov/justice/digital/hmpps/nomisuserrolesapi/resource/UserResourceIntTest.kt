@@ -669,6 +669,97 @@ class UserResourceIntTest : IntegrationTestBase() {
         )
         .exchange()
         .expectStatus().is4xxClientError
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo("Validation failure: Password must be at least 9 alpha-numeric characters in length (max 30). Please re-enter password.")
+    }
+
+    @Test
+    fun `a user cannot be created with missing first name`() {
+
+      webTestClient.post().uri("/users")
+        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
+        .body(
+          BodyInserters.fromValue(
+            CreateUserRequest(
+              username = "testuser_nofirstname",
+              password = "password123",
+              lastName = "User",
+              defaultCaseloadId = "BXI",
+              email = "test@test.com"
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().is4xxClientError
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo("Validation failure: First name required when not linking to existing staff account")
+    }
+
+    @Test
+    fun `a user cannot be created with missing last name`() {
+
+      webTestClient.post().uri("/users")
+        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
+        .body(
+          BodyInserters.fromValue(
+            CreateUserRequest(
+              username = "testuser_nolastname",
+              password = "password123",
+              firstName = "Test",
+              defaultCaseloadId = "BXI",
+              email = "test@test.com"
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().is4xxClientError
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo("Validation failure: Last name required when not linking to existing staff account")
+    }
+
+    @Test
+    fun `a user cannot be created with missing email`() {
+
+      webTestClient.post().uri("/users")
+        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
+        .body(
+          BodyInserters.fromValue(
+            CreateUserRequest(
+              username = "testuser_noemail",
+              password = "password123",
+              firstName = "Test",
+              lastName = "User",
+              defaultCaseloadId = "BXI"
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().is4xxClientError
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo("Validation failure: Email required when not linking to existing staff account")
+    }
+
+    @Test
+    fun `a user cannot be created with invalid password`() {
+
+      webTestClient.post().uri("/users")
+        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
+        .body(
+          BodyInserters.fromValue(
+            CreateUserRequest(
+              username = "testuser_noemail",
+              password = "yh^%DHISFJ__00",
+              firstName = "Test",
+              lastName = "User",
+              defaultCaseloadId = "BXI",
+              email = "test@test.com"
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().is4xxClientError
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo("Validation failure: Password must consist of alphanumeric characters only")
     }
 
     @Test
@@ -745,10 +836,7 @@ class UserResourceIntTest : IntegrationTestBase() {
             CreateUserRequest(
               username = "testuser5",
               password = "password123",
-              firstName = "Test",
-              lastName = "User",
               defaultCaseloadId = "BXI",
-              email = "test@test.com",
               adminUser = false,
               linkedUsername = "TESTUSER4"
             )
@@ -791,10 +879,7 @@ class UserResourceIntTest : IntegrationTestBase() {
             CreateUserRequest(
               username = "testuser5",
               password = "password123456",
-              firstName = "Test",
-              lastName = "User",
               defaultCaseloadId = "CADM_I",
-              email = "test@test.com",
               adminUser = true,
               linkedUsername = "TESTUSER6"
             )
@@ -802,6 +887,8 @@ class UserResourceIntTest : IntegrationTestBase() {
         )
         .exchange()
         .expectStatus().is4xxClientError
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo("User already exists: Admin user already exists for this staff member")
     }
 
     @Test
@@ -831,16 +918,15 @@ class UserResourceIntTest : IntegrationTestBase() {
             CreateUserRequest(
               username = "testuser8",
               password = "password123",
-              firstName = "Test",
-              lastName = "User",
               defaultCaseloadId = "BXI",
-              email = "test@test.com",
               linkedUsername = "TESTUSER7"
             )
           )
         )
         .exchange()
         .expectStatus().is4xxClientError
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo("User already exists: General user already exists for this staff member")
     }
   }
 

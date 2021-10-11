@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper
 
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadPk
@@ -51,7 +52,7 @@ class GeneralUserBuilder(
     userPersonDetail =
       userPersonDetail.copy(
         activeAndInactiveMemberOfUserGroups = generalUsersOf(prisonCodes),
-        type = "GENERAL",
+        type = AccountType.GENERAL,
         activeCaseLoad = prisonCodes.firstOrNull()?.let { caseloadRepository.findByIdOrNull(it) },
         caseloads = (prisonCodes + dpsCaseloadId).map {
           UserCaseload(
@@ -101,7 +102,7 @@ class LocalAdministratorBuilder(
     userPersonDetail =
       userPersonDetail.copy(
         activeAndInactiveAdministratorOfUserGroups = adminUsersOf(prisonCodes),
-        type = "ADMIN",
+        type = AccountType.ADMIN,
         activeCaseLoad = prisonCodes.firstOrNull()?.let { caseloadRepository.findByIdOrNull(it) },
       )
     return this
@@ -175,7 +176,7 @@ fun defaultPerson(): UserPersonDetail {
   return UserPersonDetail(
     username = "tony",
     staff = Staff(firstName = "John", lastName = "Smith", status = "ACTIVE"),
-    type = "GENERAL"
+    type = AccountType.GENERAL
   )
 }
 

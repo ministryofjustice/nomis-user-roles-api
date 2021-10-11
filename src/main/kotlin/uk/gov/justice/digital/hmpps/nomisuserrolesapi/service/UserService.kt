@@ -15,6 +15,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountProfile
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.AccountDetailRepository
@@ -26,6 +27,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserSumm
 import java.util.function.Supplier
 import java.util.stream.Collectors
 import javax.transaction.Transactional
+import javax.validation.ValidationException
 
 @Service
 @Transactional
@@ -53,16 +55,21 @@ class UserService(
       throw PasswordTooShortException("Password must be at least 14 alpha-numeric characters in length. Please re-enter password.")
     }
 
-    val type = if (createUserRequest.adminUser) {
-      "ADMIN"
-    } else {
-      "GENERAL"
-    }
-
     val staffAccount = createUserRequest.linkedUsername?.let { userAccount ->
       userPersonDetailRepository.findById(userAccount).map { it.staff }
         .orElseThrow { UserNotFoundException("Linked User Account $userAccount not found") }
     } ?: run {
+
+      if (createUserRequest.firstName == null) {
+        throw ValidationException("First name required when not linking to existing staff account")
+      }
+      if (createUserRequest.lastName == null) {
+        throw ValidationException("Last name required when not linking to existing staff account")
+      }
+      if (createUserRequest.email == null) {
+        throw ValidationException("Email required when not linking to existing staff account")
+      }
+
       val staff = Staff(
         firstName = createUserRequest.firstName.uppercase(),
         lastName = createUserRequest.lastName.uppercase(),
@@ -72,10 +79,16 @@ class UserService(
       staff
     }
 
-    if (type == "GENERAL" && staffAccount.generalAccount() != null) {
+    val type = if (createUserRequest.adminUser) {
+      AccountType.ADMIN
+    } else {
+      AccountType.GENERAL
+    }
+
+    if (type == AccountType.GENERAL && staffAccount.generalAccount() != null) {
       throw UserAlreadyExistsException("General user already exists for this staff member")
     }
-    if (type == "ADMIN" && staffAccount.adminAccount() != null) {
+    if (type == AccountType.ADMIN && staffAccount.adminAccount() != null) {
       throw UserAlreadyExistsException("Admin user already exists for this staff member")
     }
 
