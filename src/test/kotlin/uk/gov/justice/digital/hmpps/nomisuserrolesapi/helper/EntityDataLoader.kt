@@ -246,7 +246,7 @@ abstract class UserBuilder<T>(
     roleCodes.map { userCaseloadRole(userCaseload, it) }
 
   private fun userCaseloadRole(userCaseload: UserCaseload, roleCode: String): UserCaseloadRole {
-    val role = roleRepository.findByCode(roleCode)!!
+    val role = roleRepository.findByCode(roleCode).orElseThrow()
     return UserCaseloadRole(
       UserCaseloadRoleIdentity(role.id, this.userPersonDetail.username, userCaseload.caseload.id),
       role = role,
