@@ -16,7 +16,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountProfile
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.getUsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.AccountDetailRepository
