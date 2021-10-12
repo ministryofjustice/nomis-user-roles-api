@@ -5,6 +5,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateRoleRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.RoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UpdateRoleRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Role
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.RoleType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.getUsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toRoleDetail
@@ -32,6 +33,18 @@ class RoleService(
         }
       )
     ).toRoleDetail()
+  }
+
+  fun getAllRoles(): List<RoleDetail> {
+    return roleRepository.findAll().map {
+      it.toRoleDetail()
+    }
+  }
+
+  fun getAllDPSRoles(): List<RoleDetail> {
+    return roleRepository.findAllByType(RoleType.APP).map {
+      it.toRoleDetail()
+    }
   }
 
   fun findByCode(roleCode: String): RoleDetail =

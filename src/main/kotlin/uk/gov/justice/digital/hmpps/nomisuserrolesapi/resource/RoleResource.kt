@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.ErrorResponse
@@ -113,7 +114,6 @@ class RoleResource(
       )
     ]
   )
-
   fun updateRole(
     @Schema(description = "Role Code", example = "GLOBAL_SEARCH", required = true)
     @PathVariable @Size(max = 30, min = 1, message = "Role code must be between 1 and 30") code: String,
@@ -121,6 +121,40 @@ class RoleResource(
   ): RoleDetail {
     return roleService.updateRole(code, updateRoleRequest)
   }
+
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
+  @GetMapping
+  @Operation(
+    summary = "Get all roles",
+    description = "Information on a list of roles",
+    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Role Information Returned"
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to get role information",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to get a list of roles",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      )
+    ]
+  )
+  fun getAllRoles(
+    @Schema(description = "Get all roles", example = "true", required = false, defaultValue = "false")
+    @RequestParam(value = "all-roles", required = false, defaultValue = "false") allRoles: Boolean = false
+  ): List<RoleDetail> =
+    if (allRoles) { roleService.getAllRoles() } else { roleService.getAllDPSRoles() }
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @GetMapping("/{code}")

@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
 import org.hibernate.Hibernate
 import org.hibernate.annotations.Type
+import org.hibernate.annotations.Where
 import java.io.Serializable
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -41,7 +42,7 @@ data class Role(
 
   @Column(name = "ROLE_TYPE", nullable = true)
   @Enumerated(EnumType.STRING)
-  var type: RoleType = RoleType.APP,
+  var type: RoleType? = RoleType.APP,
 
   @Column(name = "ROLE_FUNCTION", nullable = false)
   @Enumerated(EnumType.STRING)
@@ -57,6 +58,10 @@ data class Role(
 
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], mappedBy = "parent")
   val childRoles: List<Role> = listOf(),
+
+  @OneToMany(mappedBy = "role", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+  @Where(clause = "LOCAL_AUTHORITY_CODE = 'NWEB'")
+  val allowedCaseloads: List<RoleCaseload> = listOf(),
 
 ) : Serializable {
 

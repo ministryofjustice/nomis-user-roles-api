@@ -11,14 +11,14 @@ data class RoleDetail(
   @Schema(description = "Role Code", example = "GLOBAL_SEARCH", required = true)
   val code: String,
 
-  @Schema(description = "Role Name", example = "GLOBAL_SEARCH", required = true)
+  @Schema(description = "Role Name", example = "Global Search Role", required = true)
   val name: String,
 
-  @Schema(description = "Role Code", example = "GLOBAL_SEARCH", required = false, defaultValue = "1")
+  @Schema(description = "Role Code", example = "1", required = false, defaultValue = "1")
   val sequence: Int = 1,
 
   @Schema(description = "Role Type ", example = "APP", required = false, defaultValue = "APP")
-  val type: RoleType = RoleType.APP,
+  val type: RoleType? = RoleType.APP,
 
   @Schema(description = "Role Code", example = "true", required = false, defaultValue = "false")
   val adminRoleOnly: Boolean = false,
