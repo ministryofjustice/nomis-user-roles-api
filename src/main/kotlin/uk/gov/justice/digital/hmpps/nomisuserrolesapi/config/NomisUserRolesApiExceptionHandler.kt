@@ -17,6 +17,8 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.CaseloadNotFoundEx
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.PasswordTooShortException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserAlreadyExistsException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserNotFoundException
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserRoleAlreadyExistsException
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserRoleNotFoundException
 import javax.validation.ValidationException
 
 @RestControllerAdvice
@@ -105,6 +107,33 @@ class NomisUserRolesApiExceptionHandler {
       )
   }
 
+  @ExceptionHandler(UserRoleNotFoundException::class)
+  fun handleUserRoleNotFoundException(e: UserRoleNotFoundException): ResponseEntity<ErrorResponse?>? {
+    log.debug("Role not found exception caught: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.NOT_FOUND)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.NOT_FOUND,
+          userMessage = "Role not found: ${e.message}",
+          developerMessage = e.message
+        )
+      )
+  }
+
+  @ExceptionHandler(UserRoleAlreadyExistsException::class)
+  fun handleUserRoleAlreadyExistsException(e: UserRoleAlreadyExistsException): ResponseEntity<ErrorResponse?>? {
+    log.debug("Role already exists exception caught: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.CONFLICT)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.NOT_FOUND,
+          userMessage = "Role already exists: ${e.message}",
+          developerMessage = e.message
+        )
+      )
+  }
   @ExceptionHandler(CaseloadNotFoundException::class)
   fun handleCaseloadNotFoundException(e: CaseloadNotFoundException): ResponseEntity<ErrorResponse?>? {
     log.debug("Caseload not found exception caught: {}", e.message)
@@ -150,7 +179,7 @@ class NomisUserRolesApiExceptionHandler {
   @ExceptionHandler(MethodArgumentNotValidException::class)
   fun handleValidationException(e: MethodArgumentNotValidException): ResponseEntity<ErrorResponse> {
     log.debug("Validation error (400) returned", e)
-    val message = if (e.hasFieldErrors()) { e.fieldError.defaultMessage } else { e.message }
+    val message = if (e.hasFieldErrors()) { e.fieldError?.defaultMessage } else { e.message }
     return ResponseEntity
       .status(BAD_REQUEST)
       .body(

@@ -51,7 +51,7 @@ data class UserPersonDetail(
 
   @Column(name = "STAFF_USER_TYPE", nullable = false)
   @Enumerated(EnumType.STRING)
-  val type: AccountType,
+  val type: UsageType,
 
   @JoinColumn(name = "WORKING_CASELOAD_ID", nullable = true)
   @ManyToOne
@@ -78,8 +78,4 @@ data class UserPersonDetail(
     )
     caseloads = caseloads + userCaseload
   }
-}
-
-enum class AccountType {
-  GENERAL, ADMIN;
 }

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountType
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -17,7 +17,7 @@ data class UserDetail(
   @Schema(description = "Active Caseload of the user", example = "BXI", required = false) val activeCaseloadId: String?,
   @Schema(description = "Indicates that the user is active", example = "true", required = true) val active: Boolean,
   @Schema(description = "Status of the user", example = "OPEN", required = true) val accountStatus: AccountStatus?,
-  @Schema(description = "Type of user account", example = "GENERAL", required = true) val accountType: AccountType = AccountType.GENERAL,
+  @Schema(description = "Type of user account", example = "GENERAL", required = true) val accountType: UsageType = UsageType.GENERAL,
   @Schema(description = "Email addresses of user", example = "test@test.com", required = false) val primaryEmail: String?
 ) {
   constructor(userPersonDetail: UserPersonDetail, accountDetail: AccountDetail) :

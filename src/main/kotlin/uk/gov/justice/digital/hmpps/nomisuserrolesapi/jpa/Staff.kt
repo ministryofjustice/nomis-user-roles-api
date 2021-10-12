@@ -38,9 +38,9 @@ data class Staff(
   var emails: List<EmailAddress> = listOf(),
 ) {
 
-  fun generalAccount(): UserPersonDetail? = users.firstOrNull { u -> AccountType.GENERAL == u.type }
+  fun generalAccount(): UserPersonDetail? = users.firstOrNull { u -> UsageType.GENERAL == u.type }
 
-  fun adminAccount(): UserPersonDetail? = users.firstOrNull { u -> AccountType.ADMIN == u.type }
+  fun adminAccount(): UserPersonDetail? = users.firstOrNull { u -> UsageType.ADMIN == u.type }
 
   fun primaryEmail(): EmailAddress? = emails.firstOrNull { e -> e.email.contains("justice.gov.uk") } ?: run { emails.firstOrNull() }
 

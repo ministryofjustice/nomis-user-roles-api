@@ -2,8 +2,8 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper
 
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadPk
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadRole
@@ -52,7 +52,7 @@ class GeneralUserBuilder(
     userPersonDetail =
       userPersonDetail.copy(
         activeAndInactiveMemberOfUserGroups = generalUsersOf(prisonCodes),
-        type = AccountType.GENERAL,
+        type = UsageType.GENERAL,
         activeCaseLoad = prisonCodes.firstOrNull()?.let { caseloadRepository.findByIdOrNull(it) },
         caseloads = (prisonCodes + dpsCaseloadId).map {
           UserCaseload(
@@ -102,7 +102,7 @@ class LocalAdministratorBuilder(
     userPersonDetail =
       userPersonDetail.copy(
         activeAndInactiveAdministratorOfUserGroups = adminUsersOf(prisonCodes),
-        type = AccountType.ADMIN,
+        type = UsageType.ADMIN,
         activeCaseLoad = prisonCodes.firstOrNull()?.let { caseloadRepository.findByIdOrNull(it) },
       )
     return this
@@ -176,7 +176,7 @@ fun defaultPerson(): UserPersonDetail {
   return UserPersonDetail(
     username = "tony",
     staff = Staff(firstName = "John", lastName = "Smith", status = "ACTIVE"),
-    type = AccountType.GENERAL
+    type = UsageType.GENERAL
   )
 }
 
@@ -246,7 +246,7 @@ abstract class UserBuilder<T>(
     roleCodes.map { userCaseloadRole(userCaseload, it) }
 
   private fun userCaseloadRole(userCaseload: UserCaseload, roleCode: String): UserCaseloadRole {
-    val role = roleRepository.findByCode(roleCode)!!
+    val role = roleRepository.findByCode(roleCode).orElseThrow()
     return UserCaseloadRole(
       UserCaseloadRoleIdentity(role.id, this.userPersonDetail.username, userCaseload.caseload.id),
       role = role,
