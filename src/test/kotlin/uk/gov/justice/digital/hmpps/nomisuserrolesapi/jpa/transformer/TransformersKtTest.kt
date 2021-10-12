@@ -5,9 +5,9 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.PrisonCaseload
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 
 internal class TransformersKtTest {
@@ -20,7 +20,7 @@ internal class TransformersKtTest {
       val entity = UserPersonDetail(
         username = "raj.maki",
         staff = Staff(staffId = 99, firstName = "RAJ", lastName = "MAKI", status = "ACTIVE"),
-        type = AccountType.GENERAL,
+        type = UsageType.GENERAL,
         activeCaseLoad = Caseload("WWI", "WANDSWORTH (HMP)")
       )
 
@@ -38,7 +38,7 @@ internal class TransformersKtTest {
       val entity = UserPersonDetail(
         username = "raj.maki",
         staff = Staff(staffId = 99, firstName = "RAJ BOB", lastName = "MAKI", status = "ACTIVE"),
-        type = AccountType.GENERAL,
+        type = UsageType.GENERAL,
         activeCaseLoad = Caseload("WWI", "WANDSWORTH (HMP)")
       )
 
@@ -54,7 +54,7 @@ internal class TransformersKtTest {
       val entity = UserPersonDetail(
         username = "raj.maki",
         staff = Staff(staffId = 99, firstName = "Raj", lastName = "Maki", status = "ACTIVE"),
-        type = AccountType.GENERAL
+        type = UsageType.GENERAL
       )
 
       val data = entity.toUserSummary()

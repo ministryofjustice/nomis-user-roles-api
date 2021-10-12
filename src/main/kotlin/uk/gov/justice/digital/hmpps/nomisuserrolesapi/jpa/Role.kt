@@ -2,6 +2,8 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
 import org.hibernate.Hibernate
 import org.hibernate.annotations.Type
+import java.io.Serializable
+import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EnumType
@@ -22,32 +24,42 @@ data class Role(
   @SequenceGenerator(name = "ROLE_ID", sequenceName = "ROLE_ID", allocationSize = 1)
   @GeneratedValue(generator = "ROLE_ID")
   @Column(name = "ROLE_ID", nullable = false)
-  val id: Long,
+  val id: Long = 0,
 
   @Column(name = "ROLE_CODE", nullable = false, unique = true)
   val code: String,
 
   @Column(name = "ROLE_NAME", nullable = false)
-  val name: String,
+  var name: String,
 
   @Column(name = "ROLE_SEQ", nullable = false)
-  val sequence: Int = 1,
+  var sequence: Int = 1,
 
   @ManyToOne(fetch = FetchType.LAZY, optional = true)
-  @JoinColumn(name = "PARENT_ROLE_CODE", referencedColumnName = "ROLE_CODE", nullable = true)
-  val parent: Role? = null,
+  @JoinColumn(name = "PARENT_ROLE_CODE", nullable = true, referencedColumnName = "ROLE_CODE")
+  var parent: Role? = null,
 
   @Column(name = "ROLE_TYPE", nullable = true)
   @Enumerated(EnumType.STRING)
-  val type: RoleType = RoleType.APP,
+  var type: RoleType = RoleType.APP,
 
   @Column(name = "ROLE_FUNCTION", nullable = false)
-  val roleFunction: String = "GENERAL",
+  @Enumerated(EnumType.STRING)
+  var roleFunction: UsageType = UsageType.GENERAL,
 
   @Column(name = "SYSTEM_DATA_FLAG", nullable = false)
   @Type(type = "yes_no")
-  val systemData: Boolean = false,
-) {
+  val systemData: Boolean = true,
+
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
+  @JoinColumn(name = "ROLE_ID", updatable = false, insertable = false, nullable = false)
+  val usersWithRole: List<UserCaseloadRole> = listOf(),
+
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], mappedBy = "parent")
+  val childRoles: List<Role> = listOf(),
+
+) : Serializable {
+
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
@@ -64,6 +76,6 @@ data class Role(
   }
 }
 
-enum class RoleType{
+enum class RoleType {
   APP, INST, COMM
 }

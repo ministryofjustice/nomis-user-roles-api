@@ -15,9 +15,10 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountProfile
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.getUsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.AccountDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.CaseloadRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
@@ -79,23 +80,20 @@ class UserService(
       staff
     }
 
-    val type = if (createUserRequest.adminUser) {
-      AccountType.ADMIN
+    if (createUserRequest.adminUser) {
+      if (staffAccount.adminAccount() != null) {
+        throw UserAlreadyExistsException("Admin user already exists for this staff member")
+      }
     } else {
-      AccountType.GENERAL
-    }
-
-    if (type == AccountType.GENERAL && staffAccount.generalAccount() != null) {
-      throw UserAlreadyExistsException("General user already exists for this staff member")
-    }
-    if (type == AccountType.ADMIN && staffAccount.adminAccount() != null) {
-      throw UserAlreadyExistsException("Admin user already exists for this staff member")
+      if (staffAccount.generalAccount() != null) {
+        throw UserAlreadyExistsException("General user already exists for this staff member")
+      }
     }
 
     val userPersonDetail = UserPersonDetail(
       username = createUserRequest.username.uppercase(),
       staff = staffAccount,
-      type = type
+      type = getUsageType(createUserRequest.adminUser)
     )
     caseloadRepository.findById("NWEB")
       .ifPresent {

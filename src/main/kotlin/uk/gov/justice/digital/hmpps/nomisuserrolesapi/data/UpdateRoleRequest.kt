@@ -7,14 +7,8 @@ import javax.validation.constraints.NotBlank
 import javax.validation.constraints.Size
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(description = "Role Information creation")
-data class CreateRoleRequest(
-
-  @Schema(description = "Role Code", example = "GLOBAL_SEARCH", required = true) @field:Size(
-    max = 30,
-    min = 1,
-    message = "Code must be between 1 and 30"
-  ) @NotBlank val code: String,
+@Schema(description = "Role update")
+data class UpdateRoleRequest(
 
   @Schema(description = "Role Name", example = "Global Search Role", required = true) @field:Size(
     max = 30,
