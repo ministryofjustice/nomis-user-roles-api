@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
+import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -24,7 +25,10 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateAdminUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateGeneralUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedAdminUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedGeneralUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
@@ -42,24 +46,24 @@ class UserResource(
   private val authenticationFacade: AuthenticationFacade,
 ) {
   @PreAuthorize("hasRole('ROLE_CREATE_USER')")
-  @PostMapping("")
+  @PostMapping("/general-account")
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(
-    summary = "Create user",
-    description = "Creates user and db schema and staff user information",
+    summary = "Create general user account",
+    description = "Creates general user account, oracle schema and staff user information. Requires role ROLE_CREATE_USER",
     security = [SecurityRequirement(name = "CREATE_USER")],
     requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
       content = [
         Content(
           mediaType = "application/json",
-          schema = Schema(implementation = CreateUserRequest::class)
+          schema = Schema(implementation = CreateGeneralUserRequest::class)
         )
       ]
     ),
     responses = [
       ApiResponse(
         responseCode = "201",
-        description = "User Information Returned"
+        description = "General user information returned"
       ),
       ApiResponse(
         responseCode = "400",
@@ -78,19 +82,153 @@ class UserResource(
       )
     ]
   )
-
-  fun createUser(
-    @RequestBody @Valid createUserRequest: CreateUserRequest
+  fun createGeneralUser(
+    @RequestBody @Valid createUserRequest: CreateGeneralUserRequest
   ): UserDetail {
-    val user = userService.createUser(createUserRequest)
+    val user = userService.createGeneralUser(createUserRequest)
     return userService.findByUsername(username = user.username)
   }
 
   @PreAuthorize("hasRole('ROLE_CREATE_USER')")
-  @DeleteMapping("/{username}")
+  @PostMapping("/admin-account")
+  @ResponseStatus(HttpStatus.CREATED)
   @Operation(
-    summary = "Delete user",
-    description = "Delete user",
+    summary = "Create admin user account",
+    description = "Creates admin user account, oracle schema and staff user information. Requires role ROLE_CREATE_USER",
+    security = [SecurityRequirement(name = "CREATE_USER")],
+    requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
+      content = [
+        Content(
+          mediaType = "application/json",
+          schema = Schema(implementation = CreateAdminUserRequest::class)
+        )
+      ]
+    ),
+    responses = [
+      ApiResponse(
+        responseCode = "201",
+        description = "Admin user account information returned"
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to create user information",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to create a user",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      )
+    ]
+  )
+  fun createAdminUser(
+    @RequestBody @Valid createUserRequest: CreateAdminUserRequest
+  ): UserDetail {
+    val user = userService.createAdminUser(createUserRequest)
+    return userService.findByUsername(username = user.username)
+  }
+
+  @PreAuthorize("hasRole('ROLE_CREATE_USER')")
+  @PostMapping("/link-general-account/{linkedUsername}")
+  @ResponseStatus(HttpStatus.CREATED)
+  @Operation(
+    summary = "Link a general user account to an existing admin account.",
+    description = "Can only be linked to an admin account. Can only be linked to an account that doesn't already have one general account. Requires role ROLE_CREATE_USER",
+    security = [SecurityRequirement(name = "CREATE_USER")],
+    requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
+      content = [
+        Content(
+          mediaType = "application/json",
+          schema = Schema(implementation = CreateLinkedGeneralUserRequest::class)
+        )
+      ]
+    ),
+    responses = [
+      ApiResponse(
+        responseCode = "201",
+        description = "Staff account information returned"
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to link general account",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to link a general account",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      )
+    ]
+  )
+  fun linkGeneralAccount(
+    @Schema(description = "Attach account to an existing admin user account", example = "testuser2", required = true)
+    @PathVariable @Size(max = 30, min = 1, message = "Username must be between 1 and 30") linkedUsername: String,
+    @RequestBody @Valid linkedGeneralUserRequest: CreateLinkedGeneralUserRequest
+  ): StaffDetail {
+    return userService.linkGeneralAccount(linkedUsername, linkedGeneralUserRequest)
+  }
+
+  @PreAuthorize("hasRole('ROLE_CREATE_USER')")
+  @PostMapping("/link-admin-account/{linkedUsername}")
+  @ResponseStatus(HttpStatus.CREATED)
+  @Operation(
+    summary = "Link an admin account to an existing general account.",
+    description = "Can only be linked to an general account. Can only be linked to an account that doesn't already have one Admin account. Requires role ROLE_CREATE_USER",
+    security = [SecurityRequirement(name = "CREATE_USER")],
+    requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
+      content = [
+        Content(
+          mediaType = "application/json",
+          schema = Schema(implementation = CreateLinkedAdminUserRequest::class)
+        )
+      ]
+    ),
+    responses = [
+      ApiResponse(
+        responseCode = "201",
+        description = "Staff account information returned"
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to link admin account",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to link an admin account",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      )
+    ]
+  )
+  fun linkAdminAccount(
+    @Schema(description = "Attach account to an existing general account", example = "testuser2", required = true)
+    @PathVariable @Size(max = 30, min = 1, message = "Username must be between 1 and 30") linkedUsername: String,
+    @RequestBody @Valid linkedUserRequest: CreateLinkedAdminUserRequest
+  ): StaffDetail {
+    return userService.linkAdminAccount(linkedUsername, linkedUserRequest)
+  }
+
+  @PreAuthorize("hasRole('ROLE_CREATE_USER')")
+  @DeleteMapping("/{username}")
+  @Hidden
+  @Operation(
+    summary = "Delete user from system",
+    description = "Removes user and staff related data, along with roles and caseloads. Also removed oracle schema user. Requires role ROLE_CREATE_USER",
     security = [SecurityRequirement(name = "CREATE_USER")],
     responses = [
       ApiResponse(
@@ -121,7 +259,7 @@ class UserResource(
   @GetMapping("/{username}")
   @Operation(
     summary = "Get specified user details",
-    description = "Information on a specific user",
+    description = "Information on a specific user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
@@ -155,7 +293,7 @@ class UserResource(
   @GetMapping("/staff/{staffId}")
   @Operation(
     summary = "Get specified staff details",
-    description = "Information on a specific user",
+    description = "Will display general and admin user account if setup.  Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(

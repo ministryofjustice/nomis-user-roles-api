@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.service
 
 import UserSpecification
+import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -8,7 +9,10 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Order
 import org.springframework.data.domain.Sort.by
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateAdminUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateGeneralUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedAdminUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedGeneralUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
@@ -27,7 +31,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserSumm
 import java.util.function.Supplier
 import java.util.stream.Collectors
 import javax.transaction.Transactional
-import javax.validation.ValidationException
 
 @Service
 @Transactional
@@ -46,78 +49,124 @@ class UserService(
     userPersonDetailRepository.findAll(UserSpecification(filter), pageRequest.withSort(::mapUserSummarySortProperties))
       .map { it.toUserSummary() }
 
-  fun createUser(createUserRequest: CreateUserRequest): UserDetail {
+  fun createGeneralUser(createUserRequest: CreateGeneralUserRequest): UserDetail {
 
-    userPersonDetailRepository.findById(createUserRequest.username.uppercase())
-      .ifPresent { throw UserAlreadyExistsException("User ${createUserRequest.username} already exists") }
+    checkIfAccountAlreadyExists(createUserRequest.username)
 
-    if (createUserRequest.adminUser && createUserRequest.password.length < 14) {
-      throw PasswordTooShortException("Password must be at least 14 alpha-numeric characters in length. Please re-enter password.")
+    val staffAccount = createStaffRecord(createUserRequest.firstName, createUserRequest.lastName, createUserRequest.email)
+
+    if (staffAccount.generalAccount() != null) {
+      throw UserAlreadyExistsException("General user already exists for this staff member")
     }
 
-    val staffAccount = createUserRequest.linkedUsername?.let { userAccount ->
-      userPersonDetailRepository.findById(userAccount).map { it.staff }
-        .orElseThrow { UserNotFoundException("Linked User Account $userAccount not found") }
-    } ?: run {
+    val userPersonDetail = createUserAccount(createUserRequest.username, createUserRequest.defaultCaseloadId, false, staffAccount)
 
-      if (createUserRequest.firstName == null) {
-        throw ValidationException("First name required when not linking to existing staff account")
-      }
-      if (createUserRequest.lastName == null) {
-        throw ValidationException("Last name required when not linking to existing staff account")
-      }
-      if (createUserRequest.email == null) {
-        throw ValidationException("Email required when not linking to existing staff account")
-      }
+    createSchemaUser(createUserRequest.username, AccountProfile.TAG_GENERAL)
 
-      val staff = Staff(
-        firstName = createUserRequest.firstName.uppercase(),
-        lastName = createUserRequest.lastName.uppercase(),
-        status = "ACTIVE"
-      )
-      staff.setEmail(createUserRequest.email)
-      staff
+    val status = accountDetailRepository.findById(createUserRequest.username)
+      .orElseThrow(UserNotFoundException("User $createUserRequest.username not found"))
+
+    return UserDetail(userPersonDetail, status)
+  }
+
+  fun linkGeneralAccount(linkedUsername: String, linkedUserRequest: CreateLinkedGeneralUserRequest): StaffDetail {
+    checkIfAccountAlreadyExists(linkedUserRequest.username)
+
+    val staffAccount = userPersonDetailRepository.findById(linkedUsername).map { it.staff }
+      .orElseThrow { UserNotFoundException("Linked User Account $linkedUsername not found") }
+
+    if (staffAccount.generalAccount() != null) {
+      throw UserAlreadyExistsException("General user already exists for this staff member")
     }
 
-    if (createUserRequest.adminUser) {
-      if (staffAccount.adminAccount() != null) {
-        throw UserAlreadyExistsException("Admin user already exists for this staff member")
-      }
-    } else {
-      if (staffAccount.generalAccount() != null) {
-        throw UserAlreadyExistsException("General user already exists for this staff member")
-      }
+    createUserAccount(linkedUserRequest.username, linkedUserRequest.defaultCaseloadId, false, staffAccount)
+    createSchemaUser(linkedUserRequest.username, AccountProfile.TAG_GENERAL)
+
+    return findByStaffId(staffAccount.staffId)
+  }
+
+  fun createAdminUser(createUserRequest: CreateAdminUserRequest): UserDetail {
+
+    checkIfAccountAlreadyExists(createUserRequest.username)
+
+    val staffAccount = createStaffRecord(createUserRequest.firstName, createUserRequest.lastName, createUserRequest.email)
+
+    if (staffAccount.adminAccount() != null) {
+      throw UserAlreadyExistsException("Admin user already exists for this staff member")
     }
 
+    val userPersonDetail = createUserAccount(createUserRequest.username, "CADM_I", true, staffAccount)
+
+    createSchemaUser(createUserRequest.username, AccountProfile.TAG_ADMIN)
+
+    val status = accountDetailRepository.findById(createUserRequest.username)
+      .orElseThrow(UserNotFoundException("User $createUserRequest.username not found"))
+
+    return UserDetail(userPersonDetail, status)
+  }
+
+  fun linkAdminAccount(linkedUsername: String, linkedUserRequest: CreateLinkedAdminUserRequest): StaffDetail {
+    checkIfAccountAlreadyExists(linkedUserRequest.username)
+
+    val staffAccount = userPersonDetailRepository.findById(linkedUsername).map { it.staff }
+      .orElseThrow { UserNotFoundException("Linked User Account $linkedUsername not found") }
+
+    if (staffAccount.adminAccount() != null) {
+      throw UserAlreadyExistsException("Admin user already exists for this staff member")
+    }
+
+    createUserAccount(linkedUserRequest.username, "CADM_I", true, staffAccount)
+    createSchemaUser(linkedUserRequest.username, AccountProfile.TAG_ADMIN)
+
+    return findByStaffId(staffAccount.staffId)
+  }
+
+  private fun checkIfAccountAlreadyExists(username: String) {
+    userPersonDetailRepository.findById(username.uppercase())
+      .ifPresent { throw UserAlreadyExistsException("User $username already exists") }
+  }
+
+  private fun createStaffRecord(firstName: String, lastName: String, email: String): Staff {
+    val staffAccount = Staff(
+      firstName = firstName.uppercase(),
+      lastName = lastName.uppercase(),
+      status = "ACTIVE"
+    )
+    staffAccount.setEmail(email)
+    return staffAccount
+  }
+
+  private fun createUserAccount(
+    username: String,
+    defaultCaseloadId: String,
+    admin: Boolean,
+    staffAccount: Staff
+  ): UserPersonDetail {
     val userPersonDetail = UserPersonDetail(
-      username = createUserRequest.username.uppercase(),
+      username = username.uppercase(),
       staff = staffAccount,
-      type = getUsageType(createUserRequest.adminUser)
+      type = getUsageType(admin)
     )
     caseloadRepository.findById("NWEB")
       .ifPresent {
         userPersonDetail.addCaseload(it)
       }
 
-    val defaultCaseload = caseloadRepository.findById(createUserRequest.defaultCaseloadId)
-      .orElseThrow(CaseloadNotFoundException("Caseload ${createUserRequest.defaultCaseloadId} not found"))
+    val defaultCaseload = caseloadRepository.findById(defaultCaseloadId)
+      .orElseThrow(CaseloadNotFoundException("Caseload $defaultCaseloadId not found"))
     userPersonDetail.addCaseload(defaultCaseload)
 
     userPersonDetail.activeCaseLoad = defaultCaseload
     userPersonDetailRepository.saveAndFlush(userPersonDetail)
+    return userPersonDetail
+  }
 
-    val profile = if (createUserRequest.adminUser) {
-      AccountProfile.TAG_ADMIN
-    } else {
-      AccountProfile.TAG_GENERAL
-    }
-    userPersonDetailRepository.createUser(createUserRequest.username, createUserRequest.password, profile.name)
-    userPersonDetailRepository.expirePassword(createUserRequest.username)
-
-    val status = accountDetailRepository.findById(createUserRequest.username)
-      .orElseThrow(UserNotFoundException("User $createUserRequest.username not found"))
-
-    return UserDetail(userPersonDetail, status)
+  private fun createSchemaUser(
+    username: String,
+    profile: AccountProfile
+  ) {
+    userPersonDetailRepository.createUser(username, generatePassword(), profile.name)
+    userPersonDetailRepository.expirePassword(username)
   }
 
   fun deleteUser(username: String) {
@@ -134,6 +183,8 @@ class UserService(
       .orElseThrow(UserNotFoundException("Staff ID $staffId not found"))
   }
 }
+
+private fun generatePassword() = RandomStringUtils.randomAlphanumeric(30, 30)
 
 private fun Pageable.withSort(sortMapper: (sortProperty: String) -> String): Pageable {
   return PageRequest.of(this.pageNumber, this.pageSize, mapSortOrderProperties(this.sort, sortMapper))

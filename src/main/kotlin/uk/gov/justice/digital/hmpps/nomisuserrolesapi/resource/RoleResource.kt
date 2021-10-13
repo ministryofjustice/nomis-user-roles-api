@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
+import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -39,7 +40,7 @@ class RoleResource(
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(
     summary = "Create a role in NOMIS",
-    description = "Creates a role",
+    description = "Creates a role. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
       content = [
@@ -81,8 +82,8 @@ class RoleResource(
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @PutMapping("/{code}")
   @Operation(
-    summary = "Create a role in NOMIS",
-    description = "Creates a role",
+    summary = "Updates a role in NOMIS",
+    description = "Updates a role. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
       content = [
@@ -126,7 +127,7 @@ class RoleResource(
   @GetMapping
   @Operation(
     summary = "Get all roles",
-    description = "Information on a list of roles",
+    description = "Information on a list of roles. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
@@ -160,7 +161,7 @@ class RoleResource(
   @GetMapping("/{code}")
   @Operation(
     summary = "Get specified role details",
-    description = "Information on a specific role",
+    description = "Information on a specific role. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
@@ -192,9 +193,10 @@ class RoleResource(
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @DeleteMapping("/{roleCode}")
+  @Hidden
   @Operation(
     summary = "Delete Role",
-    description = "Delete Role",
+    description = "Delete Role. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
