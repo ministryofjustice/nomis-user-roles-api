@@ -7,7 +7,10 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.reactive.function.BodyInserters
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateAdminUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateGeneralUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedAdminUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedGeneralUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.IntegrationTestBase
 
@@ -632,13 +635,12 @@ class UserResourceIntTest : IntegrationTestBase() {
     @Test
     fun `a database user cannot be created without correct role`() {
 
-      webTestClient.post().uri("/users")
+      webTestClient.post().uri("/users/general-account")
         .headers(setAuthorisation(roles = listOf("ROLE_DUMMY")))
         .body(
           BodyInserters.fromValue(
-            CreateUserRequest(
+            CreateGeneralUserRequest(
               username = "testuser2",
-              password = "password123",
               firstName = "Test",
               lastName = "User",
               defaultCaseloadId = "BXI",
@@ -651,132 +653,17 @@ class UserResourceIntTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `a database user cannot be created with invalid password`() {
-
-      webTestClient.post().uri("/users")
-        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
-        .body(
-          BodyInserters.fromValue(
-            CreateUserRequest(
-              username = "testuser2",
-              password = "password",
-              firstName = "Test",
-              lastName = "User",
-              defaultCaseloadId = "BXI",
-              email = "test@test.com"
-            )
-          )
-        )
-        .exchange()
-        .expectStatus().is4xxClientError
-        .expectBody()
-        .jsonPath("userMessage").isEqualTo("Validation failure: Password must be at least 9 alpha-numeric characters in length (max 30). Please re-enter password.")
-    }
-
-    @Test
-    fun `a user cannot be created with missing first name`() {
-
-      webTestClient.post().uri("/users")
-        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
-        .body(
-          BodyInserters.fromValue(
-            CreateUserRequest(
-              username = "testuser_nofirstname",
-              password = "password123",
-              lastName = "User",
-              defaultCaseloadId = "BXI",
-              email = "test@test.com"
-            )
-          )
-        )
-        .exchange()
-        .expectStatus().is4xxClientError
-        .expectBody()
-        .jsonPath("userMessage").isEqualTo("Validation failure: First name required when not linking to existing staff account")
-    }
-
-    @Test
-    fun `a user cannot be created with missing last name`() {
-
-      webTestClient.post().uri("/users")
-        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
-        .body(
-          BodyInserters.fromValue(
-            CreateUserRequest(
-              username = "testuser_nolastname",
-              password = "password123",
-              firstName = "Test",
-              defaultCaseloadId = "BXI",
-              email = "test@test.com"
-            )
-          )
-        )
-        .exchange()
-        .expectStatus().is4xxClientError
-        .expectBody()
-        .jsonPath("userMessage").isEqualTo("Validation failure: Last name required when not linking to existing staff account")
-    }
-
-    @Test
-    fun `a user cannot be created with missing email`() {
-
-      webTestClient.post().uri("/users")
-        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
-        .body(
-          BodyInserters.fromValue(
-            CreateUserRequest(
-              username = "testuser_noemail",
-              password = "password123",
-              firstName = "Test",
-              lastName = "User",
-              defaultCaseloadId = "BXI"
-            )
-          )
-        )
-        .exchange()
-        .expectStatus().is4xxClientError
-        .expectBody()
-        .jsonPath("userMessage").isEqualTo("Validation failure: Email required when not linking to existing staff account")
-    }
-
-    @Test
-    fun `a user cannot be created with invalid password`() {
-
-      webTestClient.post().uri("/users")
-        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
-        .body(
-          BodyInserters.fromValue(
-            CreateUserRequest(
-              username = "testuser_noemail",
-              password = "yh^%DHISFJ__00",
-              firstName = "Test",
-              lastName = "User",
-              defaultCaseloadId = "BXI",
-              email = "test@test.com"
-            )
-          )
-        )
-        .exchange()
-        .expectStatus().is4xxClientError
-        .expectBody()
-        .jsonPath("userMessage").isEqualTo("Validation failure: Password must consist of alphanumeric characters only")
-    }
-
-    @Test
     fun `a database user can be created`() {
 
-      webTestClient.post().uri("/users")
+      webTestClient.post().uri("/users/admin-account")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .body(
           BodyInserters.fromValue(
-            CreateUserRequest(
+            CreateAdminUserRequest(
               username = "testuser2",
-              password = "password123456",
               firstName = "Test",
               lastName = "User",
-              defaultCaseloadId = "BXI",
-              email = "test@test.com",
-              adminUser = true
+              email = "test@test.com"
             )
           )
         )
@@ -788,7 +675,7 @@ class UserResourceIntTest : IntegrationTestBase() {
           "username": "TESTUSER2",
           "firstName": "TEST",
           "lastName": "USER",
-          "activeCaseloadId" : "BXI",
+          "activeCaseloadId" : "CADM_I",
           "active": true,
           "accountStatus": "EXPIRED",
           "primaryEmail": "test@test.com",
@@ -811,77 +698,59 @@ class UserResourceIntTest : IntegrationTestBase() {
     @Test
     fun `a user can be link to an existing account`() {
 
-      webTestClient.post().uri("/users")
+      webTestClient.post().uri("/users/admin-account")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .body(
           BodyInserters.fromValue(
-            CreateUserRequest(
+            CreateAdminUserRequest(
               username = "testuser4",
-              password = "password123456",
               firstName = "Test",
               lastName = "User",
-              defaultCaseloadId = "CADM_I",
-              email = "test@test.com",
-              adminUser = true
+              email = "test@test.com"
             )
           )
         )
         .exchange()
         .expectStatus().isCreated
 
-      webTestClient.post().uri("/users")
+      webTestClient.post().uri("/users/link-general-account/TESTUSER4")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .body(
           BodyInserters.fromValue(
-            CreateUserRequest(
+            CreateLinkedGeneralUserRequest(
               username = "testuser5",
-              password = "password123",
-              defaultCaseloadId = "BXI",
-              adminUser = false,
-              linkedUsername = "TESTUSER4"
+              defaultCaseloadId = "BXI"
             )
           )
         )
         .exchange()
         .expectStatus().isCreated
-
-      webTestClient.get().uri("/users/TESTUSER4")
-        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
-        .exchange()
-        .expectStatus().isOk
     }
 
     @Test
     fun `a user cannot be link to an existing account of same ADMIN type`() {
 
-      webTestClient.post().uri("/users")
+      webTestClient.post().uri("/users/admin-account")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .body(
           BodyInserters.fromValue(
-            CreateUserRequest(
+            CreateAdminUserRequest(
               username = "testuser6",
-              password = "password123456",
               firstName = "Test",
               lastName = "User",
-              defaultCaseloadId = "CADM_I",
-              email = "test@test.com",
-              adminUser = true
+              email = "test@test.com"
             )
           )
         )
         .exchange()
         .expectStatus().isCreated
 
-      webTestClient.post().uri("/users")
+      webTestClient.post().uri("/users/link-admin-account/TESTUSER6")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .body(
           BodyInserters.fromValue(
-            CreateUserRequest(
-              username = "testuser5",
-              password = "password123456",
-              defaultCaseloadId = "CADM_I",
-              adminUser = true,
-              linkedUsername = "TESTUSER6"
+            CreateLinkedAdminUserRequest(
+              username = "testuser5"
             )
           )
         )
@@ -894,13 +763,12 @@ class UserResourceIntTest : IntegrationTestBase() {
     @Test
     fun `a user cannot be link to an existing account of same GENERAL type`() {
 
-      webTestClient.post().uri("/users")
+      webTestClient.post().uri("/users/general-account")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .body(
           BodyInserters.fromValue(
-            CreateUserRequest(
+            CreateGeneralUserRequest(
               username = "testuser7",
-              password = "password123",
               firstName = "Test",
               lastName = "User",
               defaultCaseloadId = "BXI",
@@ -911,15 +779,13 @@ class UserResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isCreated
 
-      webTestClient.post().uri("/users")
+      webTestClient.post().uri("/users/link-general-account/TESTUSER7")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .body(
           BodyInserters.fromValue(
-            CreateUserRequest(
+            CreateLinkedGeneralUserRequest(
               username = "testuser8",
-              password = "password123",
-              defaultCaseloadId = "BXI",
-              linkedUsername = "TESTUSER7"
+              defaultCaseloadId = "BXI"
             )
           )
         )
@@ -952,13 +818,12 @@ class UserResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `can drop a db user that does exist`() {
-      webTestClient.post().uri("/users")
+      webTestClient.post().uri("/users/general-account")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .body(
           BodyInserters.fromValue(
-            CreateUserRequest(
+            CreateGeneralUserRequest(
               username = "testuser3",
-              password = "password123",
               firstName = "Test",
               lastName = "User",
               defaultCaseloadId = "BXI",
