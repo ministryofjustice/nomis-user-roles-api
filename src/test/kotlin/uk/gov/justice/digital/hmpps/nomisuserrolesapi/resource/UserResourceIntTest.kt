@@ -295,7 +295,7 @@ class UserResourceIntTest : IntegrationTestBase() {
           .jsonPath(matchByUserName + "lastName", "abella.moulin").isEqualTo("Moulin")
           .jsonPath(matchByUserName + "staffId", "abella.moulin").exists()
           .jsonPath(matchByUserName + "activeCaseload.id", "abella.moulin").isEqualTo("WWI")
-          .jsonPath(matchByUserName + "activeCaseload.name", "abella.moulin").isEqualTo("WANDSWORTH (HMP)")
+          .jsonPath(matchByUserName + "activeCaseload.name", "abella.moulin").isEqualTo("Wandsworth (HMP)")
       }
 
       @Test
