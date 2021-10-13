@@ -28,24 +28,25 @@ internal class TransformersKtTest {
 
       assertThat(data.username).isEqualTo("raj.maki")
       assertThat(data.active).isTrue
-      assertThat(data.firstName).isEqualTo("Raj")
-      assertThat(data.lastName).isEqualTo("Maki")
+      assertThat(data.firstName).isNotNull
+      assertThat(data.lastName).isNotNull
       assertThat(data.staffId).isEqualTo(99)
-      assertThat(data.activeCaseload).isEqualTo(PrisonCaseload("WWI", "WANDSWORTH (HMP)"))
+      assertThat(data.activeCaseload).isNotNull
     }
     @Test
-    fun `will copy names and capitalize`() {
+    fun `will copy names, caseload and capitalize`() {
       val entity = UserPersonDetail(
         username = "raj.maki",
         staff = Staff(staffId = 99, firstName = "RAJ BOB", lastName = "MAKI", status = "ACTIVE"),
         type = UsageType.GENERAL,
-        activeCaseLoad = Caseload("WWI", "WANDSWORTH (HMP)")
+        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)")
       )
 
       val data = entity.toUserSummary()
 
       assertThat(data.firstName).isEqualTo("Raj Bob")
       assertThat(data.lastName).isEqualTo("Maki")
+      assertThat(data.activeCaseload).isEqualTo(PrisonCaseload("WWI", "Wandsworth Hmped (HMP & HMPYOI)"))
     }
 
     @Test
