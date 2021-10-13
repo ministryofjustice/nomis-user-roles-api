@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.service
 
 import UserSpecification
-import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -183,8 +182,6 @@ class UserService(
       .orElseThrow(UserNotFoundException("Staff ID $staffId not found"))
   }
 }
-
-private fun generatePassword() = RandomStringUtils.randomAlphanumeric(30, 30)
 
 private fun Pageable.withSort(sortMapper: (sortProperty: String) -> String): Pageable {
   return PageRequest.of(this.pageNumber, this.pageSize, mapSortOrderProperties(this.sort, sortMapper))
