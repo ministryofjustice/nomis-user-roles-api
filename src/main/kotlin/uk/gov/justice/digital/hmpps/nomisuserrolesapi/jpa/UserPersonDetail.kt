@@ -30,7 +30,7 @@ data class UserPersonDetail(
   @OneToMany(fetch = FetchType.LAZY)
   @JoinColumn(name = "USERNAME", updatable = false, insertable = false, nullable = false)
   @Where(clause = "CASELOAD_ID = 'NWEB'")
-  val dpsRoles: MutableList<UserCaseloadRole> = mutableListOf(),
+  val dpsRoles: List<UserCaseloadRole> = listOf(),
 
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], mappedBy = "user", orphanRemoval = true)
   var caseloads: List<UserCaseload> = listOf(),
