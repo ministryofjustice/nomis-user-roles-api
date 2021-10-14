@@ -196,7 +196,6 @@ class UserService(
     userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
     userPersonDetailRepository.changePassword(username, password)
   }
-
 }
 
 private fun Pageable.withSort(sortMapper: (sortProperty: String) -> String): Pageable {

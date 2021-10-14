@@ -975,8 +975,6 @@ class UserResourceIntTest : IntegrationTestBase() {
         .expectStatus().is4xxClientError
         .expectBody()
         .jsonPath("userMessage").isEqualTo("Validation failure: changePassword.password: Password must consist of alphanumeric characters only and a minimum of 14 chars, and max 30 chars")
-
     }
   }
-
 }
