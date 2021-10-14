@@ -48,7 +48,7 @@ class UserService(
     userPersonDetailRepository.findAll(UserSpecification(filter), pageRequest.withSort(::mapUserSummarySortProperties))
       .map { it.toUserSummary() }
 
-  fun createGeneralUser(createUserRequest: CreateGeneralUserRequest): UserDetail {
+  fun createGeneralUser(createUserRequest: CreateGeneralUserRequest): UserSummary {
 
     checkIfAccountAlreadyExists(createUserRequest.username)
 
@@ -61,14 +61,10 @@ class UserService(
     val userPersonDetail = createUserAccount(createUserRequest.username, createUserRequest.defaultCaseloadId, false, staffAccount)
 
     createSchemaUser(createUserRequest.username, AccountProfile.TAG_GENERAL)
-
-    val status = accountDetailRepository.findById(createUserRequest.username)
-      .orElseThrow(UserNotFoundException("User $createUserRequest.username not found"))
-
-    return UserDetail(userPersonDetail, status)
+    return userPersonDetail.toUserSummary()
   }
 
-  fun linkGeneralAccount(linkedUsername: String, linkedUserRequest: CreateLinkedGeneralUserRequest): StaffDetail {
+  fun linkGeneralAccount(linkedUsername: String, linkedUserRequest: CreateLinkedGeneralUserRequest): UserSummary {
     checkIfAccountAlreadyExists(linkedUserRequest.username)
 
     val staffAccount = userPersonDetailRepository.findById(linkedUsername).map { it.staff }
@@ -78,13 +74,13 @@ class UserService(
       throw UserAlreadyExistsException("General user already exists for this staff member")
     }
 
-    createUserAccount(linkedUserRequest.username, linkedUserRequest.defaultCaseloadId, false, staffAccount)
+    val userPersonDetail = createUserAccount(linkedUserRequest.username, linkedUserRequest.defaultCaseloadId, false, staffAccount)
     createSchemaUser(linkedUserRequest.username, AccountProfile.TAG_GENERAL)
 
-    return findByStaffId(staffAccount.staffId)
+    return userPersonDetail.toUserSummary()
   }
 
-  fun createAdminUser(createUserRequest: CreateAdminUserRequest): UserDetail {
+  fun createAdminUser(createUserRequest: CreateAdminUserRequest): UserSummary {
 
     checkIfAccountAlreadyExists(createUserRequest.username)
 
@@ -98,13 +94,10 @@ class UserService(
 
     createSchemaUser(createUserRequest.username, AccountProfile.TAG_ADMIN)
 
-    val status = accountDetailRepository.findById(createUserRequest.username)
-      .orElseThrow(UserNotFoundException("User $createUserRequest.username not found"))
-
-    return UserDetail(userPersonDetail, status)
+    return userPersonDetail.toUserSummary()
   }
 
-  fun linkAdminAccount(linkedUsername: String, linkedUserRequest: CreateLinkedAdminUserRequest): StaffDetail {
+  fun linkAdminAccount(linkedUsername: String, linkedUserRequest: CreateLinkedAdminUserRequest): UserSummary {
     checkIfAccountAlreadyExists(linkedUserRequest.username)
 
     val staffAccount = userPersonDetailRepository.findById(linkedUsername).map { it.staff }
@@ -114,10 +107,10 @@ class UserService(
       throw UserAlreadyExistsException("Admin user already exists for this staff member")
     }
 
-    createUserAccount(linkedUserRequest.username, "CADM_I", true, staffAccount)
+    val userPersonDetail = createUserAccount(linkedUserRequest.username, "CADM_I", true, staffAccount)
     createSchemaUser(linkedUserRequest.username, AccountProfile.TAG_ADMIN)
 
-    return findByStaffId(staffAccount.staffId)
+    return userPersonDetail.toUserSummary()
   }
 
   private fun checkIfAccountAlreadyExists(username: String) {

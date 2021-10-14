@@ -175,7 +175,8 @@ class UserResource(
     @PathVariable @Size(max = 30, min = 1, message = "Username must be between 1 and 30") linkedUsername: String,
     @RequestBody @Valid linkedGeneralUserRequest: CreateLinkedGeneralUserRequest
   ): StaffDetail {
-    return userService.linkGeneralAccount(linkedUsername, linkedGeneralUserRequest)
+    val linkedUser = userService.linkGeneralAccount(linkedUsername, linkedGeneralUserRequest)
+    return userService.findByStaffId(linkedUser.staffId)
   }
 
   @PreAuthorize("hasRole('ROLE_CREATE_USER')")
@@ -220,7 +221,8 @@ class UserResource(
     @PathVariable @Size(max = 30, min = 1, message = "Username must be between 1 and 30") linkedUsername: String,
     @RequestBody @Valid linkedUserRequest: CreateLinkedAdminUserRequest
   ): StaffDetail {
-    return userService.linkAdminAccount(linkedUsername, linkedUserRequest)
+    val linkedUser = userService.linkAdminAccount(linkedUsername, linkedUserRequest)
+    return userService.findByStaffId(linkedUser.staffId)
   }
 
   @PreAuthorize("hasRole('ROLE_CREATE_USER')")

@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -11,8 +12,10 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateAdminUserReques
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateGeneralUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedAdminUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedGeneralUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 
 class UserResourceIntTest : IntegrationTestBase() {
   @Autowired
@@ -713,7 +716,7 @@ class UserResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isCreated
 
-      webTestClient.post().uri("/users/link-general-account/TESTUSER4")
+      val staffDetail = webTestClient.post().uri("/users/link-general-account/TESTUSER4")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .body(
           BodyInserters.fromValue(
@@ -725,6 +728,44 @@ class UserResourceIntTest : IntegrationTestBase() {
         )
         .exchange()
         .expectStatus().isCreated
+        .expectBody(StaffDetail::class.java)
+        .returnResult().responseBody!!
+
+      assertThat(staffDetail.firstName).isEqualTo("TEST")
+      assertThat(staffDetail.lastName).isEqualTo("USER")
+      assertThat(staffDetail.primaryEmail).isEqualTo("test@test.com")
+      assertThat(staffDetail.status).isEqualTo("ACTIVE")
+
+      assertThat(staffDetail.generalAccount).isNotNull
+      assertThat(staffDetail.generalAccount?.username).isEqualTo("TESTUSER5")
+      assertThat(staffDetail.generalAccount?.activeCaseloadId).isEqualTo("BXI")
+      assertThat(staffDetail.generalAccount?.active).isEqualTo(true)
+      assertThat(staffDetail.generalAccount?.accountType).isEqualTo(UsageType.GENERAL)
+
+      assertThat(staffDetail.adminAccount).isNotNull
+      assertThat(staffDetail.adminAccount?.username).isEqualTo("TESTUSER4")
+      assertThat(staffDetail.adminAccount?.activeCaseloadId).isEqualTo("CADM_I")
+      assertThat(staffDetail.adminAccount?.active).isEqualTo(true)
+      assertThat(staffDetail.adminAccount?.accountType).isEqualTo(UsageType.ADMIN)
+
+      webTestClient.get().uri("/users/staff/${staffDetail.staffId}")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("staffId").exists()
+        .jsonPath("firstName").isEqualTo("TEST")
+        .jsonPath("lastName").isEqualTo("USER")
+        .jsonPath("primaryEmail").isEqualTo("test@test.com")
+        .jsonPath("status").isEqualTo("ACTIVE")
+        .jsonPath("generalAccount.username").isEqualTo("TESTUSER5")
+        .jsonPath("generalAccount.activeCaseloadId").isEqualTo("BXI")
+        .jsonPath("generalAccount.active").isEqualTo("true")
+        .jsonPath("generalAccount.accountType").isEqualTo("GENERAL")
+        .jsonPath("adminAccount.username").isEqualTo("TESTUSER4")
+        .jsonPath("adminAccount.activeCaseloadId").isEqualTo("CADM_I")
+        .jsonPath("adminAccount.active").isEqualTo("true")
+        .jsonPath("adminAccount.accountType").isEqualTo("ADMIN")
     }
 
     @Test
