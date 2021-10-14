@@ -25,4 +25,16 @@ interface UserPersonDetailRepository :
   @Modifying
   @Query(value = "call oms_utils.drop_user(:username)", nativeQuery = true)
   fun dropUser(username: String)
+
+  @Modifying
+  @Query(value = "call oms_utils.change_user_password(:username, :password)", nativeQuery = true)
+  fun changePassword(username: String?, password: String?)
+
+  @Modifying
+  @Query(value = "call oms_utils.unlock_user(:username)", nativeQuery = true)
+  fun unlockUser(username: String?)
+
+  @Modifying
+  @Query(value = "call oms_utils.lock_user(:username)", nativeQuery = true)
+  fun lockUser(username: String?)
 }

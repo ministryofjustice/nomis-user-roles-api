@@ -181,6 +181,22 @@ class UserService(
       .map { s -> StaffDetail(s) }
       .orElseThrow(UserNotFoundException("Staff ID $staffId not found"))
   }
+
+  fun lockUser(username: String) {
+    userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    userPersonDetailRepository.lockUser(username)
+  }
+
+  fun unlockUser(username: String) {
+    userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    userPersonDetailRepository.unlockUser(username)
+  }
+
+  fun changePassword(username: String, password: String) {
+    userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    userPersonDetailRepository.changePassword(username, password)
+  }
+
 }
 
 private fun Pageable.withSort(sortMapper: (sortProperty: String) -> String): Pageable {
