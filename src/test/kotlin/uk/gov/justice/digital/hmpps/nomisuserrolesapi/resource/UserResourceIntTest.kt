@@ -166,6 +166,20 @@ class UserResourceIntTest : IntegrationTestBase() {
       }
 
       @Test
+      internal fun `will return the count of DPS roles`() {
+        webTestClient.get().uri("/users/")
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+          .exchange()
+          .expectStatus().isOk
+          .expectBody()
+          .jsonPath("$.totalElements").isEqualTo(4)
+          .jsonPath(matchByUserName + "dpsRoleCount", "marco.rossi").isEqualTo(2)
+          .jsonPath(matchByUserName + "dpsRoleCount", "abella.moulin").isEqualTo(2)
+          .jsonPath(matchByUserName + "dpsRoleCount", "mark.bowlan").isEqualTo(3)
+          .jsonPath(matchByUserName + "dpsRoleCount", "ella.dribble").isEqualTo(0)
+      }
+
+      @Test
       fun `blank filters are ignored`() {
         webTestClient.get().uri {
           it.path("/users/")

@@ -21,6 +21,7 @@ fun UserPersonDetail.toUserSummary(): UserSummary = UserSummary(
       name = caseload.name.capitalizeLeavingAbbreviations()
     )
   },
+  dpsRoleCount = this.dpsRoles.size,
 )
 
 val userSummaryToEntityPropertyMap = mapOf(
