@@ -16,4 +16,6 @@ data class UserSummary(
   val active: Boolean,
   @Schema(description = "Caseload that is currently active, typically the prison the user is currently working at")
   val activeCaseload: PrisonCaseload?,
+  @Schema(description = "The count of DPS roles allocated to this staff member", example = "12")
+  val dpsRoleCount: Int
 )
