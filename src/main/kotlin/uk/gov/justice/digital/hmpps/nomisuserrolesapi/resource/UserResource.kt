@@ -92,6 +92,50 @@ class UserResource(
   }
 
   @PreAuthorize("hasRole('ROLE_CREATE_USER')")
+  @PostMapping("/local-admin-account")
+  @ResponseStatus(HttpStatus.CREATED)
+  @Operation(
+    summary = "Create local admin user account",
+    description = "Creates local admin user account, oracle schema and staff user information. Requires role ROLE_CREATE_USER",
+    security = [SecurityRequirement(name = "CREATE_USER")],
+    requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
+      content = [
+        Content(
+          mediaType = "application/json",
+          schema = Schema(implementation = CreateGeneralUserRequest::class)
+        )
+      ]
+    ),
+    responses = [
+      ApiResponse(
+        responseCode = "201",
+        description = "Local Admin user information returned"
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to create user information",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to create a user",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      )
+    ]
+  )
+  fun createLocalAdminUser(
+    @RequestBody @Valid createLocalAdminUserRequest: CreateGeneralUserRequest
+  ): UserDetail {
+    val user = userService.createLocalAdminUser(createLocalAdminUserRequest)
+    return userService.findByUsername(username = user.username)
+  }
+
+  @PreAuthorize("hasRole('ROLE_CREATE_USER')")
   @PostMapping("/admin-account")
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(
@@ -178,6 +222,52 @@ class UserResource(
     @RequestBody @Valid linkedGeneralUserRequest: CreateLinkedGeneralUserRequest
   ): StaffDetail {
     val linkedUser = userService.linkGeneralAccount(linkedUsername, linkedGeneralUserRequest)
+    return userService.findByStaffId(linkedUser.staffId)
+  }
+
+  @PreAuthorize("hasRole('ROLE_CREATE_USER')")
+  @PostMapping("/link-local-admin-account/{linkedUsername}")
+  @ResponseStatus(HttpStatus.CREATED)
+  @Operation(
+    summary = "Link a local admin user account to an existing general account.",
+    description = "Can only be linked to an general account. Can only be linked to an account that doesn't already have one admin account. Requires role ROLE_CREATE_USER",
+    security = [SecurityRequirement(name = "CREATE_USER")],
+    requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
+      content = [
+        Content(
+          mediaType = "application/json",
+          schema = Schema(implementation = CreateLinkedGeneralUserRequest::class)
+        )
+      ]
+    ),
+    responses = [
+      ApiResponse(
+        responseCode = "201",
+        description = "Staff local admin account information returned"
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to link local admin account",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to link a local admin account",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      )
+    ]
+  )
+  fun linkLocalAdminAccount(
+    @Schema(description = "Attach account to an existing general user account", example = "testuser2", required = true)
+    @PathVariable @Size(max = 30, min = 1, message = "Username must be between 1 and 30") linkedUsername: String,
+    @RequestBody @Valid linkedLocalAdminUserRequest: CreateLinkedGeneralUserRequest
+  ): StaffDetail {
+    val linkedUser = userService.linkLocalAdminAccount(linkedUsername, linkedLocalAdminUserRequest)
     return userService.findByStaffId(linkedUser.staffId)
   }
 

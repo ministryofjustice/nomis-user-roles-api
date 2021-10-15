@@ -31,10 +31,10 @@ data class UserGroupMember(
 
   @Column(name = "ACTIVE_FLAG")
   @Type(type = "yes_no")
-  val active: Boolean,
+  val active: Boolean = true,
 
   @Column(name = "START_DATE")
-  val startDate: LocalDate,
+  val startDate: LocalDate = LocalDate.now(),
 
   @Column(name = "EXPIRY_DATE")
   val expiryDate: LocalDate? = null,

@@ -32,7 +32,7 @@ data class UserGroupAdministrator(
 
   @Column(name = "ACTIVE_FLAG")
   @Type(type = "yes_no")
-  val active: Boolean,
+  val active: Boolean = true,
 
   @Column(name = "EXPIRY_DATE")
   val expiryDate: LocalDate? = null,

@@ -668,9 +668,106 @@ class UserResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isForbidden
     }
+    @Test
+    fun `a local admin database user can be created`() {
+
+      webTestClient.post().uri("/users/local-admin-account")
+        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
+        .body(
+          BodyInserters.fromValue(
+            CreateGeneralUserRequest(
+              username = "laauser1",
+              firstName = "laa",
+              lastName = "User",
+              email = "laa@test.com",
+              defaultCaseloadId = "PVI"
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().isCreated
+        .expectBody().json(
+          """
+          {
+          "username": "LAAUSER1",
+          "firstName": "LAA",
+          "lastName": "USER",
+          "activeCaseloadId" : "PVI",
+          "active": true,
+          "accountStatus": "EXPIRED",
+          "primaryEmail": "laa@test.com",
+          "accountType": "ADMIN"
+          }
+          """
+        )
+    }
 
     @Test
-    fun `a database user can be created`() {
+    fun `an local admin user can be linked to  general database user can local admin can search for general user`() {
+
+      webTestClient.post().uri("/users/local-admin-account")
+        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
+        .body(
+          BodyInserters.fromValue(
+            CreateGeneralUserRequest(
+              username = "laa_user1",
+              firstName = "laa",
+              lastName = "User",
+              email = "laa@test.com",
+              defaultCaseloadId = "WWI"
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().isCreated
+        .expectBody().json(
+          """
+          {
+          "username": "LAA_USER1",
+          "firstName": "LAA",
+          "lastName": "USER",
+          "activeCaseloadId" : "WWI",
+          "active": true,
+          "accountStatus": "EXPIRED",
+          "primaryEmail": "laa@test.com",
+          "accountType": "ADMIN"
+          }
+          """
+        )
+
+      webTestClient.post().uri("/users/link-general-account/LAA_USER1")
+        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
+        .body(
+          BodyInserters.fromValue(
+            CreateLinkedGeneralUserRequest(
+              username = "generaluser1",
+              defaultCaseloadId = "WWI"
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().isCreated
+        .expectBody()
+        .jsonPath("generalAccount.username").isEqualTo("GENERALUSER1")
+        .jsonPath("generalAccount.activeCaseloadId").isEqualTo("WWI")
+        .jsonPath("generalAccount.active").isEqualTo("true")
+        .jsonPath("generalAccount.accountType").isEqualTo("GENERAL")
+        .jsonPath("adminAccount.username").isEqualTo("LAA_USER1")
+        .jsonPath("adminAccount.activeCaseloadId").isEqualTo("WWI")
+        .jsonPath("adminAccount.active").isEqualTo("true")
+        .jsonPath("adminAccount.accountType").isEqualTo("ADMIN")
+
+      webTestClient.get().uri { it.path("/users/").queryParam("nameFilter", "generaluser1").build() }
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "LAA_USER1"))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$.numberOfElements").isEqualTo(1)
+        .jsonPath("$.content[?(@.username == '%s')]", "GENERALUSER1").exists()
+    }
+
+    @Test
+    fun `a admin database user can be created`() {
 
       webTestClient.post().uri("/users/admin-account")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))

@@ -36,14 +36,14 @@ data class UserPersonDetail(
   var caseloads: List<UserCaseload> = listOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-  val activeAndInactiveMemberOfUserGroups: List<UserGroupMember> = listOf(),
+  var activeAndInactiveMemberOfUserGroups: List<UserGroupMember> = listOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   @Where(clause = "ACTIVE_FLAG = 'Y'")
   val memberOfUserGroups: List<UserGroupMember> = listOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-  val activeAndInactiveAdministratorOfUserGroups: List<UserGroupAdministrator> = listOf(),
+  var activeAndInactiveAdministratorOfUserGroups: List<UserGroupAdministrator> = listOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   @Where(clause = "ACTIVE_FLAG = 'Y'")
@@ -77,5 +77,21 @@ data class UserPersonDetail(
       roles = listOf(),
     )
     caseloads = caseloads + userCaseload
+  }
+
+  fun addUserGroup(userGroup: UserGroup) {
+    val member = UserGroupMember(
+      id = UserGroupMemberPk(userGroupCode = userGroup.id, username = this.username),
+      user = this, userGroup = userGroup
+    )
+    activeAndInactiveMemberOfUserGroups = activeAndInactiveMemberOfUserGroups + member
+  }
+
+  fun addAdminUserGroup(userGroup: UserGroup) {
+    val adminMember = UserGroupAdministrator(
+      id = UserGroupAdministratorPk(userGroupCode = userGroup.id, username = this.username),
+      user = this, userGroup = userGroup
+    )
+    activeAndInactiveAdministratorOfUserGroups = activeAndInactiveAdministratorOfUserGroups + adminMember
   }
 }

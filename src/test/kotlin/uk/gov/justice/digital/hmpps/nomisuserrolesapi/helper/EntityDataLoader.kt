@@ -14,15 +14,15 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupMember
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupMemberPk
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.CaseloadRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.GroupCaseloadRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleRepository
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserGroupRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import java.time.LocalDate
 
 class GeneralUserBuilder(
   repository: UserPersonDetailRepository,
-  private val userGroupRepository: UserGroupRepository,
   private val caseloadRepository: CaseloadRepository,
+  private val groupCaseloadRepository: GroupCaseloadRepository,
   roleRepository: RoleRepository,
   userPersonDetail: UserPersonDetail,
   prisonCodes: List<String>,
@@ -36,15 +36,17 @@ class GeneralUserBuilder(
 ) {
 
   private fun generalUsersOf(prisonCodes: List<String>): List<UserGroupMember> {
-    return prisonCodes.map {
-      UserGroupMember(
-        UserGroupMemberPk(it, this.userPersonDetail.username),
-        active = true,
-        startDate = LocalDate.now().minusDays(1),
-        userGroup = userGroupRepository.findByIdOrNull(it)!!,
-        user = this.userPersonDetail
-      )
-    }
+    return prisonCodes.map { caseload ->
+      groupCaseloadRepository.findAllById_Caseload(caseload).map {
+        UserGroupMember(
+          UserGroupMemberPk(it.userGroup.id, this.userPersonDetail.username),
+          active = true,
+          startDate = LocalDate.now().minusDays(1),
+          userGroup = it.userGroup,
+          user = this.userPersonDetail
+        )
+      }
+    }.flatten()
   }
 
   override fun build(): GeneralUserBuilder {
@@ -74,8 +76,8 @@ class GeneralUserBuilder(
 class LocalAdministratorBuilder(
   repository: UserPersonDetailRepository,
   roleRepository: RoleRepository,
-  private val userGroupRepository: UserGroupRepository,
   private val caseloadRepository: CaseloadRepository,
+  private val groupCaseloadRepository: GroupCaseloadRepository,
   userPersonDetail: UserPersonDetail,
   prisonCodes: List<String>,
 ) : UserBuilder<LocalAdministratorBuilder>(
@@ -88,14 +90,16 @@ class LocalAdministratorBuilder(
 ) {
 
   private fun adminUsersOf(prisonCodes: List<String>): List<UserGroupAdministrator> {
-    return prisonCodes.map {
-      UserGroupAdministrator(
-        UserGroupAdministratorPk(it, this.userPersonDetail.username),
-        active = true,
-        userGroup = userGroupRepository.findByIdOrNull(it)!!,
-        user = this.userPersonDetail,
-      )
-    }
+    return prisonCodes.map { caseload ->
+      groupCaseloadRepository.findAllById_Caseload(caseload).map {
+        UserGroupAdministrator(
+          UserGroupAdministratorPk(it.userGroup.id, this.userPersonDetail.username),
+          active = true,
+          userGroup = it.userGroup,
+          user = this.userPersonDetail,
+        )
+      }
+    }.flatten()
   }
 
   override fun build(): LocalAdministratorBuilder {
@@ -112,20 +116,20 @@ class LocalAdministratorBuilder(
 @Component
 class DataBuilder(
   private val repository: UserPersonDetailRepository,
-  private val userGroupRepository: UserGroupRepository,
+  private val groupCaseloadRepository: GroupCaseloadRepository,
   private val caseloadRepository: CaseloadRepository,
   private val roleRepository: RoleRepository,
 ) {
   fun generalUser() = generalUserEntityCreator(
     repository = repository,
-    userGroupRepository = userGroupRepository,
+    groupCaseloadRepository = groupCaseloadRepository,
     caseloadRepository = caseloadRepository,
     roleRepository = roleRepository
   )
 
   fun localAdministrator() = localAdministratorEntityCreator(
     repository = repository,
-    userGroupRepository = userGroupRepository,
+    groupCaseloadRepository = groupCaseloadRepository,
     caseloadRepository = caseloadRepository,
     roleRepository = roleRepository
   )
@@ -138,7 +142,7 @@ class DataBuilder(
 
 fun generalUserEntityCreator(
   repository: UserPersonDetailRepository,
-  userGroupRepository: UserGroupRepository,
+  groupCaseloadRepository: GroupCaseloadRepository,
   caseloadRepository: CaseloadRepository,
   roleRepository: RoleRepository,
   userPersonDetail: UserPersonDetail = defaultPerson(),
@@ -146,7 +150,7 @@ fun generalUserEntityCreator(
 ): GeneralUserBuilder {
   return GeneralUserBuilder(
     repository = repository,
-    userGroupRepository = userGroupRepository,
+    groupCaseloadRepository = groupCaseloadRepository,
     caseloadRepository = caseloadRepository,
     roleRepository = roleRepository,
     userPersonDetail = userPersonDetail,
@@ -156,7 +160,7 @@ fun generalUserEntityCreator(
 
 fun localAdministratorEntityCreator(
   repository: UserPersonDetailRepository,
-  userGroupRepository: UserGroupRepository,
+  groupCaseloadRepository: GroupCaseloadRepository,
   caseloadRepository: CaseloadRepository,
   roleRepository: RoleRepository,
   userPersonDetail: UserPersonDetail = defaultPerson(),
@@ -165,7 +169,7 @@ fun localAdministratorEntityCreator(
   return LocalAdministratorBuilder(
     repository = repository,
     roleRepository = roleRepository,
-    userGroupRepository = userGroupRepository,
+    groupCaseloadRepository = groupCaseloadRepository,
     caseloadRepository = caseloadRepository,
     userPersonDetail = userPersonDetail,
     prisonCodes = prisonCodes

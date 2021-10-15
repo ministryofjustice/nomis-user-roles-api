@@ -58,7 +58,7 @@ class UserService(
       throw UserAlreadyExistsException("General user already exists for this staff member")
     }
 
-    val userPersonDetail = createUserAccount(createUserRequest.username, createUserRequest.defaultCaseloadId, false, staffAccount)
+    val userPersonDetail = createUserAccount(staffAccount, createUserRequest.username, createUserRequest.defaultCaseloadId)
 
     createSchemaUser(createUserRequest.username, AccountProfile.TAG_GENERAL)
     return userPersonDetail.toUserSummary()
@@ -74,7 +74,7 @@ class UserService(
       throw UserAlreadyExistsException("General user already exists for this staff member")
     }
 
-    val userPersonDetail = createUserAccount(linkedUserRequest.username, linkedUserRequest.defaultCaseloadId, false, staffAccount)
+    val userPersonDetail = createUserAccount(staffAccount, linkedUserRequest.username, linkedUserRequest.defaultCaseloadId)
     createSchemaUser(linkedUserRequest.username, AccountProfile.TAG_GENERAL)
 
     return userPersonDetail.toUserSummary()
@@ -90,7 +90,7 @@ class UserService(
       throw UserAlreadyExistsException("Admin user already exists for this staff member")
     }
 
-    val userPersonDetail = createUserAccount(createUserRequest.username, "CADM_I", true, staffAccount)
+    val userPersonDetail = createUserAccount(staffAccount, createUserRequest.username, defaultCaseloadId = "CADM_I", admin = true)
 
     createSchemaUser(createUserRequest.username, AccountProfile.TAG_ADMIN)
 
@@ -107,7 +107,40 @@ class UserService(
       throw UserAlreadyExistsException("Admin user already exists for this staff member")
     }
 
-    val userPersonDetail = createUserAccount(linkedUserRequest.username, "CADM_I", true, staffAccount)
+    val userPersonDetail = createUserAccount(staffAccount, linkedUserRequest.username, defaultCaseloadId = "CADM_I", admin = true)
+    createSchemaUser(linkedUserRequest.username, AccountProfile.TAG_ADMIN)
+
+    return userPersonDetail.toUserSummary()
+  }
+
+  fun createLocalAdminUser(createUserRequest: CreateGeneralUserRequest): UserSummary {
+
+    checkIfAccountAlreadyExists(createUserRequest.username)
+
+    val staffAccount = createStaffRecord(createUserRequest.firstName, createUserRequest.lastName, createUserRequest.email)
+
+    if (staffAccount.adminAccount() != null) {
+      throw UserAlreadyExistsException("Admin user already exists for this staff member")
+    }
+
+    val userPersonDetail = createUserAccount(staffAccount, createUserRequest.username, defaultCaseloadId = createUserRequest.defaultCaseloadId, admin = true, laaAdmin = true)
+
+    createSchemaUser(createUserRequest.username, AccountProfile.TAG_ADMIN)
+
+    return userPersonDetail.toUserSummary()
+  }
+
+  fun linkLocalAdminAccount(linkedUsername: String, linkedUserRequest: CreateLinkedGeneralUserRequest): UserSummary {
+    checkIfAccountAlreadyExists(linkedUserRequest.username)
+
+    val staffAccount = userPersonDetailRepository.findById(linkedUsername).map { it.staff }
+      .orElseThrow { UserNotFoundException("Linked User Account $linkedUsername not found") }
+
+    if (staffAccount.adminAccount() != null) {
+      throw UserAlreadyExistsException("Admin user already exists for this staff member")
+    }
+
+    val userPersonDetail = createUserAccount(staffAccount, linkedUserRequest.username, defaultCaseloadId = linkedUserRequest.defaultCaseloadId, admin = true, laaAdmin = true)
     createSchemaUser(linkedUserRequest.username, AccountProfile.TAG_ADMIN)
 
     return userPersonDetail.toUserSummary()
@@ -129,11 +162,13 @@ class UserService(
   }
 
   private fun createUserAccount(
+    staffAccount: Staff,
     username: String,
     defaultCaseloadId: String,
-    admin: Boolean,
-    staffAccount: Staff
+    admin: Boolean = false,
+    laaAdmin: Boolean = false
   ): UserPersonDetail {
+
     val userPersonDetail = UserPersonDetail(
       username = username.uppercase(),
       staff = staffAccount,
@@ -147,8 +182,16 @@ class UserService(
     val defaultCaseload = caseloadRepository.findById(defaultCaseloadId)
       .orElseThrow(CaseloadNotFoundException("Caseload $defaultCaseloadId not found"))
     userPersonDetail.addCaseload(defaultCaseload)
-
     userPersonDetail.activeCaseLoad = defaultCaseload
+
+    if (!admin) {
+      defaultCaseload.userGroups.forEach { userPersonDetail.addUserGroup(it.userGroup) }
+    }
+
+    if (admin && laaAdmin) {
+      defaultCaseload.userGroups.forEach { userPersonDetail.addAdminUserGroup(it.userGroup) }
+    }
+
     userPersonDetailRepository.saveAndFlush(userPersonDetail)
     return userPersonDetail
   }
@@ -227,6 +270,14 @@ class CaseloadNotFoundException(message: String?) :
   Supplier<CaseloadNotFoundException> {
   override fun get(): CaseloadNotFoundException {
     return CaseloadNotFoundException(message)
+  }
+}
+
+class UserGroupNotFoundException(message: String?) :
+  RuntimeException(message),
+  Supplier<UserGroupNotFoundException> {
+  override fun get(): UserGroupNotFoundException {
+    return UserGroupNotFoundException(message)
   }
 }
 
