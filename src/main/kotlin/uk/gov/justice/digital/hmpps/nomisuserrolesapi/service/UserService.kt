@@ -273,14 +273,6 @@ class CaseloadNotFoundException(message: String?) :
   }
 }
 
-class UserGroupNotFoundException(message: String?) :
-  RuntimeException(message),
-  Supplier<UserGroupNotFoundException> {
-  override fun get(): UserGroupNotFoundException {
-    return UserGroupNotFoundException(message)
-  }
-}
-
 class PasswordTooShortException(message: String?) :
   RuntimeException(message),
   Supplier<PasswordTooShortException> {
