@@ -3,7 +3,10 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 import org.hibernate.Hibernate
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.FetchType
 import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.OneToMany
 import javax.persistence.Table
 
 @Entity
@@ -13,7 +16,12 @@ data class Caseload(
   @Column(name = "CASELOAD_ID", nullable = false)
   val id: String,
   @Column(name = "DESCRIPTION", nullable = false)
-  val name: String
+  val name: String,
+
+  @OneToMany(fetch = FetchType.LAZY)
+  @JoinColumn(name = "CASELOAD_ID")
+  val userGroups: List<GroupCaseload> = listOf(),
+
 ) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

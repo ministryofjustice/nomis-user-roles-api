@@ -50,6 +50,10 @@ data class UserGroup(
   @Where(clause = "ACTIVE_FLAG = 'Y'")
   val administrators: List<UserGroupAdministrator> = listOf(),
 
+  @OneToMany(fetch = FetchType.LAZY)
+  @JoinColumn(name = "LOCAL_AUTHORITY_CODE")
+  val userGroups: List<GroupCaseload> = listOf(),
+
 ) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
