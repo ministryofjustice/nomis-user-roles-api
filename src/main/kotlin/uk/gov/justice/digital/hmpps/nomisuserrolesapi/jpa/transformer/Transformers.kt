@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer
 import org.apache.commons.text.WordUtils
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.PrisonCaseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.RoleDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Role
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
@@ -22,6 +23,24 @@ fun UserPersonDetail.toUserSummary(): UserSummary = UserSummary(
     )
   },
   dpsRoleCount = this.dpsRoles.size,
+)
+
+fun UserPersonDetail.toUserCaseloadDetail(): UserCaseloadDetail = UserCaseloadDetail(
+  username = this.username,
+  activeCaseload = this.activeCaseLoad?.let { caseload ->
+    PrisonCaseload(
+      id = caseload.id,
+      name = caseload.name.capitalizeLeavingAbbreviations()
+    )
+  },
+  active = this.staff.isActive,
+  accountType = this.type,
+  caseloads = this.caseloads.map { uc ->
+    PrisonCaseload(
+      id = uc.id.caseloadId,
+      name = uc.caseload.name.capitalizeLeavingAbbreviations()
+    )
+  }
 )
 
 val userSummaryToEntityPropertyMap = mapOf(

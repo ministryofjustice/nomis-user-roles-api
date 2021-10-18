@@ -13,6 +13,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateGeneralUserRequ
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedAdminUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedGeneralUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
@@ -26,6 +27,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.CaseloadRep
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.mapUserSummarySortProperties
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserSummary
 import java.util.function.Supplier
 import java.util.stream.Collectors
@@ -182,14 +184,11 @@ class UserService(
     val defaultCaseload = caseloadRepository.findById(defaultCaseloadId)
       .orElseThrow(CaseloadNotFoundException("Caseload $defaultCaseloadId not found"))
     userPersonDetail.addCaseload(defaultCaseload)
-    userPersonDetail.activeCaseLoad = defaultCaseload
 
-    if (!admin) {
-      defaultCaseload.userGroups.forEach { userPersonDetail.addUserGroup(it.userGroup) }
-    }
+    userPersonDetail.setDefaultCaseload(defaultCaseload.id)
 
     if (admin && laaAdmin) {
-      defaultCaseload.userGroups.forEach { userPersonDetail.addAdminUserGroup(it.userGroup) }
+      userPersonDetail.addToAdminUserGroup(defaultCaseload)
     }
 
     userPersonDetailRepository.saveAndFlush(userPersonDetail)
@@ -231,6 +230,32 @@ class UserService(
   fun changePassword(username: String, password: String) {
     userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
     userPersonDetailRepository.changePassword(username, password)
+  }
+
+  fun setDefaultCaseload(username: String, defaultCaseloadId: String): UserCaseloadDetail {
+    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    user.setDefaultCaseload(defaultCaseloadId)
+    return user.toUserCaseloadDetail()
+  }
+
+  fun addCaseloadToUser(username: String, caseloadId: String): UserCaseloadDetail {
+    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+
+    val caseload = caseloadRepository.findById(caseloadId)
+      .orElseThrow(CaseloadNotFoundException("Caseload $caseloadId not found"))
+
+    user.addCaseload(caseload)
+    return user.toUserCaseloadDetail()
+  }
+
+  fun getCaseloads(username: String): UserCaseloadDetail {
+    return userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found")).toUserCaseloadDetail()
+  }
+
+  fun removeCaseload(username: String, caseloadId: String): UserCaseloadDetail {
+    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    user.removeCaseload(caseloadId)
+    return user.toUserCaseloadDetail()
   }
 }
 

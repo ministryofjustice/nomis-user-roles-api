@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.reactive.function.client.WebClientException
 import org.springframework.web.reactive.function.client.WebClientResponseException
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.CaseloadAlreadyExistsException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.CaseloadNotFoundException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.PasswordTooShortException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserAlreadyExistsException
@@ -147,7 +148,19 @@ class NomisUserRolesApiExceptionHandler {
         )
       )
   }
-
+  @ExceptionHandler(CaseloadAlreadyExistsException::class)
+  fun handleCaseloadAlreadyExistsException(e: CaseloadAlreadyExistsException): ResponseEntity<ErrorResponse?>? {
+    log.debug("Caseload already exists exception caught: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.CONFLICT)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.NOT_FOUND,
+          userMessage = "Caseload already exists: ${e.message}",
+          developerMessage = e.message
+        )
+      )
+  }
   @ExceptionHandler(PasswordTooShortException::class)
   fun handlePasswordTooShortException(e: PasswordTooShortException): ResponseEntity<ErrorResponse> {
     log.debug("Password too short exception caught: {}", e)
