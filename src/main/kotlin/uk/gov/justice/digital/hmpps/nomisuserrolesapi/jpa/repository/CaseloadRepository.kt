@@ -6,5 +6,5 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload
 
 @Repository
 interface CaseloadRepository : CrudRepository<Caseload, String> {
-  fun findByActiveAndFunctionOrderByNameAsc(active: Boolean, function: String): List<Caseload>
+  fun findByActiveAndFunctionAndTypeOrderByNameAsc(active: Boolean, function: String, type: String): List<Caseload>
 }

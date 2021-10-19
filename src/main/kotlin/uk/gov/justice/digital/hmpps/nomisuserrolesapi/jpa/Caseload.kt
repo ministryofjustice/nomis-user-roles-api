@@ -23,6 +23,8 @@ data class Caseload(
   val active: Boolean = true,
   @Column(name = "CASELOAD_FUNCTION", nullable = false)
   val function: String = GENERAL_CASELOAD,
+  @Column(name = "CASELOAD_TYPE", nullable = false)
+  val type: String = INSTITUTION_CASELOAD,
 
   @OneToMany(fetch = FetchType.LAZY)
   @JoinColumn(name = "CASELOAD_ID")
@@ -48,5 +50,9 @@ data class Caseload(
     const val GENERAL_CASELOAD = "GENERAL"
     @Suppress("unused")
     const val ADMIN_CASELOAD = "ADMIN"
+
+    const val INSTITUTION_CASELOAD = "INST"
+    @Suppress("unused")
+    const val APPLICATION_CASELOAD = "APP"
   }
 }

@@ -44,12 +44,13 @@ class ReferenceDataResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("$.length()").value(greaterThan(160))
+        .jsonPath("$.length()").value(greaterThan(158))
         .jsonPath("$[?(@.id == 'AKI')]").exists()
         .jsonPath("$[0].name").isEqualTo("Acklington (HMP)")
         .jsonPath("$[0].id").isEqualTo("AKI")
-        // central admin is filtered out
+        // central admin and DPS is filtered out
         .jsonPath("$[?(@.id == 'CADM_I')]").doesNotExist()
+        .jsonPath("$[?(@.id == 'NWEB')]").doesNotExist()
     }
   }
 }
