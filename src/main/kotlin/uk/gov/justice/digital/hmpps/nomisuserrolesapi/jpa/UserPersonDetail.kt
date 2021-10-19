@@ -73,7 +73,7 @@ data class UserPersonDetail(
   override fun hashCode(): Int = username.hashCode()
 
   private fun findCaseloadById(caseloadId: String): Caseload? {
-    return caseloads.firstOrNull { caseload -> caseloadId == caseload.id.caseloadId }?.caseload
+    return caseloads.firstOrNull { caseloadId == it.id.caseloadId }?.caseload
   }
 
   fun setDefaultCaseload(caseloadId: String) {
@@ -81,7 +81,7 @@ data class UserPersonDetail(
   }
 
   fun addCaseload(caseload: Caseload) {
-    findCaseloadById(caseloadId = caseload.id)?.let { throw CaseloadAlreadyExistsException("Caseload ${it.id} already added to this user") }
+    findCaseloadById(caseloadId = caseload.id)?.run { throw CaseloadAlreadyExistsException("Caseload ${caseload.id} already added to this user") }
 
     val userCaseload = UserCaseload(
       id = UserCaseloadPk(caseloadId = caseload.id, username = this.username),
@@ -104,7 +104,7 @@ data class UserPersonDetail(
     caseloads.remove(userCaseload)
   }
 
-  fun addUserGroup(userGroup: UserGroup) {
+  private fun addUserGroup(userGroup: UserGroup) {
     val member = UserGroupMember(
       id = UserGroupMemberPk(userGroupCode = userGroup.id, username = this.username),
       user = this, userGroup = userGroup
@@ -112,7 +112,7 @@ data class UserPersonDetail(
     activeAndInactiveMemberOfUserGroups.add(member)
   }
 
-  fun addAdminUserGroup(userGroup: UserGroup) {
+  private fun addAdminUserGroup(userGroup: UserGroup) {
     val adminMember = UserGroupAdministrator(
       id = UserGroupAdministratorPk(userGroupCode = userGroup.id, username = this.username),
       user = this, userGroup = userGroup

@@ -135,6 +135,15 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
     @Test
     fun `add caseload to user`() {
 
+      webTestClient.get().uri("/users/CASELOAD_USER1/caseloads")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("username").isEqualTo("CASELOAD_USER1")
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "LEI").doesNotExist()
+
       webTestClient.post().uri("/users/CASELOAD_USER1/caseloads/LEI")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -142,6 +151,15 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("username").isEqualTo("CASELOAD_USER1")
         .jsonPath("activeCaseload.id").isEqualTo("BXI")
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "LEI").exists()
+
+      webTestClient.get().uri("/users/CASELOAD_USER1/caseloads")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("username").isEqualTo("CASELOAD_USER1")
         .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
         .jsonPath("$.caseloads[?(@.id == '%s')]", "LEI").exists()
     }

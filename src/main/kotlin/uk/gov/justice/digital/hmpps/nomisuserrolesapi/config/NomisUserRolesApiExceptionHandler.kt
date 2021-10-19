@@ -101,7 +101,7 @@ class NomisUserRolesApiExceptionHandler {
       .status(HttpStatus.CONFLICT)
       .body(
         ErrorResponse(
-          status = HttpStatus.NOT_FOUND,
+          status = HttpStatus.CONFLICT,
           userMessage = "User already exists: ${e.message}",
           developerMessage = e.message
         )
@@ -129,7 +129,7 @@ class NomisUserRolesApiExceptionHandler {
       .status(HttpStatus.CONFLICT)
       .body(
         ErrorResponse(
-          status = HttpStatus.NOT_FOUND,
+          status = HttpStatus.CONFLICT,
           userMessage = "Role already exists: ${e.message}",
           developerMessage = e.message
         )
@@ -155,7 +155,7 @@ class NomisUserRolesApiExceptionHandler {
       .status(HttpStatus.CONFLICT)
       .body(
         ErrorResponse(
-          status = HttpStatus.NOT_FOUND,
+          status = HttpStatus.CONFLICT,
           userMessage = "Caseload already exists: ${e.message}",
           developerMessage = e.message
         )
