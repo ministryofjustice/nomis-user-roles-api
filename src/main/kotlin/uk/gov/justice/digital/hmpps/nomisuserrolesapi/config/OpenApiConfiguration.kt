@@ -16,9 +16,9 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
   fun customOpenAPI(): OpenAPI = OpenAPI()
     .servers(
       listOf(
-        Server().url("https://nomis-user-roles-api.prison.service.justice.gov.uk/").description("Prod"),
-        Server().url("https://nomis-user-roles-api-preprod.prison.service.justice.gov.uk").description("PreProd"),
-        Server().url("https://nomis-user-roles-api-dev.prison.service.justice.gov.uk/").description("Development"),
+        Server().url("https://nomis-user.aks-live-1.studio-hosting.service.justice.gov.uk").description("Prod"),
+        Server().url("https://nomis-user-pp.aks-live-1.studio-hosting.service.justice.gov.uk").description("PreProd"),
+        Server().url("https://nomis-user-dev.aks-dev-1.studio-hosting.service.justice.gov.uk").description("Development"),
         Server().url("http://localhost:8080").description("Local"),
       )
     )
