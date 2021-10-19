@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.service
 
 import UserSpecification
+import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Sort.Order
 import org.springframework.data.domain.Sort.by
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateAdminUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateGeneralUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedAdminUserRequest
@@ -39,7 +41,9 @@ class UserService(
   private val userPersonDetailRepository: UserPersonDetailRepository,
   private val caseloadRepository: CaseloadRepository,
   private val accountDetailRepository: AccountDetailRepository,
-  private val staffRepository: StaffRepository
+  private val staffRepository: StaffRepository,
+  private val telemetryClient : TelemetryClient,
+  private val authenticationFacade: AuthenticationFacade
 ) {
   @Transactional(readOnly = true)
   fun findByUsername(username: String): UserDetail =
@@ -65,6 +69,11 @@ class UserService(
     val userPersonDetail = createUserAccount(staffAccount, createUserRequest.username, createUserRequest.defaultCaseloadId)
 
     createSchemaUser(createUserRequest.username, AccountProfile.TAG_GENERAL)
+
+    telemetryClient.trackEvent("NURA-general-user-created",
+      mapOf("username" to userPersonDetail.username,
+        "type" to userPersonDetail.type.name,
+        "user" to authenticationFacade.currentUsername), null)
     return userPersonDetail.toUserSummary()
   }
 
@@ -81,6 +90,11 @@ class UserService(
     val userPersonDetail = createUserAccount(staffAccount, linkedUserRequest.username, linkedUserRequest.defaultCaseloadId)
     createSchemaUser(linkedUserRequest.username, AccountProfile.TAG_GENERAL)
 
+    telemetryClient.trackEvent("NURA-link-general-user",
+      mapOf("username" to userPersonDetail.username,
+        "type" to userPersonDetail.type.name,
+        "linked-to" to linkedUsername,
+        "user" to authenticationFacade.currentUsername), null)
     return userPersonDetail.toUserSummary()
   }
 
@@ -98,6 +112,11 @@ class UserService(
 
     createSchemaUser(createUserRequest.username, AccountProfile.TAG_ADMIN)
 
+    telemetryClient.trackEvent("NURA-admin-user-created",
+      mapOf("username" to userPersonDetail.username,
+        "type" to userPersonDetail.type.name,
+        "user" to authenticationFacade.currentUsername), null)
+
     return userPersonDetail.toUserSummary()
   }
 
@@ -113,6 +132,12 @@ class UserService(
 
     val userPersonDetail = createUserAccount(staffAccount, linkedUserRequest.username, defaultCaseloadId = "CADM_I", admin = true)
     createSchemaUser(linkedUserRequest.username, AccountProfile.TAG_ADMIN)
+
+    telemetryClient.trackEvent("NURA-link-admin-user",
+      mapOf("username" to userPersonDetail.username,
+        "type" to userPersonDetail.type.name,
+        "linked-to" to linkedUsername,
+        "user" to authenticationFacade.currentUsername), null)
 
     return userPersonDetail.toUserSummary()
   }
@@ -131,6 +156,10 @@ class UserService(
 
     createSchemaUser(createUserRequest.username, AccountProfile.TAG_ADMIN)
 
+    telemetryClient.trackEvent("NURA-local-admin-user-created",
+      mapOf("username" to userPersonDetail.username,
+        "type" to userPersonDetail.type.name,
+        "user" to authenticationFacade.currentUsername), null)
     return userPersonDetail.toUserSummary()
   }
 
@@ -146,6 +175,12 @@ class UserService(
 
     val userPersonDetail = createUserAccount(staffAccount, linkedUserRequest.username, defaultCaseloadId = linkedUserRequest.defaultCaseloadId, admin = true, laaAdmin = true)
     createSchemaUser(linkedUserRequest.username, AccountProfile.TAG_ADMIN)
+
+    telemetryClient.trackEvent("NURA-link-local-admin-user",
+      mapOf("username" to userPersonDetail.username,
+        "type" to userPersonDetail.type.name,
+        "linked-to" to linkedUsername,
+        "user" to authenticationFacade.currentUsername), null)
 
     return userPersonDetail.toUserSummary()
   }
@@ -211,6 +246,11 @@ class UserService(
 
     userPersonDetailRepository.delete(userPersonDetail)
     userPersonDetailRepository.dropUser(username)
+
+    telemetryClient.trackEvent("NURA-drop-user",
+      mapOf("username" to userPersonDetail.username,
+        "type" to userPersonDetail.type.name,
+        "user" to authenticationFacade.currentUsername), null)
   }
 
   @Transactional(readOnly = true)
@@ -223,21 +263,38 @@ class UserService(
   fun lockUser(username: String) {
     userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
     userPersonDetailRepository.lockUser(username)
+
+    telemetryClient.trackEvent("NURA-lock-user",
+      mapOf("username" to username,
+        "user" to authenticationFacade.currentUsername), null)
   }
 
   fun unlockUser(username: String) {
     userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
     userPersonDetailRepository.unlockUser(username)
+
+    telemetryClient.trackEvent("NURA-unlock-user",
+      mapOf("username" to username,
+        "user" to authenticationFacade.currentUsername), null)
   }
 
   fun changePassword(username: String, password: String) {
     userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
     userPersonDetailRepository.changePassword(username, password)
+
+    telemetryClient.trackEvent("NURA-change-password",
+      mapOf("username" to username,
+        "user" to authenticationFacade.currentUsername), null)
   }
 
   fun setDefaultCaseload(username: String, defaultCaseloadId: String): UserCaseloadDetail {
     val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
     user.setDefaultCaseload(defaultCaseloadId)
+
+    telemetryClient.trackEvent("NURA-set-default-caseload",
+      mapOf("username" to username,
+        "caseload" to defaultCaseloadId,
+        "user" to authenticationFacade.currentUsername), null)
     return user.toUserCaseloadDetail()
   }
 
@@ -248,6 +305,12 @@ class UserService(
       .orElseThrow(CaseloadNotFoundException("Caseload $caseloadId not found"))
 
     user.addCaseload(caseload)
+
+    telemetryClient.trackEvent("NURA-add-caseload",
+      mapOf("username" to username,
+        "caseload" to caseloadId,
+        "user" to authenticationFacade.currentUsername), null)
+
     return user.toUserCaseloadDetail()
   }
 
@@ -259,6 +322,12 @@ class UserService(
   fun removeCaseload(username: String, caseloadId: String): UserCaseloadDetail {
     val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
     user.removeCaseload(caseloadId)
+
+    telemetryClient.trackEvent("NURA-remove-caseload",
+      mapOf("username" to username,
+        "caseload" to caseloadId,
+        "user" to authenticationFacade.currentUsername), null)
+
     return user.toUserCaseloadDetail()
   }
 }
