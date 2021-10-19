@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
 import org.hibernate.Hibernate
+import org.hibernate.annotations.Type
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.FetchType
@@ -17,6 +18,11 @@ data class Caseload(
   val id: String,
   @Column(name = "DESCRIPTION", nullable = false)
   val name: String,
+  @Type(type = "yes_no")
+  @Column(name = "ACTIVE_FLAG", nullable = false)
+  val active: Boolean = true,
+  @Column(name = "CASELOAD_FUNCTION", nullable = false)
+  val function: String = GENERAL_CASELOAD,
 
   @OneToMany(fetch = FetchType.LAZY)
   @JoinColumn(name = "CASELOAD_ID")
@@ -36,5 +42,11 @@ data class Caseload(
   @Override
   override fun toString(): String {
     return this::class.simpleName + "(id = $id )"
+  }
+
+  companion object {
+    const val GENERAL_CASELOAD = "GENERAL"
+    @Suppress("unused")
+    const val ADMIN_CASELOAD = "ADMIN"
   }
 }
