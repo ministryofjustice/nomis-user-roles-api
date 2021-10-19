@@ -18,7 +18,7 @@ import javax.transaction.Transactional
 @Transactional
 class RoleService(
   private val roleRepository: RoleRepository,
-  private val telemetryClient : TelemetryClient,
+  private val telemetryClient: TelemetryClient,
   private val authenticationFacade: AuthenticationFacade
 ) {
   fun createRole(createRoleRequest: CreateRoleRequest): RoleDetail {
@@ -38,14 +38,18 @@ class RoleService(
       )
     ).toRoleDetail()
 
-    telemetryClient.trackEvent("NURA-role-created",
-      mapOf("role" to roleDetail.code,
-            "name" to roleDetail.name,
-            "admin-role-only" to roleDetail.adminRoleOnly.toString(),
-            "type" to roleDetail.type?.name,
-            "user" to authenticationFacade.currentUsername), null)
+    telemetryClient.trackEvent(
+      "NURA-role-created",
+      mapOf(
+        "role" to roleDetail.code,
+        "name" to roleDetail.name,
+        "admin-role-only" to roleDetail.adminRoleOnly.toString(),
+        "type" to roleDetail.type?.name,
+        "user" to authenticationFacade.currentUsername
+      ),
+      null
+    )
     return roleDetail
-
   }
 
   fun getAllRoles(): List<RoleDetail> {
@@ -67,10 +71,15 @@ class RoleService(
     val roleToDelete = roleRepository.findByCode(roleCode).orElseThrow(UserRoleNotFoundException("Role with code $roleCode not found"))
     roleRepository.deleteById(roleToDelete.id)
 
-    telemetryClient.trackEvent("NURA-role-deleted",
-      mapOf("role" to roleToDelete.code,
+    telemetryClient.trackEvent(
+      "NURA-role-deleted",
+      mapOf(
+        "role" to roleToDelete.code,
         "name" to roleToDelete.name,
-        "user" to authenticationFacade.currentUsername), null)
+        "user" to authenticationFacade.currentUsername
+      ),
+      null
+    )
   }
 
   fun updateRole(roleCode: String, updateRoleRequest: UpdateRoleRequest): RoleDetail {
@@ -90,12 +99,17 @@ class RoleService(
     }
 
     val roleDetail = role.toRoleDetail()
-    telemetryClient.trackEvent("NURA-role-updated",
-      mapOf("role" to roleDetail.code,
+    telemetryClient.trackEvent(
+      "NURA-role-updated",
+      mapOf(
+        "role" to roleDetail.code,
         "name" to roleDetail.name,
         "admin-role-only" to roleDetail.adminRoleOnly.toString(),
         "type" to roleDetail.type?.name,
-        "user" to authenticationFacade.currentUsername), null)
+        "user" to authenticationFacade.currentUsername
+      ),
+      null
+    )
     return roleDetail
   }
 }
