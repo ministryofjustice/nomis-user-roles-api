@@ -35,7 +35,7 @@ class GeneralUserBuilder(
   nomsRoles = listOf(),
 ) {
 
-  private fun generalUsersOf(prisonCodes: List<String>): List<UserGroupMember> {
+  private fun generalUsersOf(prisonCodes: List<String>): MutableList<UserGroupMember> {
     return prisonCodes.map { caseload ->
       groupCaseloadRepository.findAllById_Caseload(caseload).map {
         UserGroupMember(
@@ -46,7 +46,7 @@ class GeneralUserBuilder(
           user = this.userPersonDetail
         )
       }
-    }.flatten()
+    }.flatten().toMutableList()
   }
 
   override fun build(): GeneralUserBuilder {
@@ -89,7 +89,7 @@ class LocalAdministratorBuilder(
   nomsRoles = listOf(),
 ) {
 
-  private fun adminUsersOf(prisonCodes: List<String>): List<UserGroupAdministrator> {
+  private fun adminUsersOf(prisonCodes: List<String>): MutableList<UserGroupAdministrator> {
     return prisonCodes.map { caseload ->
       groupCaseloadRepository.findAllById_Caseload(caseload).map {
         UserGroupAdministrator(
@@ -99,7 +99,7 @@ class LocalAdministratorBuilder(
           user = this.userPersonDetail,
         )
       }
-    }.flatten()
+    }.flatten().toMutableList()
   }
 
   override fun build(): LocalAdministratorBuilder {

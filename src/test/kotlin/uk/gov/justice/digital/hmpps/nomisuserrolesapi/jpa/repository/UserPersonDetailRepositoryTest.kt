@@ -147,7 +147,7 @@ class UserPersonDetailRepositoryTest {
           user.copy(
             activeAndInactiveAdministratorOfUserGroups = user.activeAndInactiveAdministratorOfUserGroups.map(
               makeWWIInactive
-            )
+            ).toMutableList()
           )
         }
         .save()
@@ -183,7 +183,7 @@ class UserPersonDetailRepositoryTest {
               makeInactive(
                 it
               )
-            }
+            }.toMutableList()
           )
         }
         .save()

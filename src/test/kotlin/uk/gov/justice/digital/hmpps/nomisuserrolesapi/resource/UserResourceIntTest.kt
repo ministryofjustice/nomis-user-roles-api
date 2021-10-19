@@ -749,11 +749,11 @@ class UserResourceIntTest : IntegrationTestBase() {
         .expectStatus().isCreated
         .expectBody()
         .jsonPath("generalAccount.username").isEqualTo("GENERALUSER1")
-        .jsonPath("generalAccount.activeCaseloadId").isEqualTo("WWI")
+        .jsonPath("generalAccount.activeCaseload.id").isEqualTo("WWI")
         .jsonPath("generalAccount.active").isEqualTo("true")
         .jsonPath("generalAccount.accountType").isEqualTo("GENERAL")
         .jsonPath("adminAccount.username").isEqualTo("LAA_USER1")
-        .jsonPath("adminAccount.activeCaseloadId").isEqualTo("WWI")
+        .jsonPath("adminAccount.activeCaseload.id").isEqualTo("WWI")
         .jsonPath("adminAccount.active").isEqualTo("true")
         .jsonPath("adminAccount.accountType").isEqualTo("ADMIN")
 
@@ -849,13 +849,13 @@ class UserResourceIntTest : IntegrationTestBase() {
 
       assertThat(staffDetail.generalAccount).isNotNull
       assertThat(staffDetail.generalAccount?.username).isEqualTo("TESTUSER5")
-      assertThat(staffDetail.generalAccount?.activeCaseloadId).isEqualTo("BXI")
+      assertThat(staffDetail.generalAccount?.activeCaseload?.id).isEqualTo("BXI")
       assertThat(staffDetail.generalAccount?.active).isEqualTo(true)
       assertThat(staffDetail.generalAccount?.accountType).isEqualTo(UsageType.GENERAL)
 
       assertThat(staffDetail.adminAccount).isNotNull
       assertThat(staffDetail.adminAccount?.username).isEqualTo("TESTUSER4")
-      assertThat(staffDetail.adminAccount?.activeCaseloadId).isEqualTo("CADM_I")
+      assertThat(staffDetail.adminAccount?.activeCaseload?.id).isEqualTo("CADM_I")
       assertThat(staffDetail.adminAccount?.active).isEqualTo(true)
       assertThat(staffDetail.adminAccount?.accountType).isEqualTo(UsageType.ADMIN)
 
@@ -870,11 +870,11 @@ class UserResourceIntTest : IntegrationTestBase() {
         .jsonPath("primaryEmail").isEqualTo("test@test.com")
         .jsonPath("status").isEqualTo("ACTIVE")
         .jsonPath("generalAccount.username").isEqualTo("TESTUSER5")
-        .jsonPath("generalAccount.activeCaseloadId").isEqualTo("BXI")
+        .jsonPath("generalAccount.activeCaseload.id").isEqualTo("BXI")
         .jsonPath("generalAccount.active").isEqualTo("true")
         .jsonPath("generalAccount.accountType").isEqualTo("GENERAL")
         .jsonPath("adminAccount.username").isEqualTo("TESTUSER4")
-        .jsonPath("adminAccount.activeCaseloadId").isEqualTo("CADM_I")
+        .jsonPath("adminAccount.activeCaseload.id").isEqualTo("CADM_I")
         .jsonPath("adminAccount.active").isEqualTo("true")
         .jsonPath("adminAccount.accountType").isEqualTo("ADMIN")
     }

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserCaseloadDetail
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "Staff Information")
@@ -14,8 +14,8 @@ data class StaffDetail(
   @Schema(description = "Last name of the user", example = "Smith", required = true) val lastName: String,
   @Schema(description = "Status of staff account", example = "Smith", required = true) val status: String,
   @Schema(description = "Email addresses of staff", example = "test@test.com", required = false) val primaryEmail: String?,
-  @Schema(description = "General user account for this staff member", required = false) val generalAccount: User?,
-  @Schema(description = "Admin user account for this staff member", required = false) val adminAccount: User?
+  @Schema(description = "General user account for this staff member", required = false) val generalAccount: UserCaseloadDetail?,
+  @Schema(description = "Admin user account for this staff member", required = false) val adminAccount: UserCaseloadDetail?
 ) {
   constructor(staff: Staff) :
     this(
@@ -24,24 +24,17 @@ data class StaffDetail(
       lastName = staff.lastName,
       status = staff.status,
       primaryEmail = staff.primaryEmail()?.email,
-      generalAccount = staff.generalAccount()?.let { User(it) },
-      adminAccount = staff.adminAccount()?.let { User(it) }
+      generalAccount = staff.generalAccount()?.toUserCaseloadDetail(),
+      adminAccount = staff.adminAccount()?.toUserCaseloadDetail()
     )
 }
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(description = "Basic User Information")
-data class User(
-  @Schema(description = "Username", example = "testuser1", required = true) val username: String,
-  @Schema(description = "Active Caseload of the user", example = "BXI", required = false) val activeCaseloadId: String?,
+@Schema(description = "User & Caseload Information")
+data class UserCaseloadDetail(
+  @Schema(description = "Username", example = "TESTUSER1", required = true) val username: String,
   @Schema(description = "Indicates that the user is active", example = "true", required = true) val active: Boolean,
-  @Schema(description = "Type of user account", example = "GENERAL", required = true) val accountType: UsageType = UsageType.GENERAL
-) {
-  constructor(userPersonDetail: UserPersonDetail) :
-    this(
-      username = userPersonDetail.username,
-      activeCaseloadId = userPersonDetail.activeCaseLoad?.id,
-      active = userPersonDetail.staff.isActive,
-      accountType = userPersonDetail.type,
-    )
-}
+  @Schema(description = "Type of user account", example = "GENERAL", required = true) val accountType: UsageType = UsageType.GENERAL,
+  @Schema(description = "Active Caseload of the user", example = "BXI", required = false) val activeCaseload: PrisonCaseload?,
+  @Schema(description = "Caseloads available for this user", required = false) val caseloads: List<PrisonCaseload> = listOf()
+)
