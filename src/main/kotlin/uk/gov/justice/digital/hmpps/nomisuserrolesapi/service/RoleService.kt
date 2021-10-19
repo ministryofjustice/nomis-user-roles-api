@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.service
 
+import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateRoleRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.RoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UpdateRoleRequest
@@ -15,12 +17,14 @@ import javax.transaction.Transactional
 @Service
 @Transactional
 class RoleService(
-  private val roleRepository: RoleRepository
+  private val roleRepository: RoleRepository,
+  private val telemetryClient: TelemetryClient,
+  private val authenticationFacade: AuthenticationFacade
 ) {
   fun createRole(createRoleRequest: CreateRoleRequest): RoleDetail {
     roleRepository.findByCode(createRoleRequest.code).ifPresent { throw UserRoleAlreadyExistsException("Role with code ${it.code} already exists") }
 
-    return roleRepository.save(
+    val roleDetail = roleRepository.save(
       Role(
         code = createRoleRequest.code.uppercase(),
         name = createRoleRequest.name,
@@ -33,6 +37,19 @@ class RoleService(
         }
       )
     ).toRoleDetail()
+
+    telemetryClient.trackEvent(
+      "NURA-role-created",
+      mapOf(
+        "role" to roleDetail.code,
+        "name" to roleDetail.name,
+        "admin-role-only" to roleDetail.adminRoleOnly.toString(),
+        "type" to roleDetail.type?.name,
+        "user" to authenticationFacade.currentUsername
+      ),
+      null
+    )
+    return roleDetail
   }
 
   fun getAllRoles(): List<RoleDetail> {
@@ -53,6 +70,16 @@ class RoleService(
   fun deleteRole(roleCode: String) {
     val roleToDelete = roleRepository.findByCode(roleCode).orElseThrow(UserRoleNotFoundException("Role with code $roleCode not found"))
     roleRepository.deleteById(roleToDelete.id)
+
+    telemetryClient.trackEvent(
+      "NURA-role-deleted",
+      mapOf(
+        "role" to roleToDelete.code,
+        "name" to roleToDelete.name,
+        "user" to authenticationFacade.currentUsername
+      ),
+      null
+    )
   }
 
   fun updateRole(roleCode: String, updateRoleRequest: UpdateRoleRequest): RoleDetail {
@@ -70,7 +97,20 @@ class RoleService(
       roleFunction = getUsageType(updateRoleRequest.adminRoleOnly)
       type = updateRoleRequest.type
     }
-    return role.toRoleDetail()
+
+    val roleDetail = role.toRoleDetail()
+    telemetryClient.trackEvent(
+      "NURA-role-updated",
+      mapOf(
+        "role" to roleDetail.code,
+        "name" to roleDetail.name,
+        "admin-role-only" to roleDetail.adminRoleOnly.toString(),
+        "type" to roleDetail.type?.name,
+        "user" to authenticationFacade.currentUsername
+      ),
+      null
+    )
+    return roleDetail
   }
 }
 
