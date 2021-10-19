@@ -5,4 +5,6 @@ import org.springframework.stereotype.Repository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload
 
 @Repository
-interface CaseloadRepository : CrudRepository<Caseload, String>
+interface CaseloadRepository : CrudRepository<Caseload, String> {
+  fun findByActiveAndFunctionOrderByNameAsc(active: Boolean, function: String): List<Caseload>
+}

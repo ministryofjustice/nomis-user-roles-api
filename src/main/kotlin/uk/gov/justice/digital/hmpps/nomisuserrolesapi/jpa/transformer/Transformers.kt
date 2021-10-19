@@ -5,6 +5,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.PrisonCaseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.RoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Role
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
@@ -27,12 +28,7 @@ fun UserPersonDetail.toUserSummary(): UserSummary = UserSummary(
 
 fun UserPersonDetail.toUserCaseloadDetail(): UserCaseloadDetail = UserCaseloadDetail(
   username = this.username,
-  activeCaseload = this.activeCaseLoad?.let { caseload ->
-    PrisonCaseload(
-      id = caseload.id,
-      name = caseload.name.capitalizeLeavingAbbreviations()
-    )
-  },
+  activeCaseload = this.activeCaseLoad?.toPrisonCaseload(),
   active = this.staff.isActive,
   accountType = this.type,
   caseloads = this.caseloads.map { uc ->
@@ -57,6 +53,11 @@ fun Role.toRoleDetail(): RoleDetail = RoleDetail(
   adminRoleOnly = this.roleFunction == UsageType.ADMIN,
   type = this.type,
   parentRole = this.parent?.toRoleDetail()
+)
+
+fun Caseload.toPrisonCaseload(): PrisonCaseload = PrisonCaseload(
+  id = this.id,
+  name = this.name.capitalizeLeavingAbbreviations()
 )
 
 internal fun mapUserSummarySortProperties(sort: String): String =
