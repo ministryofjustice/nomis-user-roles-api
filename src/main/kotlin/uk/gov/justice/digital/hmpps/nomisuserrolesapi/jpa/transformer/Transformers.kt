@@ -1,9 +1,11 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer
 
 import org.apache.commons.text.WordUtils
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CaseloadRoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.PrisonCaseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.RoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserCaseloadDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserRoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Role
@@ -53,6 +55,32 @@ fun Role.toRoleDetail(): RoleDetail = RoleDetail(
   adminRoleOnly = this.roleFunction == UsageType.ADMIN,
   type = this.type,
   parentRole = this.parent?.toRoleDetail()
+)
+
+fun UserPersonDetail.toUserRoleDetail(includeNomisRoles: Boolean = false): UserRoleDetail = UserRoleDetail(
+  username = this.username,
+  activeCaseload = this.activeCaseLoad?.toPrisonCaseload(),
+  active = this.staff.isActive,
+  accountType = this.type,
+  dpsRoles = this.caseloads.filter { uc -> uc.caseload.isDpsCaseload() }
+    .map { uc ->
+      uc.roles.map {
+        it.role.toRoleDetail()
+      }
+    }.flatten(),
+  nomisRoles = if (includeNomisRoles) {
+    this.caseloads.filter { uc -> !uc.caseload.isDpsCaseload() }
+      .map { uc ->
+        CaseloadRoleDetail(
+          caseload = uc.caseload.toPrisonCaseload(),
+          roles = uc.roles.map {
+            it.role.toRoleDetail()
+          }
+        )
+      }
+  } else {
+    null
+  }
 )
 
 fun Caseload.toPrisonCaseload(): PrisonCaseload = PrisonCaseload(

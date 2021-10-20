@@ -60,7 +60,7 @@ data class Role(
   val childRoles: List<Role> = listOf(),
 
   @OneToMany(mappedBy = "role", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-  @Where(clause = "LOCAL_AUTHORITY_CODE = 'NWEB'")
+  @Where(clause = "LOCAL_AUTHORITY_CODE = '$DPS_CASELOAD'")
   val allowedCaseloads: List<RoleCaseload> = listOf(),
 
 ) : Serializable {
