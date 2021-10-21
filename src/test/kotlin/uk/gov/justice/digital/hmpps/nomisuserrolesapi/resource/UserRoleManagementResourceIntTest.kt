@@ -83,7 +83,7 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
     @Test
     fun `get user with NOMIS roles`() {
 
-      webTestClient.get().uri("/users/ROLE_USER1/roles?include-nomis-roles")
+      webTestClient.get().uri("/users/ROLE_USER1/roles?include-nomis-roles=true")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
         .expectStatus().isOk
@@ -216,7 +216,7 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `add NOMIS role to user`() {
-      webTestClient.get().uri("/users/ROLE_USER1/roles?include-nomis-roles")
+      webTestClient.get().uri("/users/ROLE_USER1/roles?include-nomis-roles=true")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
         .expectStatus().isOk
@@ -228,11 +228,8 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
         .expectStatus().isCreated
-        .expectBody()
-        .jsonPath("username").isEqualTo("ROLE_USER1")
-        .jsonPath("$.nomisRoles[?(@.caseload.id == '%s')].roles[?(@.code == '%s')]", "BXI", "300").exists()
 
-      webTestClient.get().uri("/users/ROLE_USER1/roles?include-nomis-roles")
+      webTestClient.get().uri("/users/ROLE_USER1/roles?include-nomis-roles=true")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
         .expectStatus().isOk
