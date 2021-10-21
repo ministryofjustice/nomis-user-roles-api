@@ -237,6 +237,12 @@ abstract class UserBuilder<T>(
     return this
   }
 
+  fun email(email: String): UserBuilder<T> {
+    this.userPersonDetail = userPersonDetail.copy(staff = userPersonDetail.staff.copy())
+    this.userPersonDetail.staff.setEmail(email)
+    return this
+  }
+
   fun dpsRoles(roles: List<String>): UserBuilder<T> {
     this.dpsRoles = roles
     return this

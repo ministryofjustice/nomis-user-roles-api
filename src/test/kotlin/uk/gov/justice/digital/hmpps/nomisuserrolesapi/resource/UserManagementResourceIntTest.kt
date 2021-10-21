@@ -5,11 +5,16 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateGeneralUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.IntegrationTestBase
 
 class UserManagementResourceIntTest : IntegrationTestBase() {
+
+  @Autowired
+  private lateinit var dataBuilder: DataBuilder
 
   @Nested
   @DisplayName("PUT /users/{username}/lock-user")
@@ -141,6 +146,202 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("userMessage")
         .isEqualTo("Validation failure: changePassword.password: Password must consist of alphanumeric characters only and a minimum of 14 chars, and max 30 chars")
+    }
+  }
+
+  @Nested
+  @DisplayName("PUT /users/{username}/change-email")
+  inner class ChangeEmail {
+
+    @BeforeEach
+    internal fun createUsers() {
+      with(dataBuilder) {
+        generalUser()
+          .username("TEST_DATA_USER1")
+          .firstName("TEST")
+          .lastName("USER1")
+          .email("test@test.com")
+          .atPrisons(listOf("BXI"))
+          .buildAndSave()
+      }
+    }
+
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    fun `can't change email of a user that doesn't exist`() {
+      webTestClient.put().uri("/users/TEST_DATA_USER2/change-email")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue("newtest@test.com"))
+        .exchange()
+        .expectStatus().isNotFound
+    }
+
+    @Test
+    fun `can't change email address of user without correct role`() {
+      webTestClient.put().uri("/users/TEST_DATA_USER1/change-email")
+        .headers(setAuthorisation(roles = listOf("ROLE_DUMMY")))
+        .body(BodyInserters.fromValue("newtest@test.com"))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `can change email address of a user that does exist`() {
+      webTestClient.put().uri("/users/TEST_DATA_USER1/change-email")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue("newtest@test.com"))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("primaryEmail").isEqualTo("newtest@test.com")
+
+      webTestClient.get().uri("/users/TEST_DATA_USER1")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("primaryEmail").isEqualTo("newtest@test.com")
+    }
+
+    @Test
+    fun `can't change email of a user for an invalid email`() {
+      webTestClient.put().uri("/users/TEST_DATA_USER1/change-email")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue("testemail@"))
+        .exchange()
+        .expectStatus().is4xxClientError
+        .expectBody()
+        .jsonPath("userMessage")
+        .isEqualTo("Validation failure: changeEmail.email: Invalid email address")
+    }
+  }
+
+  @Nested
+  @DisplayName("PUT /users/{username}/change-name")
+  inner class ChangeName {
+
+    @BeforeEach
+    internal fun createUsers() {
+      with(dataBuilder) {
+        generalUser()
+          .username("TEST_DATA_USER1")
+          .firstName("TEST")
+          .lastName("USER1")
+          .email("test@test.com")
+          .atPrisons(listOf("BXI"))
+          .buildAndSave()
+      }
+    }
+
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    fun `can't change name of a user that doesn't exist`() {
+      webTestClient.put().uri("/users/TEST_DATA_USER2/change-name")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(
+          BodyInserters.fromValue(
+            NameDetail(
+              firstName = "NewFirstName",
+              lastName = "NewLastName",
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().isNotFound
+    }
+
+    @Test
+    fun `can't change name of user without correct role`() {
+      webTestClient.put().uri("/users/TEST_DATA_USER1/change-name")
+        .headers(setAuthorisation(roles = listOf("ROLE_DUMMY")))
+        .body(
+          BodyInserters.fromValue(
+            NameDetail(
+              firstName = "NewFirstName",
+              lastName = "NewLastName",
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `can't change name of a user for an invalid first name`() {
+      webTestClient.put().uri("/users/TEST_DATA_USER1/change-name")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(
+          BodyInserters.fromValue(
+            NameDetail(
+              firstName = "87234gjhsdbfsdfh23r23f23g23",
+              lastName = "lastName",
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().is4xxClientError
+        .expectBody()
+        .jsonPath("userMessage")
+        .isEqualTo("Validation failure: First name must consist of alphabetical characters only and a max 35 chars")
+    }
+
+    @Test
+    fun `can't change name of a user for an invalid last name`() {
+      webTestClient.put().uri("/users/TEST_DATA_USER1/change-name")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(
+          BodyInserters.fromValue(
+            NameDetail(
+              firstName = "firstname",
+              lastName = "sdifhosidfhjoisdjfoiwejfoiwjefwefwefrdrd",
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().is4xxClientError
+        .expectBody()
+        .jsonPath("userMessage")
+        .isEqualTo("Validation failure: Last name must consist of alphabetical characters only and a max 35 chars")
+    }
+
+    @Test
+    fun `can change name of a user that does exist`() {
+
+      webTestClient.get().uri("/users/TEST_DATA_USER1")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("lastName").isEqualTo("USER1")
+        .jsonPath("firstName").isEqualTo("TEST")
+
+      webTestClient.put().uri("/users/TEST_DATA_USER1/change-name")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(
+          BodyInserters.fromValue(
+            NameDetail(
+              firstName = "NewFirstName",
+              lastName = "NewLastName",
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("lastName").isEqualTo("NEWLASTNAME")
+        .jsonPath("firstName").isEqualTo("NEWFIRSTNAME")
+
+      webTestClient.get().uri("/users/TEST_DATA_USER1")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("lastName").isEqualTo("NEWLASTNAME")
+        .jsonPath("firstName").isEqualTo("NEWFIRSTNAME")
     }
   }
 }
