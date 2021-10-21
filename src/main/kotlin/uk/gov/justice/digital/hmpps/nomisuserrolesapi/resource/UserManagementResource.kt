@@ -147,13 +147,13 @@ class UserManagementResource(
     userService.changePassword(username, password)
   }
 
-  @PreAuthorize("hasRole('ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @PutMapping("/{username}/change-email")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
     summary = "Change email of user account",
-    description = "Change email of user account. Requires role ROLE_MANAGE_NOMIS_USER_ACCOUNT",
-    security = [SecurityRequirement(name = "MANAGE_NOMIS_USER_ACCOUNT")],
+    description = "Change email of user account. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
+    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
         responseCode = "200",
@@ -185,13 +185,13 @@ class UserManagementResource(
     return userService.updateEmail(username, email)
   }
 
-  @PreAuthorize("hasRole('ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @PutMapping("/{username}/change-name")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
     summary = "Change staff name of user account",
-    description = "Change staff name of user account. Requires role ROLE_MANAGE_NOMIS_USER_ACCOUNT",
-    security = [SecurityRequirement(name = "MANAGE_NOMIS_USER_ACCOUNT")],
+    description = "Change staff name of user account. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
+    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
         responseCode = "200",
@@ -226,6 +226,14 @@ class UserManagementResource(
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "Name Information")
 data class NameDetail(
-  @Schema(description = "First name of the user", example = "John", required = true) val firstName: String,
-  @Schema(description = "Last name of the user", example = "Smith", required = true) val lastName: String,
+  @Schema(description = "First name of the user", example = "John", required = true)
+  @field:Pattern(
+    regexp = "^[A-Za-z]{1,35}$",
+    message = "First name must consist of alphabetical characters only and a max 35 chars"
+  ) val firstName: String,
+  @Schema(description = "Last name of the user", example = "Smith", required = true)
+  @field:Pattern(
+    regexp = "^[A-Za-z]{1,35}$",
+    message = "Last name must consist of alphabetical characters only and a max 35 chars"
+  ) val lastName: String,
 )

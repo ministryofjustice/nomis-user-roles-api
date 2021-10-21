@@ -172,7 +172,7 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
     @Test
     fun `can't change email of a user that doesn't exist`() {
       webTestClient.put().uri("/users/TEST_DATA_USER2/change-email")
-        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .body(BodyInserters.fromValue("newtest@test.com"))
         .exchange()
         .expectStatus().isNotFound
@@ -190,7 +190,7 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
     @Test
     fun `can change email address of a user that does exist`() {
       webTestClient.put().uri("/users/TEST_DATA_USER1/change-email")
-        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .body(BodyInserters.fromValue("newtest@test.com"))
         .exchange()
         .expectStatus().isOk
@@ -208,7 +208,7 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
     @Test
     fun `can't change email of a user for an invalid email`() {
       webTestClient.put().uri("/users/TEST_DATA_USER1/change-email")
-        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .body(BodyInserters.fromValue("testemail@"))
         .exchange()
         .expectStatus().is4xxClientError
@@ -241,7 +241,7 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
     @Test
     fun `can't change name of a user that doesn't exist`() {
       webTestClient.put().uri("/users/TEST_DATA_USER2/change-name")
-        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .body(
           BodyInserters.fromValue(
             NameDetail(
@@ -271,6 +271,44 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `can't change name of a user for an invalid first name`() {
+      webTestClient.put().uri("/users/TEST_DATA_USER1/change-name")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(
+          BodyInserters.fromValue(
+            NameDetail(
+              firstName = "87234gjhsdbfsdfh23r23f23g23",
+              lastName = "lastName",
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().is4xxClientError
+        .expectBody()
+        .jsonPath("userMessage")
+        .isEqualTo("Validation failure: First name must consist of alphabetical characters only and a max 35 chars")
+    }
+
+    @Test
+    fun `can't change name of a user for an invalid last name`() {
+      webTestClient.put().uri("/users/TEST_DATA_USER1/change-name")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(
+          BodyInserters.fromValue(
+            NameDetail(
+              firstName = "firstname",
+              lastName = "sdifhosidfhjoisdjfoiwejfoiwjefwefwefrdrd",
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().is4xxClientError
+        .expectBody()
+        .jsonPath("userMessage")
+        .isEqualTo("Validation failure: Last name must consist of alphabetical characters only and a max 35 chars")
+    }
+
+    @Test
     fun `can change name of a user that does exist`() {
 
       webTestClient.get().uri("/users/TEST_DATA_USER1")
@@ -282,7 +320,7 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         .jsonPath("firstName").isEqualTo("TEST")
 
       webTestClient.put().uri("/users/TEST_DATA_USER1/change-name")
-        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .body(
           BodyInserters.fromValue(
             NameDetail(
