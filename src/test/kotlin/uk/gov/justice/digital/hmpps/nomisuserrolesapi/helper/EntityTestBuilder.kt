@@ -37,7 +37,7 @@ private fun UserPersonDetail.userCaseloadRole(
     id = UserCaseloadPk(caseloadId = caseLoadId, username = this.username),
     caseload = Caseload(caseLoadId, "Prison for $caseLoadId"),
     user = this,
-    roles = listOf(),
+    roles = mutableListOf(),
     startDate = LocalDate.now(),
   )
 )

@@ -10,6 +10,8 @@ import javax.persistence.JoinColumn
 import javax.persistence.OneToMany
 import javax.persistence.Table
 
+const val DPS_CASELOAD = "NWEB"
+
 @Entity
 @Table(name = "CASELOADS")
 data class Caseload(
@@ -38,6 +40,8 @@ data class Caseload(
 
     return id == other.id
   }
+
+  fun isDpsCaseload(): Boolean = id == DPS_CASELOAD
 
   override fun hashCode(): Int = id.hashCode()
 

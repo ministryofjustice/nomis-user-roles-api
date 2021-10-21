@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper
 
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.DPS_CASELOAD
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseload
@@ -50,13 +51,13 @@ class GeneralUserBuilder(
   }
 
   override fun build(): GeneralUserBuilder {
-    val dpsCaseloadId = "NWEB"
+
     userPersonDetail =
       userPersonDetail.copy(
         activeAndInactiveMemberOfUserGroups = generalUsersOf(prisonCodes),
         type = UsageType.GENERAL,
         activeCaseLoad = prisonCodes.firstOrNull()?.let { caseloadRepository.findByIdOrNull(it) },
-        caseloads = (prisonCodes + dpsCaseloadId).map {
+        caseloads = (prisonCodes + DPS_CASELOAD).map {
           UserCaseload(
             UserCaseloadPk(
               caseloadId = it,
@@ -65,8 +66,8 @@ class GeneralUserBuilder(
             startDate = LocalDate.now().minusDays(1),
             caseload = caseloadRepository.findByIdOrNull(it)!!,
             user = userPersonDetail,
-            roles = listOf(),
-          ).let { userCaseload -> userCaseload.copy(roles = asRoles(userCaseload, if (it == dpsCaseloadId) dpsRoles else nomsRoles)) }
+            roles = mutableListOf(),
+          ).let { userCaseload -> userCaseload.copy(roles = asRoles(userCaseload, if (it == DPS_CASELOAD) dpsRoles else nomsRoles)) }
         }.toMutableList()
       )
     return this
@@ -246,8 +247,8 @@ abstract class UserBuilder<T>(
     return this
   }
 
-  internal fun asRoles(userCaseload: UserCaseload, roleCodes: List<String>): List<UserCaseloadRole> =
-    roleCodes.map { userCaseloadRole(userCaseload, it) }
+  internal fun asRoles(userCaseload: UserCaseload, roleCodes: List<String>): MutableList<UserCaseloadRole> =
+    roleCodes.map { userCaseloadRole(userCaseload, it) }.toMutableList()
 
   private fun userCaseloadRole(userCaseload: UserCaseload, roleCode: String): UserCaseloadRole {
     val role = roleRepository.findByCode(roleCode).orElseThrow()

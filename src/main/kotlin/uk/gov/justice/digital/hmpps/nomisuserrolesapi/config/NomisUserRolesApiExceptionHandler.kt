@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.reactive.function.client.WebClientException
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.CaseloadAlreadyExistsException
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.InvalidRoleAssignmentException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.CaseloadNotFoundException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.PasswordTooShortException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserAlreadyExistsException
@@ -117,6 +118,20 @@ class NomisUserRolesApiExceptionHandler {
         ErrorResponse(
           status = HttpStatus.NOT_FOUND,
           userMessage = "Role not found: ${e.message}",
+          developerMessage = e.message
+        )
+      )
+  }
+
+  @ExceptionHandler(InvalidRoleAssignmentException::class)
+  fun handleInvalidRoleAssignmentException(e: InvalidRoleAssignmentException): ResponseEntity<ErrorResponse?>? {
+    log.debug("Invalid Role assignment: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.BAD_REQUEST)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.BAD_REQUEST,
+          userMessage = "Role assignment invalid: ${e.message}",
           developerMessage = e.message
         )
       )

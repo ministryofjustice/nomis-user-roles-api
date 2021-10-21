@@ -31,7 +31,7 @@ data class UserPersonDetail(
 
   @OneToMany(fetch = FetchType.LAZY)
   @JoinColumn(name = "USERNAME", updatable = false, insertable = false, nullable = false)
-  @Where(clause = "CASELOAD_ID = 'NWEB'")
+  @Where(clause = "CASELOAD_ID = '$DPS_CASELOAD'")
   val dpsRoles: List<UserCaseloadRole> = listOf(),
 
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], mappedBy = "user", orphanRemoval = true)
@@ -72,8 +72,12 @@ data class UserPersonDetail(
 
   override fun hashCode(): Int = username.hashCode()
 
-  private fun findCaseloadById(caseloadId: String): Caseload? {
-    return caseloads.firstOrNull { caseloadId == it.id.caseloadId }?.caseload
+  private fun findUserCaseloadById(caseloadId: String): UserCaseload? {
+    return caseloads.firstOrNull { caseloadId == it.id.caseloadId }
+  }
+
+  fun findCaseloadById(caseloadId: String): Caseload? {
+    return findUserCaseloadById(caseloadId = caseloadId)?.caseload
   }
 
   fun setDefaultCaseload(caseloadId: String) {
@@ -86,11 +90,11 @@ data class UserPersonDetail(
     val userCaseload = UserCaseload(
       id = UserCaseloadPk(caseloadId = caseload.id, username = this.username),
       caseload = caseload, user = this, startDate = now(),
-      roles = listOf(),
+      roles = mutableListOf(),
     )
     caseloads.add(userCaseload)
 
-    if (type == UsageType.GENERAL) {
+    if (type == UsageType.GENERAL && !caseload.isDpsCaseload()) {
       caseload.userGroups.forEach { addUserGroup(it.userGroup) }
     }
   }
@@ -118,6 +122,19 @@ data class UserPersonDetail(
       user = this, userGroup = userGroup
     )
     activeAndInactiveAdministratorOfUserGroups.add(adminMember)
+  }
+
+  fun addRole(role: Role, caseloadId: String = DPS_CASELOAD) {
+    val userCaseload = findUserCaseloadById(caseloadId = caseloadId)
+      ?: throw CaseloadNotFoundException("User does not have access to caseload $caseloadId")
+    userCaseload.addRole(role)
+  }
+
+  fun removeRole(roleCode: String, caseloadId: String = DPS_CASELOAD) {
+    val userCaseload = findUserCaseloadById(caseloadId = caseloadId)
+      ?: throw CaseloadNotFoundException("User does not have access to caseload $caseloadId")
+
+    userCaseload.removeRole(roleCode)
   }
 }
 

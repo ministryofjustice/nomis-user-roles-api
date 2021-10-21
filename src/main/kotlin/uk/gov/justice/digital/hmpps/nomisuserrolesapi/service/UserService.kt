@@ -18,19 +18,23 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedGeneralUs
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserRoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountProfile
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.DPS_CASELOAD
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.getUsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.AccountDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.CaseloadRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.mapUserSummarySortProperties
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserCaseloadDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserRoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserSummary
 import java.util.function.Supplier
 import java.util.stream.Collectors
@@ -42,6 +46,7 @@ class UserService(
   private val caseloadRepository: CaseloadRepository,
   private val accountDetailRepository: AccountDetailRepository,
   private val staffRepository: StaffRepository,
+  private val roleRepository: RoleRepository,
   private val telemetryClient: TelemetryClient,
   private val authenticationFacade: AuthenticationFacade
 ) {
@@ -243,7 +248,7 @@ class UserService(
       staff = staffAccount,
       type = getUsageType(admin)
     )
-    caseloadRepository.findById("NWEB")
+    caseloadRepository.findById(DPS_CASELOAD)
       .ifPresent {
         userPersonDetail.addCaseload(it)
       }
@@ -394,6 +399,33 @@ class UserService(
     )
 
     return user.toUserCaseloadDetail()
+  }
+
+  fun addRoleToUser(username: String, roleCode: String, caseloadId: String = DPS_CASELOAD): UserRoleDetail {
+    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+
+    // Special case: check to see if the DPS caseload is set up - if not set it up now
+    if (caseloadId == DPS_CASELOAD) {
+      user.findCaseloadById(DPS_CASELOAD) ?: user.addCaseload(
+        caseloadRepository.findById(DPS_CASELOAD)
+          .orElseThrow(CaseloadNotFoundException("Caseload $DPS_CASELOAD not found"))
+      )
+    }
+
+    val role = roleRepository.findByCode(roleCode).orElseThrow { UserRoleNotFoundException("Role $roleCode not found") }
+    user.addRole(role, caseloadId)
+    return user.toUserRoleDetail()
+  }
+
+  fun removeRoleFromUser(username: String, roleCode: String, caseloadId: String = DPS_CASELOAD): UserRoleDetail {
+    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    user.removeRole(roleCode, caseloadId)
+    return user.toUserRoleDetail()
+  }
+
+  fun getUserRoles(username: String, includeNomisRoles: Boolean = false): UserRoleDetail {
+    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    return user.toUserRoleDetail(includeNomisRoles)
   }
 }
 
