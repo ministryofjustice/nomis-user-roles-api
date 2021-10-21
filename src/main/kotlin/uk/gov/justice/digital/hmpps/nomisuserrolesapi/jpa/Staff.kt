@@ -22,10 +22,10 @@ data class Staff(
   var staffId: Long = 0,
 
   @Column(name = "FIRST_NAME", nullable = false)
-  val firstName: String,
+  var firstName: String,
 
   @Column(name = "LAST_NAME", nullable = false)
-  val lastName: String,
+  var lastName: String,
 
   @Column(name = "STATUS")
   val status: String,
@@ -35,8 +35,10 @@ data class Staff(
 
   @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   @Where(clause = "OWNER_CLASS = 'STF' AND INTERNET_ADDRESS_CLASS = 'EMAIL'")
-  var emails: List<EmailAddress> = listOf(),
+  val emails: MutableList<EmailAddress> = mutableListOf(),
 ) {
+
+  fun fullName() = "$firstName $lastName"
 
   fun generalAccount(): UserPersonDetail? = users.firstOrNull { u -> UsageType.GENERAL == u.type }
 
@@ -52,11 +54,8 @@ data class Staff(
   }
 
   fun setEmail(email: String) {
-    emails = listOf(EmailAddress(email = email, staff = this))
-  }
-
-  fun removeEmail(email: String) {
-    emails = emails - EmailAddress(email = email, staff = this)
+    emails.clear()
+    emails.add(EmailAddress(email = email, staff = this))
   }
 
   override fun equals(other: Any?): Boolean {

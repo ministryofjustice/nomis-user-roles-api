@@ -33,6 +33,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleReposit
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.mapUserSummarySortProperties
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toStaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserRoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserSummary
@@ -53,7 +54,7 @@ class UserService(
   @Transactional(readOnly = true)
   fun findByUsername(username: String): UserDetail =
     userPersonDetailRepository.findById(username)
-      .map { u -> UserDetail(u, accountDetailRepository.findById(username).orElse(AccountDetail(username = username))) }
+      .map { u -> toUserDetail(u, username) }
       .orElseThrow(UserNotFoundException("User $username not found"))
 
   @Transactional(readOnly = true)
@@ -220,59 +221,50 @@ class UserService(
     return userPersonDetail.toUserSummary()
   }
 
-  private fun checkIfAccountAlreadyExists(username: String) {
-    userPersonDetailRepository.findById(username.uppercase())
-      .ifPresent { throw UserAlreadyExistsException("User $username already exists") }
+  fun updateEmail(username: String, email: String): StaffDetail {
+    val user = userPersonDetailRepository.findById(username)
+      .orElseThrow(UserNotFoundException("User $username not found"))
+
+    val oldEmail = user.staff.primaryEmail()?.email
+    user.staff.setEmail(email)
+
+    telemetryClient.trackEvent(
+      "NURA-change-email",
+      mapOf(
+        "username" to username,
+        "old-email" to oldEmail,
+        "new-email" to email,
+        "user" to authenticationFacade.currentUsername
+      ),
+      null
+    )
+
+    return user.staff.toStaffDetail()
   }
 
-  private fun createStaffRecord(firstName: String, lastName: String, email: String): Staff {
-    val staffAccount = Staff(
-      firstName = firstName.uppercase(),
-      lastName = lastName.uppercase(),
-      status = "ACTIVE"
-    )
-    staffAccount.setEmail(email)
-    return staffAccount
-  }
+  fun updateStaffName(username: String, firstName: String, lastName: String): StaffDetail {
+    val user = userPersonDetailRepository.findById(username)
+      .orElseThrow(UserNotFoundException("User $username not found"))
 
-  private fun createUserAccount(
-    staffAccount: Staff,
-    username: String,
-    defaultCaseloadId: String,
-    admin: Boolean = false,
-    laaAdmin: Boolean = false
-  ): UserPersonDetail {
+    with(user.staff) {
+      val oldFullName = this.fullName()
 
-    val userPersonDetail = UserPersonDetail(
-      username = username.uppercase(),
-      staff = staffAccount,
-      type = getUsageType(admin)
-    )
-    caseloadRepository.findById(DPS_CASELOAD)
-      .ifPresent {
-        userPersonDetail.addCaseload(it)
-      }
+      this.firstName = firstName.uppercase()
+      this.lastName = lastName.uppercase()
 
-    val defaultCaseload = caseloadRepository.findById(defaultCaseloadId)
-      .orElseThrow(CaseloadNotFoundException("Caseload $defaultCaseloadId not found"))
-    userPersonDetail.addCaseload(defaultCaseload)
-
-    userPersonDetail.setDefaultCaseload(defaultCaseload.id)
-
-    if (admin && laaAdmin) {
-      userPersonDetail.addToAdminUserGroup(defaultCaseload)
+      telemetryClient.trackEvent(
+        "NURA-change-staff-name",
+        mapOf(
+          "username" to username,
+          "old-name" to oldFullName,
+          "new-name" to this.fullName(),
+          "user" to authenticationFacade.currentUsername
+        ),
+        null
+      )
     }
 
-    userPersonDetailRepository.saveAndFlush(userPersonDetail)
-    return userPersonDetail
-  }
-
-  private fun createSchemaUser(
-    username: String,
-    profile: AccountProfile
-  ) {
-    userPersonDetailRepository.createUser(username, generatePassword(), profile.name)
-    userPersonDetailRepository.expirePassword(username)
+    return user.staff.toStaffDetail()
   }
 
   fun deleteUser(username: String) {
@@ -414,18 +406,102 @@ class UserService(
 
     val role = roleRepository.findByCode(roleCode).orElseThrow { UserRoleNotFoundException("Role $roleCode not found") }
     user.addRole(role, caseloadId)
+
+    telemetryClient.trackEvent(
+      "NURA-add-role-to-user",
+      mapOf(
+        "username" to username,
+        "role-code" to roleCode,
+        "caseload" to caseloadId,
+        "user" to authenticationFacade.currentUsername
+      ),
+      null
+    )
+
     return user.toUserRoleDetail()
   }
 
   fun removeRoleFromUser(username: String, roleCode: String, caseloadId: String = DPS_CASELOAD): UserRoleDetail {
     val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
     user.removeRole(roleCode, caseloadId)
+
+    telemetryClient.trackEvent(
+      "NURA-remove-role-from-user",
+      mapOf(
+        "username" to username,
+        "role-code" to roleCode,
+        "caseload" to caseloadId,
+        "user" to authenticationFacade.currentUsername
+      ),
+      null
+    )
+
     return user.toUserRoleDetail()
   }
 
   fun getUserRoles(username: String, includeNomisRoles: Boolean = false): UserRoleDetail {
     val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
     return user.toUserRoleDetail(includeNomisRoles)
+  }
+
+  private fun toUserDetail(
+    user: UserPersonDetail,
+    username: String
+  ) = UserDetail(user, accountDetailRepository.findById(username).orElse(AccountDetail(username = username)))
+
+  private fun checkIfAccountAlreadyExists(username: String) {
+    userPersonDetailRepository.findById(username.uppercase())
+      .ifPresent { throw UserAlreadyExistsException("User $username already exists") }
+  }
+
+  private fun createStaffRecord(firstName: String, lastName: String, email: String): Staff {
+    val staffAccount = Staff(
+      firstName = firstName.uppercase(),
+      lastName = lastName.uppercase(),
+      status = "ACTIVE"
+    )
+    staffAccount.setEmail(email)
+    return staffAccount
+  }
+
+  private fun createUserAccount(
+    staffAccount: Staff,
+    username: String,
+    defaultCaseloadId: String,
+    admin: Boolean = false,
+    laaAdmin: Boolean = false
+  ): UserPersonDetail {
+
+    val userPersonDetail = UserPersonDetail(
+      username = username.uppercase(),
+      staff = staffAccount,
+      type = getUsageType(admin)
+    )
+    caseloadRepository.findById(DPS_CASELOAD)
+      .ifPresent {
+        userPersonDetail.addCaseload(it)
+      }
+
+    val defaultCaseload = caseloadRepository.findById(defaultCaseloadId)
+      .orElseThrow(CaseloadNotFoundException("Caseload $defaultCaseloadId not found"))
+    userPersonDetail.addCaseload(defaultCaseload)
+
+    userPersonDetail.setDefaultCaseload(defaultCaseload.id)
+
+    if (admin && laaAdmin) {
+      userPersonDetail.addToAdminUserGroup(defaultCaseload)
+    }
+
+    userPersonDetailRepository.saveAndFlush(userPersonDetail)
+    return userPersonDetail
+  }
+
+  private fun createSchemaUser(
+    username: String,
+    profile: AccountProfile
+  ) {
+    userPersonDetailRepository.createUser(username, generatePassword(), profile.name)
+    userPersonDetailRepository.expirePassword(username)
   }
 }
 

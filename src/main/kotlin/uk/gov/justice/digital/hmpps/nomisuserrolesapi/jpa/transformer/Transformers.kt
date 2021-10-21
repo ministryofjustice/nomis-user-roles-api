@@ -4,11 +4,13 @@ import org.apache.commons.text.WordUtils
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CaseloadRoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.PrisonCaseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.RoleDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserRoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Role
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import java.util.regex.Pattern
@@ -56,6 +58,8 @@ fun Role.toRoleDetail(): RoleDetail = RoleDetail(
   type = this.type,
   parentRole = this.parent?.toRoleDetail()
 )
+
+fun Staff.toStaffDetail(): StaffDetail = StaffDetail(this)
 
 fun UserPersonDetail.toUserRoleDetail(includeNomisRoles: Boolean = false): UserRoleDetail = UserRoleDetail(
   username = this.username,
