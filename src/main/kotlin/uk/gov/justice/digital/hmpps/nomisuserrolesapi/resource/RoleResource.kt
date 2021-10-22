@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -123,11 +124,11 @@ class RoleResource(
     return roleService.updateRole(code, updateRoleRequest)
   }
 
-  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @GetMapping
   @Operation(
     summary = "Get all roles",
-    description = "Information on a list of roles. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
+    description = "Information on a list of roles. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
@@ -152,10 +153,22 @@ class RoleResource(
     ]
   )
   fun getAllRoles(
-    @Schema(description = "Get all roles", example = "true", required = false, defaultValue = "false")
-    @RequestParam(value = "all-roles", required = false, defaultValue = "false") allRoles: Boolean = false
+    @Parameter(
+      description = "Get all roles, which includes both DPS and NOMIS roles",
+      example = "true",
+    )
+    @RequestParam(value = "all-roles", required = false, defaultValue = "false") allRoles: Boolean = false,
+    @Parameter(
+      description = "Include DPS roles that can only be allocated by Central Admin",
+      example = "true",
+    )
+    @RequestParam(value = "admin-roles", required = false, defaultValue = "true") adminRoles: Boolean = true,
   ): List<RoleDetail> =
-    if (allRoles) { roleService.getAllRoles() } else { roleService.getAllDPSRoles() }
+    if (allRoles) {
+      roleService.getAllRoles()
+    } else {
+      roleService.getAllDPSRoles(adminRoles)
+    }
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @GetMapping("/{code}")

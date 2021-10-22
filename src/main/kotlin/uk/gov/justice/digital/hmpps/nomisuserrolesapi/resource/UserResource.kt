@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -157,31 +158,29 @@ class UserResource(
     @PageableDefault(sort = ["lastName", "firstName"], direction = Sort.Direction.ASC)
     pageRequest: Pageable,
     @RequestParam(value = "nameFilter", required = false)
-    @Schema(
+    @Parameter(
       description = "Filter results by first name and/or username and/or last name of staff member",
       example = "Raj"
     )
     nameFilter: String?,
     @RequestParam(value = "accessRoles", required = false)
-    @Schema(
+    @Parameter(
       description = "Filter will match users that have all DPS role specified",
       example = "ADD_SENSITIVE_CASE_NOTES"
     )
     accessRoles: List<String>?,
     @RequestParam(value = "status", required = false, defaultValue = "ALL")
-    @Schema(
-      description = "Limit to active / inactive / show all users.",
-      allowableValues = ["ACTIVE", "INACTIVE", "ALL"],
-      defaultValue = "ALL",
+    @Parameter(
+      description = "Limit to active / inactive / show all users",
       example = "INACTIVE"
     )
     status: UserStatus = UserStatus.ACTIVE,
-    @Schema(
+    @Parameter(
       description = "Filter results by user's currently active caseload i.e. the one they have currently selected",
       example = "MDI"
     )
     @RequestParam(value = "activeCaseload", required = false) activeCaseload: String?,
-    @Schema(
+    @Parameter(
       description = "Filter results to include only those users that have access to the specified caseload (irrespective of whether it is currently active or not",
       example = "MDI"
     )

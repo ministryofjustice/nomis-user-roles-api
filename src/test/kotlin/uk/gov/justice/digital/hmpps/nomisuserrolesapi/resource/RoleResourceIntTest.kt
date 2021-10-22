@@ -31,7 +31,7 @@ class RoleResourceIntTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `get roles`() {
+    fun `get roles is allowed for ROLE_MAINTAIN_ACCESS_ROLES_ADMIN and ROLE_MAINTAIN_ACCESS_ROLES`() {
 
       webTestClient.get().uri("/roles")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
@@ -41,6 +41,58 @@ class RoleResourceIntTest : IntegrationTestBase() {
         .jsonPath("$").isArray
         .jsonPath(matchByRoleCode, "GLOBAL_SEARCH").exists()
         .jsonPath(matchByRoleCode, "DELETE_SENSITIVE_CASE_NOTES").exists()
+
+      webTestClient.get().uri("/roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").isArray
+        .jsonPath(matchByRoleCode, "GLOBAL_SEARCH").exists()
+        .jsonPath(matchByRoleCode, "DELETE_SENSITIVE_CASE_NOTES").exists()
+    }
+
+    @Test
+    internal fun `can opt to retrieve NOMIS role`() {
+      webTestClient.get().uri("/roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").isArray
+        .jsonPath(matchByRoleCode, "300").doesNotExist()
+
+      webTestClient.get().uri { it.path("/roles/").queryParam("all-roles", "true").build() }
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").isArray
+        .jsonPath(matchByRoleCode, "300").exists()
+    }
+
+    @Test
+    internal fun `by default all DPS roles, including admin roles, will be retrieved`() {
+      webTestClient.get().uri("/roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").isArray
+        .jsonPath(matchByRoleCode, "GLOBAL_SEARCH").exists()
+        .jsonPath(matchByRoleCode, "MOIC_ADMIN").exists()
+    }
+
+    @Test
+    internal fun `can opt to only return general DPS roles`() {
+      webTestClient.get().uri { it.path("/roles/").queryParam("admin-roles", "false").build() }
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").isArray
+        .jsonPath(matchByRoleCode, "GLOBAL_SEARCH").exists()
+        .jsonPath(matchByRoleCode, "MOIC_ADMIN").doesNotExist()
     }
   }
 
