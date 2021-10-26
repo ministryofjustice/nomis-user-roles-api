@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -21,6 +22,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserRoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.DPS_CASELOAD
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
+import javax.validation.Valid
 import javax.validation.constraints.Size
 
 @RestController
@@ -140,6 +142,65 @@ class UserRoleManagementResource(
     @RequestParam(required = false, defaultValue = "NWEB") @Size(max = 6, min = 3, message = "Caseload must be between 3-6 characters") caseloadId: String = DPS_CASELOAD,
   ): UserRoleDetail {
     return userService.addRoleToUser(username, roleCode, caseloadId)
+  }
+
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
+  @PostMapping("/{username}/roles")
+  @ResponseStatus(HttpStatus.CREATED)
+  @Operation(
+    summary = "Add a role to the specified user account, all roles will be added to DPS caseload unless specified",
+    description = "Adds a role to a user, user must have caseload (if specified). Default caseload is DPS caseload (NWEB).  Cannot add an existing role to the same user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES",
+    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
+    responses = [
+      ApiResponse(
+        responseCode = "201",
+        description = "User information with role details"
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to add a role to a user account",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class)
+          )
+        ]
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class)
+          )
+        ]
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to add a role to this account",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class)
+          )
+        ]
+      )
+    ]
+  )
+  fun addRoles(
+    @Schema(
+      description = "Username of the account to add roles",
+      example = "TEST_USER2",
+      required = true
+    )
+    @PathVariable @Size(max = 30, min = 1, message = "Username must be between 1 and 30 characters") username: String,
+    @Schema(description = "Caseload Id", example = "NWEB", required = false, defaultValue = "NWEB")
+    @RequestParam(required = false, defaultValue = "NWEB") @Size(max = 6, min = 3, message = "Caseload must be between 3-6 characters") caseloadId: String = DPS_CASELOAD,
+    @Schema(description = "Role Codes", required = true)
+    @RequestBody @Valid roleCodes: List<String>,
+  ): UserRoleDetail {
+    return userService.addRolesToUser(username, roleCodes, caseloadId)
   }
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
