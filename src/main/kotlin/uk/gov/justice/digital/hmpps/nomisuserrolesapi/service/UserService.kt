@@ -393,7 +393,7 @@ class UserService(
     return user.toUserCaseloadDetail()
   }
 
-  fun addRolesToUser(username: String, roleCodes:List<String>, caseloadId: String = DPS_CASELOAD): UserRoleDetail {
+  fun addRolesToUser(username: String, roleCodes: List<String>, caseloadId: String = DPS_CASELOAD): UserRoleDetail {
     val user = setupCaseloadForUser(username, caseloadId)
     roleCodes.forEach { addRole(it, user, caseloadId) }
     return user.toUserRoleDetail()
