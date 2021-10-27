@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.IntegrationTestBase
 
@@ -252,6 +253,152 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
     fun `add non existant NOMIS role to user`() {
       webTestClient.post().uri("/users/ROLE_USER1/roles/XXX?caseloadId=BXI")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().is4xxClientError
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo("Role not found: Role XXX not found")
+    }
+  }
+
+  @DisplayName("POST /users/{username}/roles")
+  @Nested
+  inner class AddListOfRolesByUsername {
+    @BeforeEach
+    internal fun createUsers() {
+      with(dataBuilder) {
+        generalUser()
+          .username("ROLE_USER1")
+          .firstName("MARK")
+          .lastName("BOWLAN")
+          .atPrison("BXI")
+          .dpsRoles(listOf("VIEW_PRISONER_DATA"))
+          .nomisRoles(listOf("400", "200"))
+          .buildAndSave()
+      }
+    }
+
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    fun `access forbidden when no authority`() {
+      webTestClient.post().uri("/users/ROLE_USER1/roles")
+        .exchange()
+        .expectStatus().isUnauthorized
+    }
+
+    @Test
+    fun `access forbidden when no role`() {
+
+      webTestClient.post().uri("/users/ROLE_USER1/roles")
+        .body(BodyInserters.fromValue(listOf("GLOBAL_SEARCH", "POM")))
+        .headers(setAuthorisation(roles = listOf()))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `add role to user forbidden with wrong role`() {
+
+      webTestClient.post().uri("/users/ROLE_USER1/roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
+        .body(BodyInserters.fromValue(listOf("GLOBAL_SEARCH", "POM")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `add roles user not found`() {
+
+      webTestClient.post().uri("/users/dummy/roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue(listOf("GLOBAL_SEARCH", "POM")))
+        .exchange()
+        .expectStatus().isNotFound
+    }
+
+    @Test
+    fun `add roles to user`() {
+
+      webTestClient.post().uri("/users/ROLE_USER1/roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue(listOf("GLOBAL_SEARCH", "POM")))
+        .exchange()
+        .expectStatus().isCreated
+        .expectBody()
+        .jsonPath("username").isEqualTo("ROLE_USER1")
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "GLOBAL_SEARCH").exists()
+    }
+
+    @Test
+    fun `add non-existant role to user`() {
+      webTestClient.post().uri("/users/ROLE_USER1/roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue(listOf("GLOBAL_SEARCH", "XXX")))
+        .exchange()
+        .expectStatus().is4xxClientError
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo("Role not found: Role XXX not found")
+    }
+
+    @Test
+    fun `add existing role to user`() {
+      webTestClient.post().uri("/users/ROLE_USER1/roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue(listOf("GLOBAL_SEARCH", "VIEW_PRISONER_DATA")))
+        .exchange()
+        .expectStatus().is4xxClientError
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo("Role already exists: Role VIEW_PRISONER_DATA is already assigned to this user")
+    }
+
+    @Test
+    fun `add role to user that is not same type`() {
+      webTestClient.post().uri("/users/ROLE_USER1/roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue(listOf("200")))
+        .exchange()
+        .expectStatus().is4xxClientError
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo("Role assignment invalid: Roles of type INST cannot be assigned to caseloads of type APP")
+    }
+
+    @Test
+    fun `add NOMIS roles to user`() {
+
+      webTestClient.post().uri("/users/ROLE_USER1/roles?caseloadId=BXI")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue(listOf("300")))
+        .exchange()
+        .expectStatus().isCreated
+
+      webTestClient.get().uri("/users/ROLE_USER1/roles?include-nomis-roles=true")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("username").isEqualTo("ROLE_USER1")
+        .jsonPath("$.nomisRoles[?(@.caseload.id == '%s')].roles[?(@.code == '%s')]", "BXI", "300").exists()
+    }
+
+    @Test
+    fun `add NOMIS role to user of wrong type`() {
+      webTestClient.post().uri("/users/ROLE_USER1/roles?caseloadId=BXI")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue(listOf("GLOBAL_SEARCH")))
+        .exchange()
+        .expectStatus().is4xxClientError
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo("Role assignment invalid: Roles of type APP cannot be assigned to caseloads of type INST")
+    }
+
+    @Test
+    fun `add non existant NOMIS role to user`() {
+      webTestClient.post().uri("/users/ROLE_USER1/roles?caseloadId=BXI")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue(listOf("XXX")))
         .exchange()
         .expectStatus().is4xxClientError
         .expectBody()

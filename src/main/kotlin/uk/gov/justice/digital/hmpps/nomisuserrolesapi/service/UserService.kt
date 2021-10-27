@@ -393,31 +393,15 @@ class UserService(
     return user.toUserCaseloadDetail()
   }
 
+  fun addRolesToUser(username: String, roleCodes: List<String>, caseloadId: String = DPS_CASELOAD): UserRoleDetail {
+    val user = setupCaseloadForUser(username, caseloadId)
+    roleCodes.forEach { addRole(it, user, caseloadId) }
+    return user.toUserRoleDetail()
+  }
+
   fun addRoleToUser(username: String, roleCode: String, caseloadId: String = DPS_CASELOAD): UserRoleDetail {
-    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
-
-    // Special case: check to see if the DPS caseload is set up - if not set it up now
-    if (caseloadId == DPS_CASELOAD) {
-      user.findCaseloadById(DPS_CASELOAD) ?: user.addCaseload(
-        caseloadRepository.findById(DPS_CASELOAD)
-          .orElseThrow(CaseloadNotFoundException("Caseload $DPS_CASELOAD not found"))
-      )
-    }
-
-    val role = roleRepository.findByCode(roleCode).orElseThrow { UserRoleNotFoundException("Role $roleCode not found") }
-    user.addRole(role, caseloadId)
-
-    telemetryClient.trackEvent(
-      "NURA-add-role-to-user",
-      mapOf(
-        "username" to username,
-        "role-code" to roleCode,
-        "caseload" to caseloadId,
-        "user" to authenticationFacade.currentUsername
-      ),
-      null
-    )
-
+    val user = setupCaseloadForUser(username, caseloadId)
+    addRole(roleCode, user, caseloadId)
     return user.toUserRoleDetail()
   }
 
@@ -442,6 +426,43 @@ class UserService(
   fun getUserRoles(username: String, includeNomisRoles: Boolean = false): UserRoleDetail {
     val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
     return user.toUserRoleDetail(includeNomisRoles)
+  }
+
+  private fun setupCaseloadForUser(
+    username: String,
+    caseloadId: String
+  ): UserPersonDetail {
+    val user =
+      userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+
+    // Special case: check to see if the DPS caseload is set up - if not set it up now
+    if (caseloadId == DPS_CASELOAD) {
+      user.findCaseloadById(DPS_CASELOAD) ?: user.addCaseload(
+        caseloadRepository.findById(DPS_CASELOAD)
+          .orElseThrow(CaseloadNotFoundException("Caseload $DPS_CASELOAD not found"))
+      )
+    }
+    return user
+  }
+
+  private fun addRole(
+    roleCode: String,
+    user: UserPersonDetail,
+    caseloadId: String
+  ) {
+    val role = roleRepository.findByCode(roleCode).orElseThrow { UserRoleNotFoundException("Role $roleCode not found") }
+    user.addRole(role, caseloadId)
+
+    telemetryClient.trackEvent(
+      "NURA-add-role-to-user",
+      mapOf(
+        "username" to user.username,
+        "role-code" to roleCode,
+        "caseload" to caseloadId,
+        "user" to authenticationFacade.currentUsername
+      ),
+      null
+    )
   }
 
   private fun toUserDetail(
