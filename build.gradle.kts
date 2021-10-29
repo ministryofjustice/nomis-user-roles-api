@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.3.9"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.3.12"
   kotlin("plugin.spring") version "1.5.30"
   kotlin("plugin.jpa") version "1.5.30"
   idea
@@ -19,17 +19,17 @@ dependencies {
   implementation("org.apache.commons:commons-lang3:3.12.0")
   implementation("org.apache.commons:commons-text:1.9")
 
-  implementation("org.flywaydb:flyway-core:8.0.0")
-  implementation("com.vladmihalcea:hibernate-types-52:2.12.1")
+  implementation("org.flywaydb:flyway-core:8.0.2")
+  implementation("com.vladmihalcea:hibernate-types-52:2.14.0")
 
   implementation("javax.transaction:javax.transaction-api:1.3")
   implementation("javax.xml.bind:jaxb-api:2.3.1")
 
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0")
 
-  implementation("org.springdoc:springdoc-openapi-ui:1.5.11")
-  implementation("org.springdoc:springdoc-openapi-kotlin:1.5.11")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.5.11")
+  implementation("org.springdoc:springdoc-openapi-ui:1.5.12")
+  implementation("org.springdoc:springdoc-openapi-kotlin:1.5.12")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.5.12")
 
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
@@ -40,7 +40,7 @@ dependencies {
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-  testImplementation("org.awaitility:awaitility-kotlin:4.1.0")
+  testImplementation("org.awaitility:awaitility-kotlin:4.1.1")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
