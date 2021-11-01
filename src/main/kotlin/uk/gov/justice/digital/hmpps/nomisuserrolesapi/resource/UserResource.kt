@@ -70,12 +70,12 @@ class UserResource(
   ) =
     userService.deleteUser(username)
 
-  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @GetMapping("/{username}")
   @Operation(
     summary = "Get specified user details",
-    description = "Information on a specific user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
-    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
+    description = "Information on a specific user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES",
+    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES")],
     responses = [
       ApiResponse(
         responseCode = "200",
@@ -104,12 +104,12 @@ class UserResource(
   ): UserDetail =
     userService.findByUsername(username)
 
-  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @GetMapping("/staff/{staffId}")
   @Operation(
     summary = "Get specified staff details",
-    description = "Will display general and admin user account if setup.  Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
-    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
+    description = "Will display general and admin user account if setup.  Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES",
+    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES")],
     responses = [
       ApiResponse(
         responseCode = "200",
