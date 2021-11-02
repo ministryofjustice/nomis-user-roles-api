@@ -17,6 +17,8 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.CaseloadAlreadyExistsE
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.InvalidRoleAssignmentException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.CaseloadNotFoundException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.PasswordTooShortException
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.PasswordValidationException
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.ReusedPasswordException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserAlreadyExistsException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserNotFoundException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserRoleAlreadyExistsException
@@ -62,7 +64,8 @@ class NomisUserRolesApiExceptionHandler {
         ErrorResponse(
           status = BAD_REQUEST,
           userMessage = "Validation failure: ${e.message}",
-          developerMessage = e.message
+          developerMessage = e.message,
+          errorCode = BASIC_VALIDATION_FAILURE
         )
       )
   }
@@ -127,10 +130,10 @@ class NomisUserRolesApiExceptionHandler {
   fun handleInvalidRoleAssignmentException(e: InvalidRoleAssignmentException): ResponseEntity<ErrorResponse?>? {
     log.debug("Invalid Role assignment: {}", e.message)
     return ResponseEntity
-      .status(HttpStatus.BAD_REQUEST)
+      .status(BAD_REQUEST)
       .body(
         ErrorResponse(
-          status = HttpStatus.BAD_REQUEST,
+          status = BAD_REQUEST,
           userMessage = "Role assignment invalid: ${e.message}",
           developerMessage = e.message
         )
@@ -219,6 +222,36 @@ class NomisUserRolesApiExceptionHandler {
       )
   }
 
+  @ExceptionHandler(ReusedPasswordException::class)
+  fun reusedPasswordException(e: ReusedPasswordException): ResponseEntity<ErrorResponse> {
+    log.debug("Password reused error (400) returned", e)
+    return ResponseEntity
+      .status(BAD_REQUEST)
+      .body(
+        ErrorResponse(
+          status = BAD_REQUEST.value(),
+          userMessage = e.message,
+          developerMessage = e.message,
+          errorCode = PASSWORD_HAS_BEEN_USED_BEFORE,
+        )
+      )
+  }
+
+  @ExceptionHandler(PasswordValidationException::class)
+  fun passwordValidationException(e: PasswordValidationException): ResponseEntity<ErrorResponse> {
+    log.debug("Password not acceptable error (400) returned", e)
+    return ResponseEntity
+      .status(BAD_REQUEST)
+      .body(
+        ErrorResponse(
+          status = BAD_REQUEST.value(),
+          userMessage = e.message,
+          developerMessage = e.message,
+          errorCode = PASSWORD_NOT_ACCEPTABLE,
+        )
+      )
+  }
+
   @ExceptionHandler(java.lang.Exception::class)
   fun handleException(e: java.lang.Exception): ResponseEntity<ErrorResponse?>? {
     log.error("Unexpected exception", e)
@@ -252,3 +285,7 @@ data class ErrorResponse(
   ) :
     this(status.value(), errorCode, userMessage, developerMessage)
 }
+
+const val BASIC_VALIDATION_FAILURE = 1000
+const val PASSWORD_HAS_BEEN_USED_BEFORE = 1001
+const val PASSWORD_NOT_ACCEPTABLE = 1002

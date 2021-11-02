@@ -186,7 +186,7 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `add non-existant role to user`() {
+    fun `add non-existent role to user`() {
       webTestClient.post().uri("/users/ROLE_USER1/roles/XXX")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()

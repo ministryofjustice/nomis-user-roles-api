@@ -32,6 +32,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.CaseloadRep
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.changePasswordWithValidation
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.mapUserSummarySortProperties
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toStaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserCaseloadDetail
@@ -322,7 +323,7 @@ class UserService(
 
   fun changePassword(username: String, password: String) {
     userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
-    userPersonDetailRepository.changePassword(username, password)
+    changePasswordWithValidation(username, password, userPersonDetailRepository::changePassword)
 
     telemetryClient.trackEvent(
       "NURA-change-password",
@@ -572,3 +573,7 @@ class PasswordTooShortException(message: String?) :
     return PasswordTooShortException(message)
   }
 }
+
+class PasswordValidationException(message: String) : RuntimeException(message)
+
+class ReusedPasswordException(message: String) : RuntimeException(message)
