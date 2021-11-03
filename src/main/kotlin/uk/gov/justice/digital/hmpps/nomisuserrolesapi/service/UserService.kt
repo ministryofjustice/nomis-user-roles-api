@@ -82,7 +82,7 @@ class UserService(
       mapOf(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
-        "user" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername
       ),
       null
     )
@@ -108,7 +108,7 @@ class UserService(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
         "linked-to" to linkedUsername,
-        "user" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername
       ),
       null
     )
@@ -134,7 +134,7 @@ class UserService(
       mapOf(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
-        "user" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername
       ),
       null
     )
@@ -161,7 +161,7 @@ class UserService(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
         "linked-to" to linkedUsername,
-        "user" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername
       ),
       null
     )
@@ -188,7 +188,7 @@ class UserService(
       mapOf(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
-        "user" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername
       ),
       null
     )
@@ -214,7 +214,7 @@ class UserService(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
         "linked-to" to linkedUsername,
-        "user" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername
       ),
       null
     )
@@ -235,7 +235,7 @@ class UserService(
         "username" to username,
         "old-email" to oldEmail,
         "new-email" to email,
-        "user" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername
       ),
       null
     )
@@ -259,7 +259,7 @@ class UserService(
           "username" to username,
           "old-name" to oldFullName,
           "new-name" to this.fullName(),
-          "user" to authenticationFacade.currentUsername
+          "admin" to authenticationFacade.currentUsername
         ),
         null
       )
@@ -280,7 +280,7 @@ class UserService(
       mapOf(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
-        "user" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername
       ),
       null
     )
@@ -301,7 +301,7 @@ class UserService(
       "NURA-lock-user",
       mapOf(
         "username" to username,
-        "user" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername
       ),
       null
     )
@@ -315,7 +315,7 @@ class UserService(
       "NURA-unlock-user",
       mapOf(
         "username" to username,
-        "user" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername
       ),
       null
     )
@@ -329,7 +329,7 @@ class UserService(
       "NURA-change-password",
       mapOf(
         "username" to username,
-        "user" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername
       ),
       null
     )
@@ -344,7 +344,7 @@ class UserService(
       mapOf(
         "username" to username,
         "caseload" to defaultCaseloadId,
-        "user" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername
       ),
       null
     )
@@ -364,7 +364,7 @@ class UserService(
       mapOf(
         "username" to username,
         "caseload" to caseloadId,
-        "user" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername
       ),
       null
     )
@@ -386,7 +386,7 @@ class UserService(
       mapOf(
         "username" to username,
         "caseload" to caseloadId,
-        "user" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername
       ),
       null
     )
@@ -416,7 +416,7 @@ class UserService(
         "username" to username,
         "role-code" to roleCode,
         "caseload" to caseloadId,
-        "user" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername
       ),
       null
     )
@@ -460,7 +460,7 @@ class UserService(
         "username" to user.username,
         "role-code" to roleCode,
         "caseload" to caseloadId,
-        "user" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername
       ),
       null
     )
