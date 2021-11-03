@@ -36,12 +36,12 @@ class RoleResource(
   private val roleService: RoleService
 ) {
 
-  @PreAuthorize("hasAnyRole('ROLES_ADMIN','MAINTAIN_ACCESS_ROLES_ADMIN')")
+  @PreAuthorize("hasAnyRole('ROLE_ROLES_ADMIN','ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @PostMapping("")
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(
     summary = "Create a role in NOMIS",
-    description = "Creates a role. Requires role MAINTAIN_ACCESS_ROLES_ADMIN or ROLES_ADMIN",
+    description = "Creates a role. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLES_ADMIN",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
       content = [
@@ -80,11 +80,11 @@ class RoleResource(
     return roleService.createRole(createRoleRequest)
   }
 
-  @PreAuthorize("hasAnyRole('ROLES_ADMIN','MAINTAIN_ACCESS_ROLES_ADMIN')")
+  @PreAuthorize("hasAnyRole('ROLE_ROLES_ADMIN','ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @PutMapping("/{code}")
   @Operation(
     summary = "Updates a role in NOMIS",
-    description = "Updates a role. Requires role MAINTAIN_ACCESS_ROLES_ADMIN or ROLES_ADMIN",
+    description = "Updates a role. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLES_ADMIN",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
       content = [
@@ -124,11 +124,11 @@ class RoleResource(
     return roleService.updateRole(code, updateRoleRequest)
   }
 
-  @PreAuthorize("hasAnyRole('ROLES_ADMIN','MAINTAIN_ACCESS_ROLES_ADMIN', 'MAINTAIN_ACCESS_ROLES')")
+  @PreAuthorize("hasAnyRole('ROLE_ROLES_ADMIN','ROLE_MAINTAIN_ACCESS_ROLES_ADMIN', 'ROLE_MAINTAIN_ACCESS_ROLES')")
   @GetMapping
   @Operation(
     summary = "Get all roles",
-    description = "Information on a list of roles. Requires role MAINTAIN_ACCESS_ROLES_ADMIN, MAINTAIN_ACCESS_ROLES or ROLES_ADMIN",
+    description = "Information on a list of roles. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN, ROLE_MAINTAIN_ACCESS_ROLES or ROLES_ADMIN",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
@@ -170,11 +170,11 @@ class RoleResource(
       roleService.getAllDPSRoles(adminRoles)
     }
 
-  @PreAuthorize("hasAnyRole('ROLES_ADMIN','MAINTAIN_ACCESS_ROLES_ADMIN')")
+  @PreAuthorize("hasAnyRole('ROLE_ROLES_ADMIN','ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @GetMapping("/{code}")
   @Operation(
     summary = "Get specified role details",
-    description = "Information on a specific role. Requires role MAINTAIN_ACCESS_ROLES_ADMIN or ROLES_ADMIN",
+    description = "Information on a specific role. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLES_ADMIN",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
@@ -204,12 +204,12 @@ class RoleResource(
   ): RoleDetail =
     roleService.findByCode(code)
 
-  @PreAuthorize("hasAnyRole('ROLES_ADMIN','MAINTAIN_ACCESS_ROLES_ADMIN')")
+  @PreAuthorize("hasAnyRole('ROLE_ROLES_ADMIN','ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @DeleteMapping("/{roleCode}")
   @Hidden
   @Operation(
     summary = "Delete Role",
-    description = "Delete Role. Requires role MAINTAIN_ACCESS_ROLES_ADMIN or ROLES_ADMIN",
+    description = "Delete Role. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLES_ADMIN",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
@@ -229,7 +229,6 @@ class RoleResource(
       )
     ]
   )
-
   fun deleteRole(
     @Schema(description = "Role Code", example = "GLOBAL_SEARCH", required = true)
     @PathVariable @Size(max = 30, min = 1, message = "role code must be between 1 and 30") roleCode: String
