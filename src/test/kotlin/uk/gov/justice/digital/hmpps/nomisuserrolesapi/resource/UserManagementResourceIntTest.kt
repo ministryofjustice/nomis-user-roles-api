@@ -1,20 +1,35 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doThrow
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.doNothing
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.orm.jpa.JpaSystemException
 import org.springframework.web.reactive.function.BodyInserters
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.BASIC_VALIDATION_FAILURE
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.PASSWORD_HAS_BEEN_USED_BEFORE
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.PASSWORD_NOT_ACCEPTABLE
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateGeneralUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
+import java.lang.RuntimeException
+import java.sql.SQLException
 
 class UserManagementResourceIntTest : IntegrationTestBase() {
 
   @Autowired
   private lateinit var dataBuilder: DataBuilder
+
+  @SpyBean
+  private lateinit var userPersonDetailRepository: UserPersonDetailRepository
 
   @Nested
   @DisplayName("PUT /users/{username}/lock-user")
@@ -215,6 +230,94 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("userMessage")
         .isEqualTo("Validation failure: changeEmail.email: Invalid email address")
+    }
+  }
+
+  @Nested
+  @DisplayName("PUT /users/{username}/change-password")
+  inner class ChangePassword {
+    @BeforeEach
+    internal fun createUsers() {
+      with(dataBuilder) {
+        generalUser()
+          .username("JMULLARD_GEN")
+          .buildAndSave()
+      }
+    }
+
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    internal fun `must have role ROLE_MANAGE_NOMIS_USER_ACCOUNT`() {
+
+      webTestClient.put().uri("/users/JMULLARD_GEN/change-password")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue("hdhshshhhabad73hde"))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    internal fun `can change password when there are no errors returned from NOMIS`() {
+      doNothing().whenever(userPersonDetailRepository).changePassword(any(), any())
+
+      webTestClient.put().uri("/users/JMULLARD_GEN/change-password")
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .body(BodyInserters.fromValue("hdhshshhhabad73hde"))
+        .exchange()
+        .expectStatus().isOk
+    }
+
+    @Test
+    internal fun `changing the password to old passwords recorded by NOMIS results in 400 error`() {
+      doThrow(JpaSystemException(RuntimeException(SQLException("Password has been used before", "SQLSTATE", 20087)))).whenever(userPersonDetailRepository).changePassword(any(), any())
+
+      webTestClient.put().uri("/users/JMULLARD_GEN/change-password")
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .body(BodyInserters.fromValue("hdhshshhhabad73hde"))
+        .exchange()
+        .expectStatus().isBadRequest
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo("Password has been used before and was rejected by NOMIS due to Password has been used before")
+        .jsonPath("errorCode").isEqualTo(PASSWORD_HAS_BEEN_USED_BEFORE)
+    }
+
+    @Test
+    internal fun `changing the password to one not compatible with NOMIS rules results in 400 error`() {
+      doThrow(JpaSystemException(RuntimeException(SQLException("Password can not contain password", "SQLSTATE", 20001)))).whenever(userPersonDetailRepository).changePassword(any(), any())
+
+      webTestClient.put().uri("/users/JMULLARD_GEN/change-password")
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .body(BodyInserters.fromValue("hdhshshhhabad73hde"))
+        .exchange()
+        .expectStatus().isBadRequest
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo("Password is not valid and has been rejected by NOMIS due to Password can not contain password")
+        .jsonPath("errorCode").isEqualTo(PASSWORD_NOT_ACCEPTABLE)
+    }
+
+    @Test
+    internal fun `changing the password that fails basic validation results in 400 error`() {
+      webTestClient.put().uri("/users/JMULLARD_GEN/change-password")
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .body(BodyInserters.fromValue("X"))
+        .exchange()
+        .expectStatus().isBadRequest
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo("Validation failure: changePassword.password: Password must consist of alphanumeric characters only and a minimum of 14 chars, and max 30 chars")
+        .jsonPath("errorCode").isEqualTo(BASIC_VALIDATION_FAILURE)
+    }
+
+    @Test
+    internal fun `any unexpected NOMIS error results in a 500 error`() {
+      doThrow(JpaSystemException(RuntimeException(SQLException("Bind error", "SQLSTATE", -803)))).whenever(userPersonDetailRepository).changePassword(any(), any())
+
+      webTestClient.put().uri("/users/JMULLARD_GEN/change-password")
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .body(BodyInserters.fromValue("hdhshshhhabad73hde"))
+        .exchange()
+        .expectStatus().is5xxServerError
     }
   }
 

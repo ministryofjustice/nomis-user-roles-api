@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
@@ -30,7 +30,6 @@ import javax.validation.constraints.Size
 @RequestMapping("/users", produces = [MediaType.APPLICATION_JSON_VALUE])
 class UserManagementResource(
   private val userService: UserService,
-  private val authenticationFacade: AuthenticationFacade,
 ) {
 
   @PreAuthorize("hasRole('ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
@@ -119,8 +118,50 @@ class UserManagementResource(
       ),
       ApiResponse(
         responseCode = "400",
-        description = "Incorrect request to change password of user",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        description = "Incorrect request to change password of user. Some specific responses returns a different errorCode that can be checked by the client",
+        content = [
+          Content(
+            mediaType = "application/json",
+            examples = [
+              ExampleObject(
+                summary = "Password used before",
+                name = "Password validation failed due to NOMIS matching the password with a previously used password",
+                value = """
+              {
+                "status": 400,
+                "errorCode": 1001,
+                "userMessage": "Password has been used before and was rejected by NOMIS due to <reason>",
+                "developerMessage": "Password has been used before and was rejected by NOMIS due to <reason>"
+              }
+            """
+              ),
+              ExampleObject(
+                summary = "Password extended validation failed",
+                name = "Password extended validation failed due to NOMIS rejecting the password",
+                value = """
+              {
+                "status": 400,
+                "errorCode": 1002,
+                "userMessage": "Password is not valid and has been rejected by NOMIS due to <reason>",
+                "developerMessage": "Password is not valid and has been rejected by NOMIS due to <reason>"
+              }
+            """
+              ),
+              ExampleObject(
+                summary = "Password simple validation failed",
+                name = "Password simple validation failed due to size and basic content",
+                value = """
+              {
+                "status": 400,
+                "errorCode": 1000,
+                "userMessage": "Validation failure: changePassword.password: Password must consist of alphanumeric characters only and a minimum of 14 chars, and max 30 chars",
+                "developerMessage": "changePassword.password: Password must consist of alphanumeric characters only and a minimum of 14 chars, and max 30 chars"
+              }
+            """
+              ),
+            ]
+          )
+        ]
       ),
       ApiResponse(
         responseCode = "401",
@@ -219,7 +260,11 @@ class UserManagementResource(
     @PathVariable @Size(max = 30, min = 1, message = "username must be between 1 and 30 characters") username: String,
     @Schema(description = "Staff name details", required = true) @RequestBody @Valid nameDetails: NameDetail,
   ): StaffDetail {
-    return userService.updateStaffName(username = username, firstName = nameDetails.firstName, lastName = nameDetails.lastName)
+    return userService.updateStaffName(
+      username = username,
+      firstName = nameDetails.firstName,
+      lastName = nameDetails.lastName
+    )
   }
 }
 
