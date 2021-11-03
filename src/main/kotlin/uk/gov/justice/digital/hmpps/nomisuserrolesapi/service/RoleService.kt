@@ -91,15 +91,15 @@ class RoleService(
       .orElseThrow { UserRoleNotFoundException("Role with code $roleCode not found") }
 
     with(role) {
-      name = updateRoleRequest.name
-      sequence = updateRoleRequest.sequence
+      name = updateRoleRequest.name ?: role.name
+      sequence = updateRoleRequest.sequence ?: role.sequence
       parent = updateRoleRequest.parentRoleCode?.let {
         roleRepository.findByCode(updateRoleRequest.parentRoleCode)
           .orElseThrow(UserRoleNotFoundException("Parent role with code ${updateRoleRequest.parentRoleCode} not found"))
       }
 
-      roleFunction = getUsageType(updateRoleRequest.adminRoleOnly)
-      type = updateRoleRequest.type
+      roleFunction = getUsageType(updateRoleRequest.adminRoleOnly ?: (role.roleFunction == UsageType.ADMIN))
+      type = updateRoleRequest.type ?: role.type
     }
 
     val roleDetail = role.toRoleDetail()
