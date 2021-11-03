@@ -10,14 +10,14 @@ import javax.validation.constraints.Size
 @Schema(description = "Role update")
 data class UpdateRoleRequest(
 
-  @Schema(description = "Role Name", example = "Global Search Role", required = true) @field:Size(
+  @Schema(description = "Role Name", example = "Global Search Role", required = false) @field:Size(
     max = 30,
     min = 1,
     message = "Name must be between 1 and 30"
-  ) @NotBlank val name: String,
+  ) val name: String? = null,
 
-  @Schema(description = "Display Sequence", example = "99", required = false, defaultValue = "1")
-  val sequence: Int = 1,
+  @Schema(description = "Display Sequence", example = "99", required = false)
+  val sequence: Int? = null,
 
   @Schema(description = "Parent Role Code", example = "LICENCE_ADMIN", required = false) @field:Size(
     max = 30,
@@ -25,10 +25,10 @@ data class UpdateRoleRequest(
     message = "Parent Code must be between 1 and 30"
   ) val parentRoleCode: String? = null,
 
-  @Schema(description = "Role Type ", example = "APP", required = false, defaultValue = "APP")
-  val type: RoleType = RoleType.APP,
+  @Schema(description = "Role Type ", example = "APP", required = false)
+  val type: RoleType? = null,
 
-  @Schema(description = "Role Code", example = "true", required = false, defaultValue = "false")
-  @NotBlank val adminRoleOnly: Boolean = false,
+  @Schema(description = "adminRoleOnly", example = "true", required = false)
+  val adminRoleOnly: Boolean? = null,
 
 )

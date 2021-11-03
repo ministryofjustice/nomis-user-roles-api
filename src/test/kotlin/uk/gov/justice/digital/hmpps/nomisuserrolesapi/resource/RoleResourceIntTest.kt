@@ -277,10 +277,10 @@ class RoleResourceIntTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `a role can be updated`() {
+    fun `a role name can be updated`() {
 
       webTestClient.put().uri("/roles/LICENCE_RO")
-        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ROLE_ROLES_ADMIN")))
         .body(
           BodyInserters.fromValue(
             UpdateRoleRequest(
@@ -296,7 +296,33 @@ class RoleResourceIntTest : IntegrationTestBase() {
                                 "code": "LICENCE_RO",
                                 "name": "Updated Role Name",
                                 "type": "APP",
-                                "adminRoleOnly": false
+                                "adminRoleOnly": true
+                            }
+                            """
+        )
+    }
+
+    @Test
+    fun `a role adminRoleOnly can be updated`() {
+
+      webTestClient.put().uri("/roles/LICENCE_DM")
+        .headers(setAuthorisation(roles = listOf("ROLE_ROLES_ADMIN")))
+        .body(
+          BodyInserters.fromValue(
+            UpdateRoleRequest(
+              adminRoleOnly = true
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          """
+                             {
+                                "code": "LICENCE_DM",
+                                "name": "Licence Decision Maker",
+                                "type": "APP",
+                                "adminRoleOnly": true
                             }
                             """
         )
