@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.data
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.RoleType
-import javax.validation.constraints.NotBlank
 import javax.validation.constraints.Size
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
