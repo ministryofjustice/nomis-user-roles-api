@@ -46,7 +46,7 @@ class RoleService(
         "name" to roleDetail.name,
         "admin-role-only" to roleDetail.adminRoleOnly.toString(),
         "type" to roleDetail.type?.name,
-        "clientId" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername
       ),
       null
     )
@@ -80,7 +80,7 @@ class RoleService(
       mapOf(
         "role" to roleToDelete.code,
         "name" to roleToDelete.name,
-        "clientId" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername
       ),
       null
     )
@@ -110,7 +110,7 @@ class RoleService(
         "name" to roleDetail.name,
         "admin-role-only" to roleDetail.adminRoleOnly.toString(),
         "type" to roleDetail.type?.name,
-        "clientId" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername
       ),
       null
     )
