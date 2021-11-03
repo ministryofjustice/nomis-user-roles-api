@@ -181,7 +181,7 @@ class NomisUserRolesApiExceptionHandler {
   }
   @ExceptionHandler(PasswordTooShortException::class)
   fun handlePasswordTooShortException(e: PasswordTooShortException): ResponseEntity<ErrorResponse> {
-    log.debug("Password too short exception caught: {}", e)
+    log.debug("Password too short exception caught: {}", e.message)
     return ResponseEntity
       .status(BAD_REQUEST)
       .body(
@@ -195,7 +195,7 @@ class NomisUserRolesApiExceptionHandler {
 
   @ExceptionHandler(MissingServletRequestParameterException::class)
   fun handleValidationException(e: MissingServletRequestParameterException): ResponseEntity<ErrorResponse> {
-    log.debug("Bad Request (400) returned", e)
+    log.debug("Bad Request (400) returned: {}", e.message)
     return ResponseEntity
       .status(BAD_REQUEST)
       .body(
@@ -209,7 +209,7 @@ class NomisUserRolesApiExceptionHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException::class)
   fun handleValidationException(e: MethodArgumentNotValidException): ResponseEntity<ErrorResponse> {
-    log.debug("Validation error (400) returned", e)
+    log.debug("Validation error (400) returned: {}", e.message)
     val message = if (e.hasFieldErrors()) { e.fieldError?.defaultMessage } else { e.message }
     return ResponseEntity
       .status(BAD_REQUEST)
@@ -224,7 +224,7 @@ class NomisUserRolesApiExceptionHandler {
 
   @ExceptionHandler(ReusedPasswordException::class)
   fun reusedPasswordException(e: ReusedPasswordException): ResponseEntity<ErrorResponse> {
-    log.debug("Password reused error (400) returned", e)
+    log.debug("Password reused error (400) returned {}", e.message)
     return ResponseEntity
       .status(BAD_REQUEST)
       .body(
@@ -239,7 +239,7 @@ class NomisUserRolesApiExceptionHandler {
 
   @ExceptionHandler(PasswordValidationException::class)
   fun passwordValidationException(e: PasswordValidationException): ResponseEntity<ErrorResponse> {
-    log.debug("Password not acceptable error (400) returned", e)
+    log.debug("Password not acceptable error (400) returned {}", e.message)
     return ResponseEntity
       .status(BAD_REQUEST)
       .body(
