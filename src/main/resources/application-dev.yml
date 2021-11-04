@@ -13,6 +13,7 @@ api:
 spring:
   flyway:
     enabled: true
+    locations: classpath:db/migration,classpath:db/dev
 
   devtools:
     add-properties: true
