@@ -6,8 +6,6 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.reactive.function.BodyInserters
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateGeneralUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.IntegrationTestBase
 
@@ -34,7 +32,6 @@ class MeResourceIntTest : IntegrationTestBase() {
 
     @AfterEach
     internal fun deleteUsers() = dataBuilder.deleteAllUsers()
-
 
     @Test
     fun `get user`() {
@@ -110,7 +107,6 @@ class MeResourceIntTest : IntegrationTestBase() {
         .jsonPath("$.caseloads[?(@.id == '%s')]", "WWI").exists()
     }
 
-
     @Test
     fun `get user caseloads in context not found`() {
 
@@ -120,5 +116,4 @@ class MeResourceIntTest : IntegrationTestBase() {
         .expectStatus().isNotFound
     }
   }
-
 }

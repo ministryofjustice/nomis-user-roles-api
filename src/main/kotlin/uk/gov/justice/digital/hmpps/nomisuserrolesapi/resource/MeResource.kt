@@ -4,16 +4,10 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
-import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -25,7 +19,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserRoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserNotFoundException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
-import javax.validation.constraints.Size
 
 @RestController
 @Validated
@@ -65,8 +58,7 @@ class MeResource(
 
     authenticationFacade.currentUsername?.run {
       return userService.findByUsername(this)
-    }?: throw UserNotFoundException("No user in context")
-
+    } ?: throw UserNotFoundException("No user in context")
 
   @GetMapping("/caseloads")
   @ResponseStatus(HttpStatus.OK)
@@ -110,11 +102,10 @@ class MeResource(
       )
     ]
   )
-  fun getMyCaseloads(
-  ): UserCaseloadDetail {
+  fun getMyCaseloads(): UserCaseloadDetail {
     authenticationFacade.currentUsername?.run {
       return userService.getCaseloads(this)
-    }?: throw UserNotFoundException("No user in context")
+    } ?: throw UserNotFoundException("No user in context")
   }
 
   @GetMapping("/roles")
@@ -165,9 +156,6 @@ class MeResource(
   ): UserRoleDetail {
     authenticationFacade.currentUsername?.run {
       return userService.getUserRoles(this, includeNomisRoles)
-    }?: throw UserNotFoundException("No user in context")
-
+    } ?: throw UserNotFoundException("No user in context")
   }
-
-
 }
