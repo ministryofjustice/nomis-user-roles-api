@@ -13,14 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.orm.jpa.JpaSystemException
 import org.springframework.web.reactive.function.BodyInserters
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.BASIC_VALIDATION_FAILURE
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.PASSWORD_HAS_BEEN_USED_BEFORE
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.PASSWORD_NOT_ACCEPTABLE
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateGeneralUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
-import java.lang.RuntimeException
 import java.sql.SQLException
 
 class UserManagementResourceIntTest : IntegrationTestBase() {
@@ -149,18 +147,6 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         .body(BodyInserters.fromValue("He110W0R1D5555"))
         .exchange()
         .expectStatus().isOk
-    }
-
-    @Test
-    fun `can't change password of a db user for an invalid password`() {
-      webTestClient.put().uri("/users/LOCKING_USER1/change-password")
-        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
-        .body(BodyInserters.fromValue("HELLO^%$"))
-        .exchange()
-        .expectStatus().is4xxClientError
-        .expectBody()
-        .jsonPath("userMessage")
-        .isEqualTo("Validation failure: changePassword.password: Password must consist of alphanumeric characters only and a minimum of 14 chars, and max 30 chars")
     }
   }
 
@@ -295,18 +281,6 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("userMessage").isEqualTo("Password is not valid and has been rejected by NOMIS due to Password can not contain password")
         .jsonPath("errorCode").isEqualTo(PASSWORD_NOT_ACCEPTABLE)
-    }
-
-    @Test
-    internal fun `changing the password that fails basic validation results in 400 error`() {
-      webTestClient.put().uri("/users/JMULLARD_GEN/change-password")
-        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
-        .body(BodyInserters.fromValue("X"))
-        .exchange()
-        .expectStatus().isBadRequest
-        .expectBody()
-        .jsonPath("userMessage").isEqualTo("Validation failure: changePassword.password: Password must consist of alphanumeric characters only and a minimum of 14 chars, and max 30 chars")
-        .jsonPath("errorCode").isEqualTo(BASIC_VALIDATION_FAILURE)
     }
 
     @Test
