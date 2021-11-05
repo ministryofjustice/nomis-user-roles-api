@@ -179,11 +179,7 @@ class UserManagementResource(
     @Schema(description = "Username", example = "testuser1", required = true)
     @PathVariable @Size(max = 30, min = 1, message = "username must be between 1 and 30") username: String,
     @Schema(description = "Password", example = "HeLl0W0R1D", required = true)
-    @Pattern(
-      regexp = "^[A-Za-z0-9]{14,30}$",
-      message = "Password must consist of alphanumeric characters only and a minimum of 14 chars, and max 30 chars"
-    )
-    @RequestBody @Valid password: String,
+    @RequestBody password: String,
   ) {
     userService.changePassword(username, password)
   }
