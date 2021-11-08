@@ -484,4 +484,141 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .jsonPath("userMessage").isEqualTo("Role not found: Role POM is not assigned to this user")
     }
   }
+  @DisplayName("POST /users/remove-roles/{roleCode}")
+  @Nested
+  inner class BulkDeleteRoleByUsernames {
+    private val matchByUserName = "$[?(@.username == '%s')]"
+    private val matchByUserNameAndRole = "$matchByUserName.dpsRoles[?(@.code == '%s')]"
+
+    @BeforeEach
+    internal fun createUsers() {
+      with(dataBuilder) {
+        generalUser()
+          .username("ROLE_USER1")
+          .dpsRoles(listOf("APPROVE_CATEGORISATION", "CREATE_CATEGORISATION", "GLOBAL_SEARCH"))
+          .nomisRoles(listOf("200"))
+          .buildAndSave()
+      }
+      with(dataBuilder) {
+        generalUser()
+          .username("ROLE_USER2")
+          .dpsRoles(listOf("APPROVE_CATEGORISATION", "CREATE_CATEGORISATION", "GLOBAL_SEARCH"))
+          .nomisRoles(listOf("200"))
+          .buildAndSave()
+      }
+      with(dataBuilder) {
+        generalUser()
+          .username("ROLE_USER3")
+          .dpsRoles(listOf("APPROVE_CATEGORISATION", "CREATE_CATEGORISATION"))
+          .nomisRoles(listOf("200"))
+          .buildAndSave()
+      }
+    }
+
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    fun `access forbidden when no authority`() {
+      webTestClient.post().uri("/users/remove-roles/APPROVE_CATEGORISATION")
+        .body(BodyInserters.fromValue("ROLE_USER1,ROLE_USER2,ROLE_USER3"))
+        .exchange()
+        .expectStatus().isUnauthorized
+    }
+
+    @Test
+    fun `access forbidden when no role`() {
+      webTestClient.post().uri("/users/remove-roles/APPROVE_CATEGORISATION")
+        .headers(setAuthorisation(roles = listOf()))
+        .body(BodyInserters.fromValue("ROLE_USER1,ROLE_USER2,ROLE_USER3"))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `delete role forbidden with wrong role`() {
+      webTestClient.post().uri("/users/remove-roles/APPROVE_CATEGORISATION")
+        .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
+        .body(BodyInserters.fromValue("ROLE_USER1,ROLE_USER2,ROLE_USER3"))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `delete user role with username not found is ignored`() {
+      webTestClient.post().uri("/users/remove-roles/APPROVE_CATEGORISATION")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue("ROLE_USER99"))
+        .exchange()
+        .expectStatus().isOk
+    }
+
+    @Test
+    fun `delete role from users only deletes role supplied`() {
+      webTestClient.post().uri("/users/remove-roles/APPROVE_CATEGORISATION")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue("ROLE_USER1,ROLE_USER2,ROLE_USER3"))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath(matchByUserNameAndRole, "ROLE_USER1", "CREATE_CATEGORISATION").exists()
+        .jsonPath(matchByUserNameAndRole, "ROLE_USER1", "GLOBAL_SEARCH").exists()
+        .jsonPath(matchByUserNameAndRole, "ROLE_USER1", "APPROVE_CATEGORISATION").doesNotExist()
+        .jsonPath(matchByUserNameAndRole, "ROLE_USER2", "CREATE_CATEGORISATION").exists()
+        .jsonPath(matchByUserNameAndRole, "ROLE_USER2", "GLOBAL_SEARCH").exists()
+        .jsonPath(matchByUserNameAndRole, "ROLE_USER2", "APPROVE_CATEGORISATION").doesNotExist()
+        .jsonPath(matchByUserNameAndRole, "ROLE_USER3", "CREATE_CATEGORISATION").exists()
+        .jsonPath(matchByUserNameAndRole, "ROLE_USER3", "APPROVE_CATEGORISATION").doesNotExist()
+    }
+
+    @Test
+    fun `delete non-existent role from user does not result in error `() {
+      webTestClient.post().uri("/users/remove-roles/GLOBAL_SEARCH")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue("ROLE_USER1,ROLE_USER2,ROLE_USER3"))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath(matchByUserNameAndRole, "ROLE_USER1", "CREATE_CATEGORISATION").exists()
+        .jsonPath(matchByUserNameAndRole, "ROLE_USER1", "GLOBAL_SEARCH").doesNotExist()
+        .jsonPath(matchByUserNameAndRole, "ROLE_USER1", "APPROVE_CATEGORISATION").exists()
+        .jsonPath(matchByUserNameAndRole, "ROLE_USER2", "CREATE_CATEGORISATION").exists()
+        .jsonPath(matchByUserNameAndRole, "ROLE_USER2", "GLOBAL_SEARCH").doesNotExist()
+        .jsonPath(matchByUserNameAndRole, "ROLE_USER2", "APPROVE_CATEGORISATION").exists()
+        .jsonPath(matchByUserNameAndRole, "ROLE_USER3", "CREATE_CATEGORISATION").exists()
+        .jsonPath(matchByUserNameAndRole, "ROLE_USER3", "APPROVE_CATEGORISATION").exists()
+    }
+    @Test
+    fun `delete non-user role will return all users except the one not found`() {
+      webTestClient.post().uri("/users/remove-roles/GLOBAL_SEARCH")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue("ROLE_USER1,ROLE_USER2,ROLE_USER4"))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath(matchByUserName, "ROLE_USER1").exists()
+        .jsonPath(matchByUserName, "ROLE_USER2").exists()
+        .jsonPath(matchByUserName, "ROLE_USER4").doesNotExist()
+    }
+    @Test
+    fun `can add quotes around the names that will be ignored`() {
+      webTestClient.post().uri("/users/remove-roles/APPROVE_CATEGORISATION")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(
+          BodyInserters.fromValue(
+            """
+          "ROLE_USER1",
+          'ROLE_USER2',
+          ROLE_USER3
+          """
+          )
+        )
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath(matchByUserName, "ROLE_USER1").exists()
+        .jsonPath(matchByUserName, "ROLE_USER2").exists()
+        .jsonPath(matchByUserName, "ROLE_USER3").exists()
+    }
+  }
 }

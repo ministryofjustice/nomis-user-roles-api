@@ -2,12 +2,14 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.service
 
 import UserSpecification
 import com.microsoft.applicationinsights.TelemetryClient
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Order
 import org.springframework.data.domain.Sort.by
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
@@ -52,6 +54,10 @@ class UserService(
   private val telemetryClient: TelemetryClient,
   private val authenticationFacade: AuthenticationFacade
 ) {
+  companion object {
+    private val log = LoggerFactory.getLogger(this::class.java)
+  }
+
   @Transactional(readOnly = true)
   fun findByUsername(username: String): UserDetail =
     userPersonDetailRepository.findById(username)
@@ -423,6 +429,31 @@ class UserService(
 
     return user.toUserRoleDetail()
   }
+
+  fun removeRoleFromUsers(users: List<String>, roleCode: String): List<UserRoleDetail> =
+    users.mapNotNull { userPersonDetailRepository.findByIdOrNull(it) }
+      .map {
+        it.also {
+          user ->
+          kotlin.runCatching { user.removeRole(roleCode, DPS_CASELOAD) }
+            .onFailure { error ->
+              log.warn("Unable to remove role $roleCode from ${user.username}", error)
+            }
+            .onSuccess {
+              telemetryClient.trackEvent(
+                "NURA-remove-role-from-user",
+                mapOf(
+                  "username" to user.username,
+                  "role-code" to roleCode,
+                  "caseload" to DPS_CASELOAD,
+                  "admin" to authenticationFacade.currentUsername
+                ),
+                null
+              )
+            }
+        }
+          .toUserRoleDetail()
+      }
 
   fun getUserRoles(username: String, includeNomisRoles: Boolean = false): UserRoleDetail {
     val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
