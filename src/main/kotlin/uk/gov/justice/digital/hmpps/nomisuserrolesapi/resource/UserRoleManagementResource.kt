@@ -260,4 +260,62 @@ class UserRoleManagementResource(
   ): UserRoleDetail {
     return userService.removeRoleFromUser(username, roleCode, caseloadId)
   }
+
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
+  @PostMapping("/remove-roles/{roleCode}")
+  @Operation(
+    summary = "Bulk removes a role from a group of users",
+    description = "If the user does not have the role already it is ignored. Any users not found will also be ignored but will not be returned in the response. Only DPS roles are removed on the DPS caseload (NWEB). Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES",
+    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "User information with role details"
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to remove a role from a user account",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class)
+          )
+        ]
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class)
+          )
+        ]
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to remove a role this user account",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class)
+          )
+        ]
+      )
+    ]
+  )
+  fun bulkRemoveRoles(
+    @Schema(description = "Role Code", example = "GLOBAL_SEARCH", required = true)
+    @PathVariable @Size(max = 30, min = 1, message = "Role code must be between 1 and 30") roleCode: String,
+    @Schema(description = "Users", example = "JSMITH_GEN,JMOHMAND_GEN", required = true)
+    @RequestBody users: String,
+  ): List<UserRoleDetail> {
+    return userService.removeRoleFromUsers(users.asList(), roleCode)
+  }
 }
+
+private fun String.asList(): List<String> = this.split(",").map { it.removeQuotes().trim() }
+
+private fun String.removeQuotes(): String = this
+  .replace("\"", "")
+  .replace("'", "")
