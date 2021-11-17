@@ -64,6 +64,10 @@ class UserService(
       .map { u -> toUserDetail(u, username) }
       .orElseThrow(UserNotFoundException("User $username not found"))
 
+  fun findUsersByFirstAndLastNames(firstName: String, lastName: String): List<UserSummary> =
+    userPersonDetailRepository.findAllByStaff_FirstNameIgnoreCaseAndStaff_LastNameIgnoreCase(firstName, lastName)
+      .map { it.toUserSummary() }
+
   @Transactional(readOnly = true)
   fun findUsersByFilter(pageRequest: Pageable, filter: UserFilter): Page<UserSummary> =
     userPersonDetailRepository.findAll(UserSpecification(filter), pageRequest.withSort(::mapUserSummarySortProperties))

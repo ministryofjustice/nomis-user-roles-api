@@ -77,6 +77,89 @@ class UserResourceIntTest : IntegrationTestBase() {
     }
   }
 
+  @DisplayName("GET /users/staff?firstName={firstName}&lastName={lastName}")
+  @Nested
+  inner class GetUserByFirstNameAndLastName {
+    val matchByUserName = "$[?(@.username == '%s')]"
+
+    @BeforeEach
+    internal fun createUsers() {
+      with(dataBuilder) {
+        generalUser().username("marco.rossi").firstName("Marco").lastName("Rossi")
+          .atPrison("WWI")
+          .buildAndSave()
+      }
+    }
+
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    fun `access forbidden when no authority`() {
+      webTestClient.get().uri {
+        it.path("/users/staff")
+          .queryParam("firstName", "Marco")
+          .queryParam("lastName", "Rossi").build()
+      }
+        .exchange()
+        .expectStatus().isUnauthorized
+    }
+
+    @Test
+    fun `access forbidden when no role`() {
+
+      webTestClient.get().uri {
+        it.path("/users/staff")
+          .queryParam("firstName", "Marco")
+          .queryParam("lastName", "Rossi").build()
+      }
+        .headers(setAuthorisation(roles = listOf()))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `get user forbidden with wrong role`() {
+
+      webTestClient.get().uri {
+        it.path("/users/staff")
+          .queryParam("firstName", "Marco")
+          .queryParam("lastName", "Rossi").build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `get user by first name and last name not found`() {
+      webTestClient.get().uri {
+        it.path("/users/staff")
+          .queryParam("firstName", "Marco")
+          .queryParam("lastName", "Rossix").build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_USE_OF_FORCE")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json("[]")
+    }
+
+    @Test
+    fun `get user by first name and last name`() {
+      webTestClient.get().uri {
+        it.path("/users/staff")
+          .queryParam("firstName", "Marco")
+          .queryParam("lastName", "Rossi").build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_USE_OF_FORCE")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").isArray
+        .jsonPath(matchByUserName, "marco.rossi").exists()
+    }
+  }
+
   @DisplayName("GET /users/")
   @Nested
   inner class GetUser {

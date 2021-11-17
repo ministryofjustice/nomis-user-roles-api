@@ -40,6 +40,8 @@ interface UserPersonDetailRepository :
   @Modifying
   @Query(value = "call oms_utils.lock_user(:username)", nativeQuery = true)
   fun lockUser(username: String?)
+
+  fun findAllByStaff_FirstNameIgnoreCaseAndStaff_LastNameIgnoreCase(firstName: String, lastName: String): List<UserPersonDetail>
 }
 
 fun changePasswordWithValidation(
