@@ -28,6 +28,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
+import javax.validation.constraints.NotEmpty
 import javax.validation.constraints.Size
 
 @RestController
@@ -136,6 +137,30 @@ class UserResource(
     @Schema(description = "Staff ID", example = "234232", required = true) @PathVariable staffId: Long
   ): StaffDetail =
     userService.findByStaffId(staffId)
+
+  @PreAuthorize("hasAnyRole('ROLE_USE_OF_FORCE', 'MANAGE_NOMIS_USER_ACCOUNT')")
+  @GetMapping("/staff")
+  @Operation(
+    summary = "Find users by first and last names",
+    description = "Requires role ROLE_USE_OF_FORCE or MANAGE_NOMIS_USER_ACCOUNT",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "List of matching users",
+      )
+    ]
+  ) fun findUsersByFirstAndLastNames(
+    @Parameter(
+      description = "The first name to match. Case insensitive.",
+      example = "Fred"
+    ) @RequestParam @NotEmpty firstName: String,
+    @Parameter(
+      description = "The last name to match. Case insensitive",
+      example = "Bloggs"
+    ) @RequestParam @NotEmpty lastName: String
+  ): List<UserSummary> {
+    return userService.findUsersByFirstAndLastNames(firstName, lastName)
+  }
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @GetMapping
