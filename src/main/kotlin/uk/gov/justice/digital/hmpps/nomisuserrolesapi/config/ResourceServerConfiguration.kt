@@ -15,6 +15,7 @@ class ResourceServerConfiguration : WebSecurityConfigurerAdapter() {
     http
       .sessionManagement()
       .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+      .and().headers().frameOptions().sameOrigin()
       .and().csrf().disable()
       .authorizeRequests { auth ->
         auth.antMatchers(
