@@ -168,8 +168,22 @@ class UserResourceIntTest : IntegrationTestBase() {
     @BeforeEach
     internal fun createUsers() {
       with(dataBuilder) {
-        generalUser().username("marco.rossi").firstName("Marco").lastName("Rossi")
+        generalUser().username("marco.rossi")
+          .firstName("Marco")
+          .lastName("Rossi")
           .email("marco@justice.gov.uk")
+          .atPrison("WWI")
+          .buildAndSave()
+        generalUser().username("fred.smith")
+          .firstName("Fred")
+          .lastName("Smith")
+          .email("fred@justice.gov.uk")
+          .atPrison("MDI")
+          .buildAndSave()
+        generalUser().username("frederica.jones")
+          .firstName("Frederica")
+          .lastName("Jones")
+          .email("fred@justice.gov.uk")
           .atPrison("WWI")
           .buildAndSave()
       }
@@ -236,6 +250,21 @@ class UserResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("$").isArray
         .jsonPath(matchByUserName, "marco.rossi").exists()
+    }
+
+    @Test
+    fun `get user by email with multiple matches`() {
+      webTestClient.get().uri {
+        it.path("/users/user")
+          .queryParam("email", "fred@justice.gov.uk").build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").isArray
+        .jsonPath(matchByUserName, "fred.smith").exists()
+        .jsonPath(matchByUserName, "frederica.jones").exists()
     }
   }
 

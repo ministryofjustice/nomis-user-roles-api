@@ -61,7 +61,7 @@ class UserService(
   @Transactional(readOnly = true)
   fun findByUsername(username: String): UserDetail =
     userPersonDetailRepository.findById(username)
-      .map { u -> toUserDetail(u, username) }
+      .map(this@UserService::toUserDetail)
       .orElseThrow(UserNotFoundException("User $username not found"))
 
   @Transactional(readOnly = true)
@@ -72,7 +72,7 @@ class UserService(
   @Transactional(readOnly = true)
   fun findAllByEmailAddress(emailAddress: String): List<UserDetail> =
     userPersonDetailRepository.findByStaff_EmailsEmail(emailAddress)
-      .map { u -> toUserDetail(u, u.username) }
+      .map(this@UserService::toUserDetail)
 
   @Transactional(readOnly = true)
   fun findUsersByFilter(pageRequest: Pageable, filter: UserFilter): Page<UserSummary> =
@@ -508,9 +508,8 @@ class UserService(
   }
 
   private fun toUserDetail(
-    user: UserPersonDetail,
-    username: String
-  ) = UserDetail(user, accountDetailRepository.findById(username).orElse(AccountDetail(username = username)))
+    user: UserPersonDetail
+  ) = UserDetail(user, accountDetailRepository.findById(user.username).orElse(AccountDetail(username = user.username)))
 
   private fun checkIfAccountAlreadyExists(username: String) {
     userPersonDetailRepository.findById(username.uppercase())
