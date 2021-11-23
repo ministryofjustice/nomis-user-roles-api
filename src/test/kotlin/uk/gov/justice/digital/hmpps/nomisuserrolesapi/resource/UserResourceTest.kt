@@ -28,7 +28,8 @@ class UserResourceTest {
       active = true,
       activeCaseloadId = "BXI",
       accountStatus = AccountStatus.OPEN,
-      primaryEmail = "test@test.com"
+      primaryEmail = "test@test.com",
+      dpsRoleCodes = listOf("ROLE_GLOBAL_SEARCH", "ROLE_ROLES_ADMIN")
     )
 
     whenever(userService.findByUsername(any())).thenReturn(user)
@@ -52,6 +53,26 @@ class UserResourceTest {
     whenever(userService.findUsersByFirstAndLastNames(any(), any())).thenReturn(listOf(user))
 
     val userDetails = userResource.findUsersByFirstAndLastNames("John", "Smith")
+    assertThat(userDetails[0]).isEqualTo(user)
+  }
+
+  @Test
+  fun `Get user by emailAddress `() {
+    val user = UserDetail(
+      username = "testuser1",
+      staffId = 1,
+      firstName = "John",
+      lastName = "Smith",
+      active = true,
+      activeCaseloadId = "BXI",
+      accountStatus = AccountStatus.OPEN,
+      primaryEmail = "test@test.com",
+      dpsRoleCodes = listOf("ROLE_GLOBAL_SEARCH", "ROLE_ROLES_ADMIN")
+    )
+
+    whenever(userService.findAllByEmailAddress(any())).thenReturn(listOf(user))
+
+    val userDetails = userResource.findUsersByEmailAddress("test@test.com")
     assertThat(userDetails[0]).isEqualTo(user)
   }
 }

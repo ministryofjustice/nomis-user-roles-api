@@ -18,7 +18,8 @@ data class UserDetail(
   @Schema(description = "Indicates that the user is active", example = "true", required = true) val active: Boolean,
   @Schema(description = "Status of the user", example = "OPEN", required = true) val accountStatus: AccountStatus?,
   @Schema(description = "Type of user account", example = "GENERAL", required = true) val accountType: UsageType = UsageType.GENERAL,
-  @Schema(description = "Email addresses of user", example = "test@test.com", required = false) val primaryEmail: String?
+  @Schema(description = "Email addresses of user", example = "test@test.com", required = false) val primaryEmail: String?,
+  @Schema(description = "List of associated DPS Role Codes", required = false) val dpsRoleCodes: List<String>
 ) {
   constructor(userPersonDetail: UserPersonDetail, accountDetail: AccountDetail) :
     this(
@@ -30,6 +31,7 @@ data class UserDetail(
       active = userPersonDetail.staff.isActive,
       accountStatus = accountDetail.status,
       accountType = userPersonDetail.type,
-      primaryEmail = userPersonDetail.staff.primaryEmail()?.email
+      primaryEmail = userPersonDetail.staff.primaryEmail()?.email,
+      dpsRoleCodes = userPersonDetail.dpsRoles.map { it.role.code }
     )
 }
