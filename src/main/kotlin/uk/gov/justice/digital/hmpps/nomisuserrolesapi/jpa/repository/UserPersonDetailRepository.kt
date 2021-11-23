@@ -42,6 +42,8 @@ interface UserPersonDetailRepository :
   fun lockUser(username: String?)
 
   fun findAllByStaff_FirstNameIgnoreCaseAndStaff_LastNameIgnoreCase(firstName: String, lastName: String): List<UserPersonDetail>
+
+  fun findByStaff_EmailsEmail(emailAddress: String): List<UserPersonDetail>
 }
 
 fun changePasswordWithValidation(

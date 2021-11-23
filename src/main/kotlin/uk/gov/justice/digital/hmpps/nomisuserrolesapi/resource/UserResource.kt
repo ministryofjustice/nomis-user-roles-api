@@ -162,6 +162,27 @@ class UserResource(
     return userService.findUsersByFirstAndLastNames(firstName, lastName)
   }
 
+  @PreAuthorize("hasRole('ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
+  @GetMapping("/user")
+  @Operation(
+    summary = "Find users by their email address",
+    description = "Requires role ROLE_MANAGE_NOMIS_USER_ACCOUNT",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "List of matching users",
+      )
+    ]
+  ) fun findUsersByEmailAddress(
+    @Parameter(
+      description = "The email to match. Case insensitive",
+      example = "jim@smith.com",
+      required = true
+    ) @RequestParam @NotEmpty email: String
+  ): List<UserDetail> {
+    return userService.findAllByEmailAddress(email)
+  }
+
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @GetMapping
   @Operation(
