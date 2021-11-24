@@ -9,17 +9,6 @@ import java.time.format.DateTimeFormatter
 class InfoTest : IntegrationTestBase() {
 
   @Test
-  fun `Info page is accessible`() {
-    webTestClient.get()
-      .uri("/info")
-      .exchange()
-      .expectStatus()
-      .isOk
-      .expectBody()
-      .jsonPath("app.name").isEqualTo("Nomis User Roles Api")
-  }
-
-  @Test
   fun `Info page reports version`() {
     webTestClient.get().uri("/info")
       .exchange()
