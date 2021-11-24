@@ -1,7 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.3.13"
-  kotlin("plugin.spring") version "1.5.31"
-  kotlin("plugin.jpa") version "1.5.31"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.3.14-beta"
+  kotlin("plugin.spring") version "1.6.0"
+  kotlin("plugin.jpa") version "1.6.0"
   idea
 }
 
@@ -19,7 +19,7 @@ dependencies {
   implementation("org.apache.commons:commons-lang3:3.12.0")
   implementation("org.apache.commons:commons-text:1.9")
 
-  implementation("org.flywaydb:flyway-core:8.0.2")
+  implementation("org.flywaydb:flyway-core:8.0.5")
   implementation("com.vladmihalcea:hibernate-types-52:2.14.0")
 
   implementation("javax.transaction:javax.transaction-api:1.3")
@@ -44,17 +44,17 @@ dependencies {
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
-  testImplementation("org.mockito:mockito-inline:4.0.0")
+  testImplementation("org.mockito:mockito-inline:4.1.0")
 }
 
 java {
-  toolchain.languageVersion.set(JavaLanguageVersion.of(16))
+  toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }
 
 tasks {
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-      jvmTarget = "16"
+      jvmTarget = "17"
     }
   }
 }
