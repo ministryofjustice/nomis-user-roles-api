@@ -38,3 +38,7 @@ The `rename-project.bash` script takes a single argument - the name of the proje
 * The main package name (project name with hyphens removed)
 
 It then performs a search and replace and directory renames so the project is ready to be used.
+
+### Architecture
+
+Architecture decision records start [here](doc/architecture/decisions/0001-use-adr.md)
