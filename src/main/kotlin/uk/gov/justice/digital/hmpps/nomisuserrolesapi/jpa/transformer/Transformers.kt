@@ -7,28 +7,12 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.RoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserRoleDetail
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Role
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import java.util.regex.Pattern
-
-fun UserPersonDetail.toUserSummary(): UserSummary = UserSummary(
-  username = this.username,
-  staffId = this.staff.staffId,
-  firstName = this.staff.firstName.capitalizeFully(),
-  lastName = this.staff.lastName.capitalizeFully(),
-  active = this.staff.isActive,
-  activeCaseload = this.activeCaseLoad?.let { caseload ->
-    PrisonCaseload(
-      id = caseload.id,
-      name = caseload.name.capitalizeLeavingAbbreviations()
-    )
-  },
-  dpsRoleCount = this.dpsRoles.size,
-)
 
 fun UserPersonDetail.toUserCaseloadDetail(): UserCaseloadDetail = UserCaseloadDetail(
   username = this.username,

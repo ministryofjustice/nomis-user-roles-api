@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.PrisonCaseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
 
@@ -40,14 +40,14 @@ class UserResourceTest {
 
   @Test
   fun `Get user by first name and last name `() {
-    val user = UserSummary(
+    val user = UserSummaryWithEmail(
       username = "testuser1",
       staffId = 1,
       firstName = "John",
       lastName = "Smith",
       active = true,
       activeCaseload = PrisonCaseload("MDI", "Moorland"),
-      dpsRoleCount = 1
+      email = "joe@bloggs.com",
     )
 
     whenever(userService.findUsersByFirstAndLastNames(any(), any())).thenReturn(listOf(user))
