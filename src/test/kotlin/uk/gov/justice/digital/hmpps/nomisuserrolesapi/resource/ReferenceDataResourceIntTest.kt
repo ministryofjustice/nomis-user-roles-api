@@ -1,5 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
+import net.minidev.json.JSONArray
+import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.greaterThan
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -10,37 +12,31 @@ class ReferenceDataResourceIntTest : IntegrationTestBase() {
   @DisplayName("GET /reference-data/caseloads")
   @Nested
   inner class GetCaseloads {
+    private val spec = webTestClient.get().uri("/reference-data/caseloads")
 
     @Test
     fun `access forbidden when no authority`() {
-      webTestClient.get().uri("/reference-data/caseloads")
-        .exchange()
+      spec.exchange()
         .expectStatus().isUnauthorized
     }
 
     @Test
     fun `access allowed even when no roles specified`() {
-
-      webTestClient.get().uri("/reference-data/caseloads")
-        .headers(setAuthorisation(roles = listOf()))
+      spec.headers(setAuthorisation(roles = listOf()))
         .exchange()
         .expectStatus().isOk
     }
 
     @Test
     fun `access allowed for any role specified`() {
-
-      webTestClient.get().uri("/reference-data/caseloads")
-        .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
+      spec.headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
         .exchange()
         .expectStatus().isOk
     }
 
     @Test
     fun `will return all active general caseloads ordered by name`() {
-
-      webTestClient.get().uri("/reference-data/caseloads")
-        .headers(setAuthorisation())
+      spec.headers(setAuthorisation())
         .exchange()
         .expectStatus().isOk
         .expectBody()
@@ -51,6 +47,48 @@ class ReferenceDataResourceIntTest : IntegrationTestBase() {
         // central admin and DPS is filtered out
         .jsonPath("$[?(@.id == 'CADM_I')]").doesNotExist()
         .jsonPath("$[?(@.id == 'NWEB')]").doesNotExist()
+    }
+  }
+
+  @DisplayName("GET /reference-data/email-domains")
+  @Nested
+  inner class GetActiveEmailDomains {
+    private val spec = webTestClient.get().uri("/reference-data/email-domains")
+
+    @Test
+    fun `access forbidden when no authority`() {
+      spec.exchange()
+        .expectStatus().isUnauthorized
+    }
+
+    @Test
+    fun `access allowed even when no roles specified`() {
+      spec.headers(setAuthorisation(roles = listOf()))
+        .exchange()
+        .expectStatus().isOk
+    }
+
+    @Test
+    fun `access allowed for any role specified`() {
+      spec.headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
+        .exchange()
+        .expectStatus().isOk
+    }
+
+    @Test
+    fun `will return all active email domains`() {
+      spec.headers(setAuthorisation())
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").value<JSONArray> {
+          assertThat(it.map { m -> m as Map<*, *> }).contains(
+            mapOf(
+              "code" to "CJSM",
+              "domain" to "%.cjsm.net",
+            )
+          ).hasSizeGreaterThan(5)
+        }
     }
   }
 }
