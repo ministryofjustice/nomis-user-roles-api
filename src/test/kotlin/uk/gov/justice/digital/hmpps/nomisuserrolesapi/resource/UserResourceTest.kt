@@ -18,20 +18,20 @@ class UserResourceTest {
   private val authenticationFacade: AuthenticationFacade = mock()
   private val userResource = UserResource(userService, authenticationFacade)
 
+  private val user = UserDetail(
+    username = "testuser1",
+    staffId = 1,
+    firstName = "John",
+    lastName = "Smith",
+    active = true,
+    activeCaseloadId = "BXI",
+    accountStatus = AccountStatus.OPEN,
+    primaryEmail = "test@test.com",
+    dpsRoleCodes = listOf("ROLE_GLOBAL_SEARCH", "ROLE_ROLES_ADMIN")
+  )
+
   @Test
   fun `Get user details`() {
-    val user = UserDetail(
-      username = "testuser1",
-      staffId = 1,
-      firstName = "John",
-      lastName = "Smith",
-      active = true,
-      activeCaseloadId = "BXI",
-      accountStatus = AccountStatus.OPEN,
-      primaryEmail = "test@test.com",
-      dpsRoleCodes = listOf("ROLE_GLOBAL_SEARCH", "ROLE_ROLES_ADMIN")
-    )
-
     whenever(userService.findByUsername(any())).thenReturn(user)
 
     val userDetails = userResource.getUserDetails("testuser1")
@@ -39,7 +39,7 @@ class UserResourceTest {
   }
 
   @Test
-  fun `Get user by first name and last name `() {
+  fun `Get user by first name and last name`() {
     val user = UserSummaryWithEmail(
       username = "testuser1",
       staffId = 1,
@@ -53,26 +53,22 @@ class UserResourceTest {
     whenever(userService.findUsersByFirstAndLastNames(any(), any())).thenReturn(listOf(user))
 
     val userDetails = userResource.findUsersByFirstAndLastNames("John", "Smith")
-    assertThat(userDetails[0]).isEqualTo(user)
+    assertThat(userDetails).containsExactly(user)
   }
 
   @Test
-  fun `Get user by emailAddress `() {
-    val user = UserDetail(
-      username = "testuser1",
-      staffId = 1,
-      firstName = "John",
-      lastName = "Smith",
-      active = true,
-      activeCaseloadId = "BXI",
-      accountStatus = AccountStatus.OPEN,
-      primaryEmail = "test@test.com",
-      dpsRoleCodes = listOf("ROLE_GLOBAL_SEARCH", "ROLE_ROLES_ADMIN")
-    )
-
+  fun `Get user by emailAddress`() {
     whenever(userService.findAllByEmailAddress(any())).thenReturn(listOf(user))
 
     val userDetails = userResource.findUsersByEmailAddress("test@test.com")
-    assertThat(userDetails[0]).isEqualTo(user)
+    assertThat(userDetails).containsExactly(user)
+  }
+
+  @Test
+  fun `Get user by emailAddress and usernames`() {
+    whenever(userService.findAllByEmailAddressAndUsernames(any(), any())).thenReturn(listOf(user))
+
+    val userDetails = userResource.findUsersByEmailAddressAndUsernames("test@test.com", listOf("bob", "fred"))
+    assertThat(userDetails).containsExactly(user)
   }
 }

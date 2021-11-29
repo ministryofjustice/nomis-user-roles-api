@@ -263,6 +263,155 @@ class UserResourceIntTest : IntegrationTestBase() {
     }
   }
 
+  @DisplayName("POST /users/user?email={emailAddress}")
+  @Nested
+  inner class GetUsersByEmailAddressAndUsernames {
+    @BeforeEach
+    internal fun createUsers() {
+      with(dataBuilder) {
+        generalUser().username("marco.rossi")
+          .firstName("Marco")
+          .lastName("Rossi")
+          .email("marco@justice.gov.uk")
+          .atPrison("WWI")
+          .buildAndSave()
+        generalUser().username("fred.smith")
+          .firstName("Fred")
+          .lastName("Smith")
+          .email("fred@justice.gov.uk")
+          .atPrison("MDI")
+          .buildAndSave()
+        generalUser().username("frederica.jones")
+          .firstName("Frederica")
+          .lastName("Jones")
+          .email("fred@justice.gov.uk")
+          .atPrison("WWI")
+          .buildAndSave()
+      }
+    }
+
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    fun `access forbidden when no authority`() {
+      webTestClient.post().uri {
+        it.path("/users/user")
+          .queryParam("email", "marco@justice.gov.uk").build()
+      }
+        .exchange()
+        .expectStatus().isUnauthorized
+    }
+
+    @Test
+    fun `access forbidden when no role`() {
+
+      webTestClient.post().uri {
+        it.path("/users/user")
+          .queryParam("email", "marco@justice.gov.uk").build()
+      }
+        .headers(setAuthorisation(roles = listOf()))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `get user forbidden with wrong role`() {
+
+      webTestClient.post().uri {
+        it.path("/users/user")
+          .queryParam("email", "marco@justice.gov.uk").build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `get user when email address not found`() {
+      webTestClient.post().uri {
+        it.path("/users/user")
+          .queryParam("email", "missing@justice.gov.uk").build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json("[]")
+    }
+
+    @Test
+    fun `get user when email address not found but match on username`() {
+      webTestClient.post().uri {
+        it.path("/users/user")
+          .queryParam("email", "missing@justice.gov.uk")
+          .build()
+      }
+        .bodyValue(listOf("marco.rossi"))
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] })
+            .containsExactly("marco.rossi")
+            .hasSize(1)
+        }
+    }
+
+    @Test
+    fun `get user by email`() {
+      webTestClient.post().uri {
+        it.path("/users/user")
+          .queryParam("email", "marco@justice.gov.uk").build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).contains("marco.rossi")
+        }
+    }
+
+    @Test
+    fun `get user by email remove duplicates`() {
+      webTestClient.post().uri {
+        it.path("/users/user")
+          .queryParam("email", "marco@justice.gov.uk").build()
+      }
+        .bodyValue(listOf("marco.rossi"))
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] })
+            .contains("marco.rossi")
+            .hasSize(1)
+        }
+    }
+
+    @Test
+    fun `get user by email with multiple matches`() {
+      webTestClient.post().uri {
+        it.path("/users/user")
+          .queryParam("email", "fred@justice.gov.uk").build()
+      }
+        .bodyValue(listOf("marco.rossi"))
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] })
+            .contains("fred.smith")
+            .contains("frederica.jones")
+            .contains("marco.rossi")
+            .hasSize(3)
+        }
+    }
+  }
+
   @DisplayName("GET /users/")
   @Nested
   inner class GetUser {
