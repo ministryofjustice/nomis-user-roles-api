@@ -17,6 +17,8 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -69,8 +71,7 @@ class UserResource(
   fun deleteUser(
     @Schema(description = "Username", example = "testuser1", required = true)
     @PathVariable @Size(max = 30, min = 1, message = "username must be between 1 and 30") username: String
-  ) =
-    userService.deleteUser(username)
+  ) = userService.deleteUser(username)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @GetMapping("/{username}")
@@ -150,7 +151,8 @@ class UserResource(
         description = "List of matching users",
       )
     ]
-  ) fun findUsersByFirstAndLastNames(
+  )
+  fun findUsersByFirstAndLastNames(
     @Parameter(
       description = "The first name to match. Case insensitive.",
       example = "Fred"
@@ -159,9 +161,7 @@ class UserResource(
       description = "The last name to match. Case insensitive",
       example = "Bloggs"
     ) @RequestParam @NotEmpty lastName: String
-  ): List<UserSummaryWithEmail> {
-    return userService.findUsersByFirstAndLastNames(firstName, lastName)
-  }
+  ): List<UserSummaryWithEmail> = userService.findUsersByFirstAndLastNames(firstName, lastName)
 
   @PreAuthorize("hasRole('ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
   @GetMapping("/user")
@@ -174,15 +174,35 @@ class UserResource(
         description = "List of matching users",
       )
     ]
-  ) fun findUsersByEmailAddress(
+  )
+  fun findUsersByEmailAddress(
     @Parameter(
       description = "The email to match. Case insensitive",
       example = "jim@smith.com",
       required = true
     ) @RequestParam @NotEmpty email: String
-  ): List<UserDetail> {
-    return userService.findAllByEmailAddress(email)
-  }
+  ): List<UserDetail> = userService.findAllByEmailAddress(email)
+
+  @PreAuthorize("hasRole('ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
+  @PostMapping("/user")
+  @Operation(
+    summary = "Find users by their email address and / or list of usernames",
+    description = "Requires role ROLE_MANAGE_NOMIS_USER_ACCOUNT",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "List of matching users",
+      )
+    ]
+  )
+  fun findUsersByEmailAddressAndUsernames(
+    @Parameter(
+      description = "The email to match. Case insensitive",
+      example = "jim@smith.com",
+      required = true
+    ) @RequestParam @NotEmpty email: String,
+    @Parameter(description = "List of usernames.") @RequestBody usernames: List<String>?,
+  ): List<UserDetail> = userService.findAllByEmailAddressAndUsernames(email, usernames)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @GetMapping

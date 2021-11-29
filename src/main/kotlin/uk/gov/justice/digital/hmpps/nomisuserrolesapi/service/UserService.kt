@@ -63,7 +63,7 @@ class UserService(
   @Transactional(readOnly = true)
   fun findByUsername(username: String): UserDetail =
     userPersonDetailRepository.findById(username)
-      .map(this@UserService::toUserDetail)
+      .map(this::toUserDetail)
       .orElseThrow(UserNotFoundException("User $username not found"))
 
   @Transactional(readOnly = true)
@@ -74,7 +74,15 @@ class UserService(
   @Transactional(readOnly = true)
   fun findAllByEmailAddress(emailAddress: String): List<UserDetail> =
     userPersonDetailRepository.findByStaff_EmailsEmail(emailAddress)
-      .map(this@UserService::toUserDetail)
+      .map(this::toUserDetail)
+
+  @Transactional(readOnly = true)
+  fun findAllByEmailAddressAndUsernames(emailAddress: String, usernames: List<String>?): List<UserDetail> {
+    val usersByEmail = userPersonDetailRepository.findByStaff_EmailsEmail(emailAddress)
+    val users = if (usernames.isNullOrEmpty()) usersByEmail
+    else usersByEmail.union(userPersonDetailRepository.findAllById(usernames))
+    return users.map(this::toUserDetail)
+  }
 
   @Transactional(readOnly = true)
   fun findUsersByFilter(pageRequest: Pageable, filter: UserFilter): Page<UserSummary> =
@@ -85,13 +93,15 @@ class UserService(
 
     checkIfAccountAlreadyExists(createUserRequest.username)
 
-    val staffAccount = createStaffRecord(createUserRequest.firstName, createUserRequest.lastName, createUserRequest.email)
+    val staffAccount =
+      createStaffRecord(createUserRequest.firstName, createUserRequest.lastName, createUserRequest.email)
 
     if (staffAccount.generalAccount() != null) {
       throw UserAlreadyExistsException("General user already exists for this staff member")
     }
 
-    val userPersonDetail = createUserAccount(staffAccount, createUserRequest.username, createUserRequest.defaultCaseloadId)
+    val userPersonDetail =
+      createUserAccount(staffAccount, createUserRequest.username, createUserRequest.defaultCaseloadId)
 
     createSchemaUser(createUserRequest.username, AccountProfile.TAG_GENERAL)
 
@@ -117,7 +127,8 @@ class UserService(
       throw UserAlreadyExistsException("General user already exists for this staff member")
     }
 
-    val userPersonDetail = createUserAccount(staffAccount, linkedUserRequest.username, linkedUserRequest.defaultCaseloadId)
+    val userPersonDetail =
+      createUserAccount(staffAccount, linkedUserRequest.username, linkedUserRequest.defaultCaseloadId)
     createSchemaUser(linkedUserRequest.username, AccountProfile.TAG_GENERAL)
 
     telemetryClient.trackEvent(
@@ -137,13 +148,15 @@ class UserService(
 
     checkIfAccountAlreadyExists(createUserRequest.username)
 
-    val staffAccount = createStaffRecord(createUserRequest.firstName, createUserRequest.lastName, createUserRequest.email)
+    val staffAccount =
+      createStaffRecord(createUserRequest.firstName, createUserRequest.lastName, createUserRequest.email)
 
     if (staffAccount.adminAccount() != null) {
       throw UserAlreadyExistsException("Admin user already exists for this staff member")
     }
 
-    val userPersonDetail = createUserAccount(staffAccount, createUserRequest.username, defaultCaseloadId = "CADM_I", admin = true)
+    val userPersonDetail =
+      createUserAccount(staffAccount, createUserRequest.username, defaultCaseloadId = "CADM_I", admin = true)
 
     createSchemaUser(createUserRequest.username, AccountProfile.TAG_ADMIN)
 
@@ -170,7 +183,8 @@ class UserService(
       throw UserAlreadyExistsException("Admin user already exists for this staff member")
     }
 
-    val userPersonDetail = createUserAccount(staffAccount, linkedUserRequest.username, defaultCaseloadId = "CADM_I", admin = true)
+    val userPersonDetail =
+      createUserAccount(staffAccount, linkedUserRequest.username, defaultCaseloadId = "CADM_I", admin = true)
     createSchemaUser(linkedUserRequest.username, AccountProfile.TAG_ADMIN)
 
     telemetryClient.trackEvent(
@@ -191,13 +205,20 @@ class UserService(
 
     checkIfAccountAlreadyExists(createUserRequest.username)
 
-    val staffAccount = createStaffRecord(createUserRequest.firstName, createUserRequest.lastName, createUserRequest.email)
+    val staffAccount =
+      createStaffRecord(createUserRequest.firstName, createUserRequest.lastName, createUserRequest.email)
 
     if (staffAccount.adminAccount() != null) {
       throw UserAlreadyExistsException("Admin user already exists for this staff member")
     }
 
-    val userPersonDetail = createUserAccount(staffAccount, createUserRequest.username, defaultCaseloadId = createUserRequest.defaultCaseloadId, admin = true, laaAdmin = true)
+    val userPersonDetail = createUserAccount(
+      staffAccount,
+      createUserRequest.username,
+      defaultCaseloadId = createUserRequest.defaultCaseloadId,
+      admin = true,
+      laaAdmin = true
+    )
 
     createSchemaUser(createUserRequest.username, AccountProfile.TAG_ADMIN)
 
@@ -223,7 +244,13 @@ class UserService(
       throw UserAlreadyExistsException("Admin user already exists for this staff member")
     }
 
-    val userPersonDetail = createUserAccount(staffAccount, linkedUserRequest.username, defaultCaseloadId = linkedUserRequest.defaultCaseloadId, admin = true, laaAdmin = true)
+    val userPersonDetail = createUserAccount(
+      staffAccount,
+      linkedUserRequest.username,
+      defaultCaseloadId = linkedUserRequest.defaultCaseloadId,
+      admin = true,
+      laaAdmin = true
+    )
     createSchemaUser(linkedUserRequest.username, AccountProfile.TAG_ADMIN)
 
     telemetryClient.trackEvent(
@@ -354,7 +381,8 @@ class UserService(
   }
 
   fun setDefaultCaseload(username: String, defaultCaseloadId: String): UserCaseloadDetail {
-    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    val user =
+      userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
     user.setDefaultCaseload(defaultCaseloadId)
 
     telemetryClient.trackEvent(
@@ -370,7 +398,8 @@ class UserService(
   }
 
   fun addCaseloadToUser(username: String, caseloadId: String): UserCaseloadDetail {
-    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    val user =
+      userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
 
     val caseload = caseloadRepository.findById(caseloadId)
       .orElseThrow(CaseloadNotFoundException("Caseload $caseloadId not found"))
@@ -392,11 +421,13 @@ class UserService(
 
   @Transactional(readOnly = true)
   fun getCaseloads(username: String): UserCaseloadDetail {
-    return userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found")).toUserCaseloadDetail()
+    return userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+      .toUserCaseloadDetail()
   }
 
   fun removeCaseload(username: String, caseloadId: String): UserCaseloadDetail {
-    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    val user =
+      userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
     user.removeCaseload(caseloadId)
 
     telemetryClient.trackEvent(
@@ -425,7 +456,8 @@ class UserService(
   }
 
   fun removeRoleFromUser(username: String, roleCode: String, caseloadId: String = DPS_CASELOAD): UserRoleDetail {
-    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    val user =
+      userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
     user.removeRole(roleCode, caseloadId)
 
     telemetryClient.trackEvent(
@@ -445,8 +477,7 @@ class UserService(
   fun removeRoleFromUsers(users: List<String>, roleCode: String): List<UserRoleDetail> =
     users.mapNotNull { userPersonDetailRepository.findByIdOrNull(it) }
       .map {
-        it.also {
-          user ->
+        it.also { user ->
           kotlin.runCatching { user.removeRole(roleCode, DPS_CASELOAD) }
             .onFailure { error ->
               log.warn("Unable to remove role $roleCode from ${user.username}", error)
@@ -468,7 +499,8 @@ class UserService(
       }
 
   fun getUserRoles(username: String, includeNomisRoles: Boolean = false): UserRoleDetail {
-    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    val user =
+      userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
     return user.toUserRoleDetail(includeNomisRoles)
   }
 
@@ -509,9 +541,8 @@ class UserService(
     )
   }
 
-  private fun toUserDetail(
-    user: UserPersonDetail
-  ) = UserDetail(user, accountDetailRepository.findById(user.username).orElse(AccountDetail(username = user.username)))
+  private fun toUserDetail(user: UserPersonDetail) =
+    UserDetail(user, accountDetailRepository.findById(user.username).orElse(AccountDetail(username = user.username)))
 
   private fun checkIfAccountAlreadyExists(username: String) {
     userPersonDetailRepository.findById(username.uppercase())
