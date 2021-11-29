@@ -1,5 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
+import net.minidev.json.JSONArray
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -80,12 +82,13 @@ class UserResourceIntTest : IntegrationTestBase() {
   @DisplayName("GET /users/staff?firstName={firstName}&lastName={lastName}")
   @Nested
   inner class GetUserByFirstNameAndLastName {
-    val matchByUserName = "$[?(@.username == '%s')]"
-
     @BeforeEach
     internal fun createUsers() {
       with(dataBuilder) {
-        generalUser().username("marco.rossi").firstName("Marco").lastName("Rossi")
+        generalUser().username("marco.rossi")
+          .firstName("Marco")
+          .lastName("Rossi")
+          .email("marco@justice.gov.uk")
           .atPrison("WWI")
           .buildAndSave()
       }
@@ -94,51 +97,36 @@ class UserResourceIntTest : IntegrationTestBase() {
     @AfterEach
     internal fun deleteUsers() = dataBuilder.deleteAllUsers()
 
-    @Test
-    fun `access forbidden when no authority`() {
+    private fun spec(surname: String = "Rossi") =
       webTestClient.get().uri {
         it.path("/users/staff")
           .queryParam("firstName", "Marco")
-          .queryParam("lastName", "Rossi").build()
+          .queryParam("lastName", surname).build()
       }
-        .exchange()
+
+    @Test
+    fun `access forbidden when no authority`() {
+      spec().exchange()
         .expectStatus().isUnauthorized
     }
 
     @Test
     fun `access forbidden when no role`() {
-
-      webTestClient.get().uri {
-        it.path("/users/staff")
-          .queryParam("firstName", "Marco")
-          .queryParam("lastName", "Rossi").build()
-      }
-        .headers(setAuthorisation(roles = listOf()))
+      spec().headers(setAuthorisation(roles = listOf()))
         .exchange()
         .expectStatus().isForbidden
     }
 
     @Test
     fun `get user forbidden with wrong role`() {
-
-      webTestClient.get().uri {
-        it.path("/users/staff")
-          .queryParam("firstName", "Marco")
-          .queryParam("lastName", "Rossi").build()
-      }
-        .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
+      spec().headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
         .exchange()
         .expectStatus().isForbidden
     }
 
     @Test
     fun `get user by first name and last name not found`() {
-      webTestClient.get().uri {
-        it.path("/users/staff")
-          .queryParam("firstName", "Marco")
-          .queryParam("lastName", "Rossix").build()
-      }
-        .headers(setAuthorisation(roles = listOf("ROLE_USE_OF_FORCE")))
+      spec("Rossix").headers(setAuthorisation(roles = listOf("ROLE_USE_OF_FORCE")))
         .exchange()
         .expectStatus().isOk
         .expectBody().json("[]")
@@ -146,17 +134,24 @@ class UserResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `get user by first name and last name`() {
-      webTestClient.get().uri {
-        it.path("/users/staff")
-          .queryParam("firstName", "Marco")
-          .queryParam("lastName", "Rossi").build()
-      }
-        .headers(setAuthorisation(roles = listOf("ROLE_USE_OF_FORCE")))
+      spec().headers(setAuthorisation(roles = listOf("ROLE_USE_OF_FORCE")))
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("$").isArray
-        .jsonPath(matchByUserName, "marco.rossi").exists()
+        .jsonPath("$").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).contains("marco.rossi")
+        }
+    }
+
+    @Test
+    fun `get user returns email addresses too`() {
+      spec().headers(setAuthorisation(roles = listOf("ROLE_USE_OF_FORCE")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["email"] }).contains("marco@justice.gov.uk")
+        }
     }
   }
 

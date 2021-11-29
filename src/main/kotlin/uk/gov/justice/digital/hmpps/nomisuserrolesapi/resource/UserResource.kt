@@ -26,6 +26,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
 import javax.validation.constraints.NotEmpty
@@ -158,7 +159,7 @@ class UserResource(
       description = "The last name to match. Case insensitive",
       example = "Bloggs"
     ) @RequestParam @NotEmpty lastName: String
-  ): List<UserSummary> {
+  ): List<UserSummaryWithEmail> {
     return userService.findUsersByFirstAndLastNames(firstName, lastName)
   }
 

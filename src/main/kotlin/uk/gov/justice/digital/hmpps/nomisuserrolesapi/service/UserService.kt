@@ -22,6 +22,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserRoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountProfile
@@ -35,11 +36,12 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleReposit
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.changePasswordWithValidation
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.toUserSummary
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.toUserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.mapUserSummarySortProperties
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toStaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserRoleDetail
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserSummary
 import java.util.function.Supplier
 import java.util.stream.Collectors
 
@@ -65,9 +67,9 @@ class UserService(
       .orElseThrow(UserNotFoundException("User $username not found"))
 
   @Transactional(readOnly = true)
-  fun findUsersByFirstAndLastNames(firstName: String, lastName: String): List<UserSummary> =
+  fun findUsersByFirstAndLastNames(firstName: String, lastName: String): List<UserSummaryWithEmail> =
     userPersonDetailRepository.findAllByStaff_FirstNameIgnoreCaseAndStaff_LastNameIgnoreCase(firstName, lastName)
-      .map { it.toUserSummary() }
+      .map { it.toUserSummaryWithEmail() }
 
   @Transactional(readOnly = true)
   fun findAllByEmailAddress(emailAddress: String): List<UserDetail> =

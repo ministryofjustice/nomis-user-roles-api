@@ -1,7 +1,12 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
+import org.apache.commons.text.WordUtils
 import org.hibernate.Hibernate
 import org.hibernate.annotations.Where
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.PrisonCaseload
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummaryWithEmail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.AbbreviationsProcessor
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.CaseloadNotFoundException
 import java.time.LocalDate.now
 import java.util.function.Supplier
@@ -145,3 +150,36 @@ class CaseloadAlreadyExistsException(message: String?) :
     return CaseloadAlreadyExistsException(message)
   }
 }
+
+fun UserPersonDetail.toUserSummaryWithEmail() = UserSummaryWithEmail(
+  username = username,
+  staffId = staff.staffId,
+  firstName = staff.firstName.capitalizeFully(),
+  lastName = staff.lastName.capitalizeFully(),
+  active = staff.isActive,
+  activeCaseload = activeCaseLoad?.let { caseload ->
+    PrisonCaseload(
+      id = caseload.id,
+      name = caseload.name.capitalizeLeavingAbbreviations()
+    )
+  },
+  email = staff.primaryEmail()?.email,
+)
+
+fun UserPersonDetail.toUserSummary(): UserSummary = UserSummary(
+  username = this.username,
+  staffId = this.staff.staffId,
+  firstName = this.staff.firstName.capitalizeFully(),
+  lastName = this.staff.lastName.capitalizeFully(),
+  active = this.staff.isActive,
+  activeCaseload = this.activeCaseLoad?.let { caseload ->
+    PrisonCaseload(
+      id = caseload.id,
+      name = caseload.name.capitalizeLeavingAbbreviations()
+    )
+  },
+  dpsRoleCount = this.dpsRoles.size,
+)
+
+private fun String.capitalizeFully() = WordUtils.capitalizeFully(this)
+private fun String.capitalizeLeavingAbbreviations() = AbbreviationsProcessor.capitalizeLeavingAbbreviations(this)
