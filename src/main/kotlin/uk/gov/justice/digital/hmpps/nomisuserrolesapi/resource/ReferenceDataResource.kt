@@ -28,26 +28,4 @@ class ReferenceDataResource(private val referenceDataService: ReferenceDataServi
     ]
   )
   fun getCaseload(): List<PrisonCaseload> = referenceDataService.getActiveGeneralCaseloads()
-
-  @GetMapping("/email-domains")
-  @Operation(
-    summary = "Retrieves all valid email domains",
-    description = "Retrieves all the valid email domains",
-    responses = [
-      ApiResponse(
-        responseCode = "401",
-        description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      ),
-    ]
-  )
-  fun getActiveEmailDomains(): List<EmailDomain> = referenceDataService.getActiveEmailDomains()
-    .map { EmailDomain(it.domainCodeIdentifier.code, it.description) }
 }
-
-data class EmailDomain(
-  @Schema(description = "Code for email domain", example = "GEOAMEY")
-  val code: String,
-  @Schema(description = "Email domain", example = "geoamey.co.uk")
-  val domain: String,
-)
