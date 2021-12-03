@@ -84,7 +84,7 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
 
       webTestClient.get().uri("/users/LOCKING_USER1")
-        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES")))
         .exchange()
         .expectStatus().isOk
         .expectBody()
@@ -115,7 +115,7 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
 
       webTestClient.get().uri("/users/LOCKING_USER1")
-        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES")))
         .exchange()
         .expectStatus().isOk
         .expectBody()
@@ -199,7 +199,7 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         .jsonPath("primaryEmail").isEqualTo("newtest@test.com")
 
       webTestClient.get().uri("/users/TEST_DATA_USER1")
-        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES")))
         .exchange()
         .expectStatus().isOk
         .expectBody()
@@ -389,7 +389,7 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
     fun `can change name of a user that does exist`() {
 
       webTestClient.get().uri("/users/TEST_DATA_USER1")
-        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES")))
         .exchange()
         .expectStatus().isOk
         .expectBody()
@@ -413,7 +413,7 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         .jsonPath("firstName").isEqualTo("NEWFIRSTNAME")
 
       webTestClient.get().uri("/users/TEST_DATA_USER1")
-        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES")))
         .exchange()
         .expectStatus().isOk
         .expectBody()

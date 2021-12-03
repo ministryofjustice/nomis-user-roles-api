@@ -59,7 +59,7 @@ class UserResourceIntTest : IntegrationTestBase() {
     fun `get user not found`() {
 
       webTestClient.get().uri("/users/dummy")
-        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES")))
         .exchange()
         .expectStatus().isNotFound
     }
@@ -68,7 +68,7 @@ class UserResourceIntTest : IntegrationTestBase() {
     fun `get user`() {
 
       webTestClient.get().uri("/users/marco.rossi")
-        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES")))
         .exchange()
         .expectStatus().isOk
         .expectBody()
@@ -1020,7 +1020,7 @@ class UserResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
 
       webTestClient.get().uri("/users/TESTUSER3")
-        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES")))
         .exchange()
         .expectStatus().isNotFound
     }

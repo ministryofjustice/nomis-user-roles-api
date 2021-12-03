@@ -170,7 +170,7 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
         )
 
       webTestClient.get().uri("/users/TESTUSER2")
-        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES")))
         .exchange()
         .expectStatus().isOk
         .expectBody()
