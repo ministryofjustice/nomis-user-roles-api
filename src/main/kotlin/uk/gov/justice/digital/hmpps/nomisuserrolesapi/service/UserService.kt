@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Order
 import org.springframework.data.domain.Sort.by
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
@@ -34,6 +35,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.AccountDeta
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.CaseloadRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPasswordRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.changePasswordWithValidation
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.toUserSummary
@@ -54,7 +56,9 @@ class UserService(
   private val staffRepository: StaffRepository,
   private val roleRepository: RoleRepository,
   private val telemetryClient: TelemetryClient,
-  private val authenticationFacade: AuthenticationFacade
+  private val authenticationFacade: AuthenticationFacade,
+  private val passwordEncoder: PasswordEncoder,
+  private val userPasswordRepository: UserPasswordRepository,
 ) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -598,6 +602,9 @@ class UserService(
     userPersonDetailRepository.createUser(username, generatePassword(), profile.name)
     userPersonDetailRepository.expirePassword(username)
   }
+
+  fun authenticateUser(username: String, password: String): Boolean =
+    passwordEncoder.matches(password, userPasswordRepository.findByIdOrNull(username)?.password)
 }
 
 private fun Pageable.withSort(sortMapper: (sortProperty: String) -> String): Pageable {
