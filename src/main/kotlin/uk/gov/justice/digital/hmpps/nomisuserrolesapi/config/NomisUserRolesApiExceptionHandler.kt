@@ -5,6 +5,7 @@ import org.springframework.beans.TypeMismatchException
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
+import org.springframework.http.HttpStatus.UNAUTHORIZED
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -15,6 +16,7 @@ import org.springframework.web.reactive.function.client.WebClientException
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.CaseloadAlreadyExistsException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.InvalidRoleAssignmentException
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource.UnauthorisedException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.CaseloadNotFoundException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.PasswordTooShortException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.PasswordValidationException
@@ -248,6 +250,20 @@ class NomisUserRolesApiExceptionHandler {
           userMessage = e.message,
           developerMessage = e.message,
           errorCode = PASSWORD_NOT_ACCEPTABLE,
+        )
+      )
+  }
+
+  @ExceptionHandler(UnauthorisedException::class)
+  fun unauthorisedException(e: UnauthorisedException): ResponseEntity<ErrorResponse> {
+    log.debug("Authentication failed (401) returned {}", e.message)
+    return ResponseEntity
+      .status(UNAUTHORIZED)
+      .body(
+        ErrorResponse(
+          status = UNAUTHORIZED.value(),
+          userMessage = e.message,
+          developerMessage = e.message,
         )
       )
   }

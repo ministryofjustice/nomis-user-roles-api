@@ -12,6 +12,7 @@ import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -22,6 +23,8 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
 import javax.validation.Valid
 import javax.validation.constraints.Email
+import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
 
@@ -262,6 +265,41 @@ class UserManagementResource(
       lastName = nameDetails.lastName
     )
   }
+
+  @Operation(
+    summary = "Authenticate a username and password against Delius Identity (LDAP)",
+    security = [SecurityRequirement(name = "ROLE_MANAGE_NOMIS_USER_ACCOUNT")],
+    responses = [
+      ApiResponse(
+        responseCode = "400",
+        description = "Invalid request",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Requires role ROLE_MANAGE_NOMIS_USER_ACCOUNT",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      )
+    ],
+    requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
+      content = [
+        Content(
+          mediaType = "application/json",
+          schema = Schema(implementation = Authentication::class)
+        )
+      ]
+    ),
+
+  )
+  @PreAuthorize("hasRole('ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
+  @PostMapping("{username}/authenticate")
+  fun authenticate(
+    @PathVariable username: String,
+    @RequestBody user: @NotNull @Valid Authentication,
+  ) {
+    if (!userService.authenticateUser(username, user.password))
+      throw UnauthorisedException("User with username $username failed authentication")
+  }
 }
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -277,4 +315,13 @@ data class NameDetail(
     regexp = "^[A-Za-z]{1,35}$",
     message = "Last name must consist of alphabetical characters only and a max 35 chars"
   ) val lastName: String,
+)
+
+class UnauthorisedException(message: String) : Exception(message)
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(description = "Authentication Details")
+data class Authentication(
+  @Schema(description = "Password", example = "password123456", required = true)
+  val password: @NotBlank String,
 )
