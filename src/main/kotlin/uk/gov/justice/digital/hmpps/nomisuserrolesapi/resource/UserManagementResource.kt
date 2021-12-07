@@ -267,12 +267,17 @@ class UserManagementResource(
   }
 
   @Operation(
-    summary = "Authenticate a username and password against Delius Identity (LDAP)",
+    summary = "Authenticate a username and password against NOMIS database",
     security = [SecurityRequirement(name = "ROLE_MANAGE_NOMIS_USER_ACCOUNT")],
     responses = [
       ApiResponse(
         responseCode = "400",
         description = "Invalid request",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Authentication failed. Either no access token was provided or the username / password combination is incorrect",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
       ),
       ApiResponse(
