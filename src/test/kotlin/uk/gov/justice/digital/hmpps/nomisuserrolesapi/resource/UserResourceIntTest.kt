@@ -65,7 +65,7 @@ class UserResourceIntTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `get user`() {
+    fun `get user with role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN`() {
 
       webTestClient.get().uri("/users/marco.rossi")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
@@ -75,6 +75,28 @@ class UserResourceIntTest : IntegrationTestBase() {
         .jsonPath("username").isEqualTo("marco.rossi")
         .jsonPath("firstName").isEqualTo("Marco")
         .jsonPath("lastName").isEqualTo("Rossi")
+        .jsonPath("staffId").exists()
+    }
+
+    @Test
+    fun `get user with role ROLE_MAINTAIN_ACCESS_ROLES`() {
+
+      webTestClient.get().uri("/users/marco.rossi")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("staffId").exists()
+    }
+
+    @Test
+    fun `get user with role ROLE_MANAGE_NOMIS_USER_ACCOUNT`() {
+
+      webTestClient.get().uri("/users/marco.rossi")
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
         .jsonPath("staffId").exists()
     }
   }
