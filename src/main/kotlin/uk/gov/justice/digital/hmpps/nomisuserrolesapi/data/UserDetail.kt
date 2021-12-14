@@ -15,23 +15,27 @@ data class UserDetail(
   @Schema(description = "First name of the user", example = "John", required = true) val firstName: String,
   @Schema(description = "Last name of the user", example = "Smith", required = true) val lastName: String,
   @Schema(description = "Active Caseload of the user", example = "BXI", required = false) val activeCaseloadId: String?,
-  @Schema(description = "Indicates that the user is active", example = "true", required = true) val active: Boolean,
   @Schema(description = "Status of the user", example = "OPEN", required = true) val accountStatus: AccountStatus?,
   @Schema(description = "Type of user account", example = "GENERAL", required = true) val accountType: UsageType = UsageType.GENERAL,
   @Schema(description = "Email addresses of user", example = "test@test.com", required = false) val primaryEmail: String?,
-  @Schema(description = "List of associated DPS Role Codes", required = false) val dpsRoleCodes: List<String>
+  @Schema(description = "List of associated DPS Role Codes", required = false) val dpsRoleCodes: List<String>,
+  @Schema(description = "Account is not locked", required = true) val isAccountNonLocked: Boolean,
+  @Schema(description = "Credentials are not expired flag", required = true) val isCredentialsNonExpired: Boolean,
+  @Schema(description = "User is enabled flag", required = true) val isEnabled: Boolean
 ) {
-  constructor(userPersonDetail: UserPersonDetail, accountDetail: AccountDetail) :
+  constructor(userPersonDetail: UserPersonDetail, accountDetail: AccountDetail, isAccountNonLocked: Boolean, isCredentialsNonExpired: Boolean, isEnabled: Boolean) :
     this(
       username = userPersonDetail.username,
       staffId = userPersonDetail.staff.staffId,
       firstName = userPersonDetail.staff.firstName,
       lastName = userPersonDetail.staff.lastName,
       activeCaseloadId = userPersonDetail.activeCaseLoad?.id,
-      active = userPersonDetail.staff.isActive,
       accountStatus = accountDetail.status,
       accountType = userPersonDetail.type,
       primaryEmail = userPersonDetail.staff.primaryEmail()?.email,
-      dpsRoleCodes = userPersonDetail.dpsRoles.map { it.role.code }
+      dpsRoleCodes = userPersonDetail.dpsRoles.map { it.role.code },
+      isAccountNonLocked = isAccountNonLocked,
+      isCredentialsNonExpired = isCredentialsNonExpired,
+      isEnabled = isEnabled
     )
 }

@@ -27,6 +27,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountProfile
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.DPS_CASELOAD
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
@@ -44,6 +45,8 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.mapUserSum
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toStaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserRoleDetail
+import java.time.LocalDateTime
+import java.util.EnumSet
 import java.util.function.Supplier
 import java.util.stream.Collectors
 
@@ -545,8 +548,34 @@ class UserService(
     )
   }
 
-  private fun toUserDetail(user: UserPersonDetail) =
-    UserDetail(user, accountDetailRepository.findById(user.username).orElse(AccountDetail(username = user.username)))
+  private fun toUserDetail(user: UserPersonDetail): UserDetail {
+    val accountDetail = accountDetailRepository.findById(user.username).orElse(AccountDetail(username = user.username))
+    return UserDetail(
+      user,
+      accountDetail,
+      isAccountNonLocked(accountDetail.status),
+      isCredentialsNonExpired(accountDetail),
+      isEnabled(user, accountDetail.status)
+    )
+  }
+
+  fun isAccountNonLocked(accountStatus: AccountStatus): Boolean =
+    EnumSet.of(AccountStatus.OPEN, AccountStatus.EXPIRED, AccountStatus.EXPIRED_GRACE)
+      .contains(accountStatus)
+
+  fun isCredentialsNonExpired(accountDetail: AccountDetail): Boolean {
+    val statusNonExpired =
+      !EnumSet.of(AccountStatus.EXPIRED, AccountStatus.EXPIRED_LOCKED, AccountStatus.EXPIRED_LOCKED_TIMED).contains(
+        accountDetail.status
+      )
+    val passwordExpiry = accountDetail.passwordExpiry
+    return statusNonExpired && (passwordExpiry == null || passwordExpiry.isAfter(LocalDateTime.now()))
+  }
+
+  fun isEnabled(user: UserPersonDetail, accountStatus: AccountStatus): Boolean {
+    return user.staff.isActive && EnumSet.of(AccountStatus.OPEN, AccountStatus.EXPIRED, AccountStatus.EXPIRED_GRACE)
+      .contains(accountStatus)
+  }
 
   private fun checkIfAccountAlreadyExists(username: String) {
     userPersonDetailRepository.findById(username.uppercase())

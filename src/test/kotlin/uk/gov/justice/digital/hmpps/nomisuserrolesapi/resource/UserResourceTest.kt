@@ -23,11 +23,13 @@ class UserResourceTest {
     staffId = 1,
     firstName = "John",
     lastName = "Smith",
-    active = true,
     activeCaseloadId = "BXI",
     accountStatus = AccountStatus.OPEN,
     primaryEmail = "test@test.com",
-    dpsRoleCodes = listOf("ROLE_GLOBAL_SEARCH", "ROLE_ROLES_ADMIN")
+    dpsRoleCodes = listOf("ROLE_GLOBAL_SEARCH", "ROLE_ROLES_ADMIN"),
+    isAccountNonLocked = true,
+    isCredentialsNonExpired = true,
+    isEnabled = true
   )
 
   @Test
