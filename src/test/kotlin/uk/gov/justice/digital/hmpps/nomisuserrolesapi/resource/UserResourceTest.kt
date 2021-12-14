@@ -27,9 +27,9 @@ class UserResourceTest {
     accountStatus = AccountStatus.OPEN,
     primaryEmail = "test@test.com",
     dpsRoleCodes = listOf("ROLE_GLOBAL_SEARCH", "ROLE_ROLES_ADMIN"),
-    isAccountNonLocked = true,
-    isCredentialsNonExpired = true,
-    isEnabled = true
+    accountNonLocked = true,
+    credentialsNonExpired = true,
+    enabled = true
   )
 
   @Test

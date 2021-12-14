@@ -19,11 +19,11 @@ data class UserDetail(
   @Schema(description = "Type of user account", example = "GENERAL", required = true) val accountType: UsageType = UsageType.GENERAL,
   @Schema(description = "Email addresses of user", example = "test@test.com", required = false) val primaryEmail: String?,
   @Schema(description = "List of associated DPS Role Codes", required = false) val dpsRoleCodes: List<String>,
-  @Schema(description = "Account is not locked", required = true) val isAccountNonLocked: Boolean,
-  @Schema(description = "Credentials are not expired flag", required = true) val isCredentialsNonExpired: Boolean,
-  @Schema(description = "User is enabled flag", required = true) val isEnabled: Boolean
+  @Schema(description = "Account is not locked", required = true) val accountNonLocked: Boolean,
+  @Schema(description = "Credentials are not expired flag", required = true) val credentialsNonExpired: Boolean,
+  @Schema(description = "User is enabled flag", required = true) val enabled: Boolean
 ) {
-  constructor(userPersonDetail: UserPersonDetail, accountDetail: AccountDetail, isAccountNonLocked: Boolean, isCredentialsNonExpired: Boolean, isEnabled: Boolean) :
+  constructor(userPersonDetail: UserPersonDetail, accountDetail: AccountDetail, accountNonLocked: Boolean, credentialsNonExpired: Boolean, enabled: Boolean) :
     this(
       username = userPersonDetail.username,
       staffId = userPersonDetail.staff.staffId,
@@ -34,8 +34,8 @@ data class UserDetail(
       accountType = userPersonDetail.type,
       primaryEmail = userPersonDetail.staff.primaryEmail()?.email,
       dpsRoleCodes = userPersonDetail.dpsRoles.map { it.role.code },
-      isAccountNonLocked = isAccountNonLocked,
-      isCredentialsNonExpired = isCredentialsNonExpired,
-      isEnabled = isEnabled
+      accountNonLocked = accountNonLocked,
+      credentialsNonExpired = credentialsNonExpired,
+      enabled = enabled
     )
 }
