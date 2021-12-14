@@ -64,7 +64,6 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           "firstName": "LAA",
           "lastName": "USER",
           "activeCaseloadId" : "PVI",
-          "active": true,
           "accountStatus": "EXPIRED",
           "primaryEmail": "laa@test.com",
           "accountType": "ADMIN"
@@ -98,7 +97,6 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           "firstName": "LAA",
           "lastName": "USER",
           "activeCaseloadId" : "WWI",
-          "active": true,
           "accountStatus": "EXPIRED",
           "primaryEmail": "laa@test.com",
           "accountType": "ADMIN"
@@ -161,7 +159,6 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           "firstName": "TEST",
           "lastName": "USER",
           "activeCaseloadId" : "CADM_I",
-          "active": true,
           "accountStatus": "EXPIRED",
           "primaryEmail": "test@test.com",
           "accountType": "ADMIN"
