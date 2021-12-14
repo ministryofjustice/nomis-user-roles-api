@@ -16,10 +16,10 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountProfile
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPassword
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.AccountDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.CaseloadRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleRepository
@@ -127,15 +127,19 @@ internal class UserServiceTest {
       // Given
       val activeUser = UserPersonDetail(
         username = "raj.maki",
-        staff = Staff(staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
-          status = "ACTIVE"),
+        staff = Staff(
+          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
+          status = "ACTIVE"
+        ),
         type = UsageType.GENERAL,
         activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)")
       )
       val inactiveUser = UserPersonDetail(
         username = "raj.maki",
-        staff = Staff(staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
-          status = "INACTIVE"),
+        staff = Staff(
+          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
+          status = "INACTIVE"
+        ),
         type = UsageType.GENERAL,
         activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)")
       )
