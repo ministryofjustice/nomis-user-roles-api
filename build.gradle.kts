@@ -36,7 +36,7 @@ dependencies {
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
 
   implementation("com.zaxxer:HikariCP:5.0.0")
-  runtimeOnly("com.h2database:h2:1.4.200")
+  runtimeOnly("com.h2database:h2:2.0.202")
   runtimeOnly("com.oracle.database.jdbc:ojdbc10:19.12.0.0")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
