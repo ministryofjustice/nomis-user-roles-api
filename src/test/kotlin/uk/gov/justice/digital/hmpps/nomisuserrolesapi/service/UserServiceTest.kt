@@ -168,14 +168,14 @@ internal class UserServiceTest {
     @Test
     fun `isAdmin`() {
       val accountDetailIsAdmin = AccountDetail(
-              "user",
-              profile = AccountProfile.TAG_ADMIN.name
+        "user",
+        profile = AccountProfile.TAG_ADMIN.name
       )
       assertThat(userService.isAdmin(accountDetailIsAdmin)).isTrue
 
       val accountDetailIsNotAdmin = AccountDetail(
-              "user",
-              profile = AccountProfile.TAG_GENERAL.name
+        "user",
+        profile = AccountProfile.TAG_GENERAL.name
       )
       assertThat(userService.isAdmin(accountDetailIsNotAdmin)).isFalse
     }
