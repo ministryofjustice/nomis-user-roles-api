@@ -555,7 +555,8 @@ class UserService(
       accountDetail,
       isAccountNonLocked(accountDetail.status),
       isCredentialsNonExpired(accountDetail),
-      isEnabled(user, accountDetail.status)
+      isEnabled(user, accountDetail.status),
+      isAdmin(accountDetail)
     )
   }
 
@@ -576,6 +577,8 @@ class UserService(
     return user.staff.isActive && EnumSet.of(AccountStatus.OPEN, AccountStatus.EXPIRED, AccountStatus.EXPIRED_GRACE)
       .contains(accountStatus)
   }
+
+  fun isAdmin(accountDetail: AccountDetail): Boolean = accountDetail.accountProfile === AccountProfile.TAG_ADMIN
 
   private fun checkIfAccountAlreadyExists(username: String) {
     userPersonDetailRepository.findById(username.uppercase())
