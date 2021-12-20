@@ -21,9 +21,10 @@ data class UserDetail(
   @Schema(description = "List of associated DPS Role Codes", required = false) val dpsRoleCodes: List<String>,
   @Schema(description = "Account is not locked", required = true) val accountNonLocked: Boolean,
   @Schema(description = "Credentials are not expired flag", required = true) val credentialsNonExpired: Boolean,
-  @Schema(description = "User is enabled flag", required = true) val enabled: Boolean
+  @Schema(description = "User is enabled flag", required = true) val enabled: Boolean,
+  @Schema(description = "User is admin flag", required = true) val admin: Boolean
 ) {
-  constructor(userPersonDetail: UserPersonDetail, accountDetail: AccountDetail, accountNonLocked: Boolean, credentialsNonExpired: Boolean, enabled: Boolean) :
+  constructor(userPersonDetail: UserPersonDetail, accountDetail: AccountDetail, accountNonLocked: Boolean, credentialsNonExpired: Boolean, enabled: Boolean, admin: Boolean) :
     this(
       username = userPersonDetail.username,
       staffId = userPersonDetail.staff.staffId,
@@ -36,6 +37,7 @@ data class UserDetail(
       dpsRoleCodes = userPersonDetail.dpsRoles.map { it.role.code },
       accountNonLocked = accountNonLocked,
       credentialsNonExpired = credentialsNonExpired,
-      enabled = enabled
+      enabled = enabled,
+      admin = admin
     )
 }

@@ -29,7 +29,8 @@ class UserResourceTest {
     dpsRoleCodes = listOf("ROLE_GLOBAL_SEARCH", "ROLE_ROLES_ADMIN"),
     accountNonLocked = true,
     credentialsNonExpired = true,
-    enabled = true
+    enabled = true,
+    admin = false
   )
 
   @Test
