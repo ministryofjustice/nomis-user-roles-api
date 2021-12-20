@@ -16,7 +16,7 @@ class InfoTest : IntegrationTestBase() {
       .expectStatus()
       .isOk
       .expectBody()
-      .jsonPath("app.name").isEqualTo("Nomis User Roles Api")
+      .jsonPath("build.name").isEqualTo("nomis-user-roles-api")
   }
 
   @Test
