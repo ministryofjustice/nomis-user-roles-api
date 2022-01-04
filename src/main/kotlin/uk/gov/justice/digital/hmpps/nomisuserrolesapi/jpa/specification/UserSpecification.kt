@@ -4,6 +4,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Role
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadPk
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadRole
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroup
@@ -100,6 +101,19 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     fun caseload(caseloadId: String): Predicate =
       equal(join(UserPersonDetail::caseloads).get(Caseload::id).get(UserCaseloadPk::caseloadId), caseloadId)
 
+    fun nomisRoles(caseloadId: String, roleCode: String): Predicate {
+      val userCaseload = join(UserPersonDetail::caseloads)
+      return and(
+        equal(userCaseload.get(Caseload::id).get(UserCaseloadPk::caseloadId), caseloadId),
+        equal(userCaseload.join(UserCaseload::roles).get(UserCaseloadRole::role).get(Role::code), roleCode)
+      )
+    }
+
+    fun nomisRoles(roleCode: String): Predicate =
+      and(
+        equal(join(UserPersonDetail::caseloads).join(UserCaseload::roles).get(UserCaseloadRole::role).get(Role::code), roleCode)
+      )
+
     fun roles(roleCodes: List<String>): Predicate =
       and(
         * roleCodes.map {
@@ -124,7 +138,15 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     }
 
     filter.caseloadId?.run {
-      predicates.add(caseload(this))
+      filter.nomisRoleCode?.run {
+        predicates.add(nomisRoles(filter.caseloadId, this))
+      }
+        ?: predicates.add(caseload(this))
+    }
+
+    filter.nomisRoleCode?.run {
+      filter.caseloadId
+        ?: predicates.add(nomisRoles(this))
     }
 
     filter.roleCodes.takeIf { it.isEmpty().not() }?.run {

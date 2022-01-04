@@ -8,5 +8,6 @@ data class UserFilter(
   val status: UserStatus? = null,
   val activeCaseloadId: String? = null,
   val caseloadId: String? = null,
-  val roleCodes: List<String> = listOf()
+  val roleCodes: List<String> = listOf(),
+  val nomisRoleCode: String? = null
 )
