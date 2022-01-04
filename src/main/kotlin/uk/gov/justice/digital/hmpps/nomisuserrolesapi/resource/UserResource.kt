@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -31,6 +32,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
+import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotEmpty
 import javax.validation.constraints.Size
 
@@ -106,6 +108,39 @@ class UserResource(
     @PathVariable @Size(max = 30, min = 1, message = "username must be between 1 and 30") username: String
   ): UserDetail =
     userService.findByUsername(username)
+
+  @PreAuthorize("hasAnyRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN', 'ROLE_MAINTAIN_ACCESS_ROLES', 'ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
+  @GetMapping("/{username}/emailAddresses")
+  @Operation(
+    summary = "Get email addresses for a user",
+    description = "Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES or ROLE_MANAGE_NOMIS_USER_ACCOUNT",
+    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES"), SecurityRequirement(name = "ROLE_MANAGE_NOMIS_USER_ACCOUNT")],
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Set of email addresses for a user",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to get user information",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to get a user",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      )
+    ]
+  )
+  fun findAllEmailAddressesByUsername(
+    @Schema(description = "Username", example = "testuser1", required = true)
+    @PathVariable @Size(max = 30, min = 1, message = "username must be between 1 and 30") username: String
+  ): EmailAddresses = EmailAddresses(userService.findAllEmailAddressesByUsername(username))
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @GetMapping("/staff/{staffId}")
@@ -269,3 +304,10 @@ class UserResource(
 }
 
 private fun String?.nonBlank() = if (this.isNullOrBlank()) null else this
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(description = "Email Addresses")
+data class EmailAddresses(
+  @Schema(description = "Email addresses", example = "jim@smith.com", required = true)
+  val emailAddresses: @NotBlank Set<String>,
+)

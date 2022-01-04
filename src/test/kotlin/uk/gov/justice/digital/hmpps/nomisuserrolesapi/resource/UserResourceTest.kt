@@ -74,4 +74,12 @@ class UserResourceTest {
     val userDetails = userResource.findUsersByEmailAddressAndUsernames("test@test.com", listOf("bob", "fred"))
     assertThat(userDetails).containsExactly(user)
   }
+
+  @Test
+  fun `Get email addresses by username`() {
+    whenever(userService.findAllEmailAddressesByUsername(any())).thenReturn(setOf("test@test.com"))
+
+    val emailAddresses = userResource.findAllEmailAddressesByUsername("testuser1")
+    assertThat(emailAddresses).isEqualTo(EmailAddresses(setOf("test@test.com")))
+  }
 }

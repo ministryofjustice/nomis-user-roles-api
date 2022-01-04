@@ -4,6 +4,7 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
@@ -16,6 +17,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountProfile
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.EmailAddress
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPassword
@@ -71,6 +73,57 @@ internal class UserServiceTest {
     fun `not found in database`() {
       assertThat(userService.authenticateUser("user", "pass")).isFalse
       verify(passwordEncoder).matches("pass", null)
+    }
+  }
+
+  @Nested
+  internal inner class findAllEmailAddressesByUsername {
+    @Test
+    fun `returns all email addresses`() {
+      val staff = Staff(firstName = "RAJ BOB", lastName = "MAKI", status = "ACTIVE")
+      whenever(userPersonDetailRepository.findById(anyString())).thenReturn(
+        Optional.of(
+          UserPersonDetail(
+            username = "raj.maki",
+            type = UsageType.GENERAL,
+            staff = staff.copy(
+              emails = mutableListOf(
+                EmailAddress(email = "joe@bob.com", staff = staff),
+                EmailAddress(email = "bloggs@justice.gov.uk", staff = staff)
+              )
+            )
+          )
+        )
+      )
+
+      assertThat(userService.findAllEmailAddressesByUsername("raj.maki")).containsOnly("joe@bob.com", "bloggs@justice.gov.uk")
+    }
+
+    @Test
+    fun `returns email addresses in lowercase`() {
+      val staff = Staff(firstName = "RAJ BOB", lastName = "MAKI", status = "ACTIVE")
+      whenever(userPersonDetailRepository.findById(anyString())).thenReturn(
+        Optional.of(
+          UserPersonDetail(
+            username = "raj.maki",
+            type = UsageType.GENERAL,
+            staff = staff.copy(
+              emails = mutableListOf(
+                EmailAddress(email = "JOE@BOB.COM", staff = staff)
+              )
+            )
+          )
+        )
+      )
+
+      assertThat(userService.findAllEmailAddressesByUsername("raj.maki")).containsOnly("joe@bob.com")
+    }
+
+    @Test
+    fun `throws exception if user is not found`() {
+      whenever(userPersonDetailRepository.findById(anyString())).thenReturn(Optional.empty())
+
+      assertThatThrownBy { userService.findAllEmailAddressesByUsername("raj.maki") }.isInstanceOf(UserNotFoundException::class.java)
     }
   }
 

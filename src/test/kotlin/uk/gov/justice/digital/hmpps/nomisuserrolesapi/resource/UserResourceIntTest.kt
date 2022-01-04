@@ -101,6 +101,88 @@ class UserResourceIntTest : IntegrationTestBase() {
     }
   }
 
+  @DisplayName("GET /users/{username}/emailAddresses")
+  @Nested
+  inner class FindAllEmailAddressesByUsername {
+    @BeforeEach
+    internal fun createUsers() {
+      with(dataBuilder) {
+        generalUser()
+          .username("marco.rossi")
+          .firstName("Marco")
+          .lastName("Rossi")
+          .email("marco@justice.gov.uk")
+          .buildAndSave()
+      }
+    }
+
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    fun `access forbidden when no authority`() {
+      webTestClient.get().uri("/users/marco.rossi/emailAddresses")
+        .exchange()
+        .expectStatus().isUnauthorized
+    }
+
+    @Test
+    fun `access forbidden when no role`() {
+
+      webTestClient.get().uri("/users/marco.rossi/emailAddresses")
+        .headers(setAuthorisation(roles = listOf()))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `get user forbidden with wrong role`() {
+
+      webTestClient.get().uri("/users/marco.rossi/emailAddresses")
+        .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `get user not found`() {
+      webTestClient.get().uri("/users/dummy/emailAddresses")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isNotFound
+    }
+
+    @Test
+    fun `get user with role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN`() {
+      webTestClient.get().uri("/users/marco.rossi/emailAddresses")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("emailAddresses").exists()
+    }
+
+    @Test
+    fun `get user with role ROLE_MAINTAIN_ACCESS_ROLES`() {
+      webTestClient.get().uri("/users/marco.rossi/emailAddresses")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("emailAddresses").exists()
+    }
+
+    @Test
+    fun `get user with role ROLE_MANAGE_NOMIS_USER_ACCOUNT`() {
+      webTestClient.get().uri("/users/marco.rossi/emailAddresses")
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("emailAddresses").exists()
+    }
+  }
+
   @DisplayName("GET /users/staff?firstName={firstName}&lastName={lastName}")
   @Nested
   inner class GetUserByFirstNameAndLastName {

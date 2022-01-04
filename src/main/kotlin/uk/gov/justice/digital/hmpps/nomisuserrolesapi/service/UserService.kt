@@ -96,6 +96,12 @@ class UserService(
     userPersonDetailRepository.findAll(UserSpecification(filter), pageRequest.withSort(::mapUserSummarySortProperties))
       .map { it.toUserSummary() }
 
+  @Transactional(readOnly = true)
+  fun findAllEmailAddressesByUsername(username: String): Set<String> =
+    userPersonDetailRepository.findById(username)
+      .map { user -> user.staff.emails.map { staffEmail -> staffEmail.email.lowercase() }.toSet() }
+      .orElseThrow(UserNotFoundException("User $username not found"))
+
   fun createGeneralUser(createUserRequest: CreateGeneralUserRequest): UserSummary {
 
     checkIfAccountAlreadyExists(createUserRequest.username)
