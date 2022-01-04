@@ -236,6 +236,12 @@ class UserResource(
       example = "ADD_SENSITIVE_CASE_NOTES"
     )
     accessRoles: List<String>?,
+    @RequestParam(value = "nomisRole", required = false)
+    @Parameter(
+      description = "Filter will match users that have the NOMIS role specified, should be used with a caseloadId or will get duplicates",
+      example = "201"
+    )
+    nomisRole: String?,
     @RequestParam(value = "status", required = false, defaultValue = "ALL")
     @Parameter(
       description = "Limit to active / inactive / show all users",
@@ -261,6 +267,7 @@ class UserResource(
       activeCaseloadId = activeCaseload.nonBlank(),
       caseloadId = caseload.nonBlank(),
       roleCodes = accessRoles ?: listOf(),
+      nomisRoleCode = nomisRole
     ),
   )
 

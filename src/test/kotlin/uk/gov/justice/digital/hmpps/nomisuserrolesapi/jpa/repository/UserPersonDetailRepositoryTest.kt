@@ -759,6 +759,37 @@ class UserPersonDetailRepositoryTest {
         )
       }
       @Test
+      internal fun `will match only users that match the role belonging to NOMIS in specific caseload`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(nomisRoleCode = "GLOBAL_SEARCH", caseloadId = "MDI")), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "SAW.MICKEN",
+        )
+      }
+      @Test
+      internal fun `will match only users that match the role belonging to NOMIS for user with same role in multiple caseloads`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(nomisRoleCode = "300", caseloadId = "BXI")), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "LEOPOLDO.CHESED",
+          "SAWYL.ALYCIA",
+        )
+      }
+      @Test
+      internal fun `will match only users that match the role belonging to NOMIS for user regardless of caseload`() {
+        val users =
+          repository.findAll(UserSpecification(UserFilter(nomisRoleCode = "300")), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
+          "IBRAGIM.MIHAIL",
+          "MARIAN.CHESED",
+          "LEOPOLDO.CHESED",
+          "LEOPOLDO.CHESED",
+          "SAWYL.ALYCIA",
+          "SAW.MICKEN",
+          "BOB.SAW"
+        )
+      }
+      @Test
       internal fun `will match only users that match the all roles in filter belonging to DPS`() {
         val users =
           repository.findAll(UserSpecification(UserFilter(roleCodes = listOf("GLOBAL_SEARCH", "CREATE_CATEGORISATION"))), PageRequest.of(0, 10))
