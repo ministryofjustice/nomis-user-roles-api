@@ -22,9 +22,18 @@ data class UserDetail(
   @Schema(description = "Account is not locked", required = true) val accountNonLocked: Boolean,
   @Schema(description = "Credentials are not expired flag", required = true) val credentialsNonExpired: Boolean,
   @Schema(description = "User is enabled flag", required = true) val enabled: Boolean,
-  @Schema(description = "User is admin flag", required = true) val admin: Boolean
+  @Schema(description = "User is admin flag", required = true) val admin: Boolean,
+  @Schema(description = "User is active flag", required = true) val active: Boolean,
 ) {
-  constructor(userPersonDetail: UserPersonDetail, accountDetail: AccountDetail, accountNonLocked: Boolean, credentialsNonExpired: Boolean, enabled: Boolean, admin: Boolean) :
+  constructor(
+    userPersonDetail: UserPersonDetail,
+    accountDetail: AccountDetail,
+    accountNonLocked: Boolean,
+    credentialsNonExpired: Boolean,
+    enabled: Boolean,
+    admin: Boolean,
+    active: Boolean
+  ) :
     this(
       username = userPersonDetail.username,
       staffId = userPersonDetail.staff.staffId,
@@ -38,6 +47,7 @@ data class UserDetail(
       accountNonLocked = accountNonLocked,
       credentialsNonExpired = credentialsNonExpired,
       enabled = enabled,
-      admin = admin
+      admin = admin,
+      active = active,
     )
 }

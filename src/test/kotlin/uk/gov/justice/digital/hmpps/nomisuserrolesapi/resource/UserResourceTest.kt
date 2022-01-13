@@ -30,7 +30,8 @@ class UserResourceTest {
     accountNonLocked = true,
     credentialsNonExpired = true,
     enabled = true,
-    admin = false
+    admin = false,
+    active = true
   )
 
   @Test
