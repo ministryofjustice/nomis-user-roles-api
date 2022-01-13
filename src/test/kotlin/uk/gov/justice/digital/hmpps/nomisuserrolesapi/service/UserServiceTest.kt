@@ -180,6 +180,32 @@ internal class UserServiceTest {
       assertThat(userService.isAdmin(accountDetailIsNotAdmin)).isFalse
     }
 
+    @Test
+    fun `isActive`() {
+      // Given
+      val activeUser = UserPersonDetail(
+        username = "raj.maki",
+        staff = Staff(
+          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
+          status = "ACTIVE"
+        ),
+        type = UsageType.GENERAL,
+        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)")
+      )
+      assertThat(userService.isActive(activeUser)).isTrue
+
+      val inactiveUser = UserPersonDetail(
+        username = "raj.maki",
+        staff = Staff(
+          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
+          status = "INACTIVE"
+        ),
+        type = UsageType.GENERAL,
+        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)")
+      )
+      assertThat(userService.isActive(inactiveUser)).isFalse
+    }
+
     private fun filterSetFromAccountStatuses(accountStatusesToFilter: Set<AccountStatus>) =
       AccountStatus.values().filterNot { accountStatusesToFilter.contains(it) }
   }
