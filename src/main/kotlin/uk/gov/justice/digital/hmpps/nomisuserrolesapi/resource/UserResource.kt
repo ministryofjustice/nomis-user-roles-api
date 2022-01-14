@@ -164,6 +164,20 @@ class UserResource(
   ): List<UserSummaryWithEmail> = userService.findUsersByFirstAndLastNames(firstName, lastName)
 
   @PreAuthorize("hasRole('ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
+  @GetMapping("/all")
+  @Operation(
+    summary = "Get all active users",
+    description = "Requires role ROLE_MANAGE_NOMIS_USER_ACCOUNT",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "List of all active users",
+      )
+    ]
+  )
+  fun findActiveUsers(): List<UserSummaryWithEmail> = userService.findActiveUsers()
+
+  @PreAuthorize("hasRole('ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
   @GetMapping("/user")
   @Operation(
     summary = "Find users by their email address",

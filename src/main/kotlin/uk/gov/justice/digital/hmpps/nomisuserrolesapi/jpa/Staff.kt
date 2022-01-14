@@ -50,7 +50,7 @@ data class Staff(
     get() = STAFF_STATUS_ACTIVE == status
 
   companion object {
-    private const val STAFF_STATUS_ACTIVE = "ACTIVE"
+    internal const val STAFF_STATUS_ACTIVE = "ACTIVE"
   }
 
   fun setEmail(email: String) {

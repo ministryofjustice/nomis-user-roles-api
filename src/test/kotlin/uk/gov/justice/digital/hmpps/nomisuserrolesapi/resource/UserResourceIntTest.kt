@@ -434,6 +434,86 @@ class UserResourceIntTest : IntegrationTestBase() {
     }
   }
 
+  @DisplayName("GET /users/all")
+  @Nested
+  inner class GetActiveUsers {
+    @BeforeEach
+    internal fun createUsers() {
+      with(dataBuilder) {
+        generalUser().username("marco.rossi")
+          .firstName("Marco")
+          .lastName("Rossi")
+          .email("marco@justice.gov.uk")
+          .atPrison("WWI")
+          .buildAndSave()
+        generalUser().username("fred.smith")
+          .firstName("Fred")
+          .lastName("Smith")
+          .email("fred@justice.gov.uk")
+          .atPrison("MDI")
+          .buildAndSave()
+        generalUser().username("frederica.jones")
+          .firstName("Frederica")
+          .lastName("Jones")
+          .email("fred@justice.gov.uk")
+          .atPrison("WWI")
+          .buildAndSave()
+      }
+    }
+
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    fun `access forbidden when no authority`() {
+      webTestClient.get().uri {
+        it.path("/users/all").build()
+      }
+        .exchange()
+        .expectStatus().isUnauthorized
+    }
+
+    @Test
+    fun `access forbidden when no role`() {
+
+      webTestClient.get().uri {
+        it.path("/users/all").build()
+      }
+        .headers(setAuthorisation(roles = listOf()))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `get user forbidden with wrong role`() {
+
+      webTestClient.get().uri {
+        it.path("/users/all").build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `get all users`() {
+      webTestClient.get().uri {
+        it.path("/users/all").build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] })
+            .contains("fred.smith")
+            .contains("frederica.jones")
+            .contains("marco.rossi")
+            .hasSize(3)
+        }
+    }
+  }
+
   @DisplayName("GET /users/")
   @Nested
   inner class GetUser {
