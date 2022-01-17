@@ -434,7 +434,7 @@ class UserResourceIntTest : IntegrationTestBase() {
     }
   }
 
-  @DisplayName("GET /users/all")
+  @DisplayName("GET /users/active")
   @Nested
   inner class GetActiveUsers {
     @BeforeEach
@@ -457,6 +457,7 @@ class UserResourceIntTest : IntegrationTestBase() {
           .lastName("Jones")
           .email("fred@justice.gov.uk")
           .atPrison("WWI")
+          .inactive()
           .buildAndSave()
       }
     }
@@ -467,7 +468,7 @@ class UserResourceIntTest : IntegrationTestBase() {
     @Test
     fun `access forbidden when no authority`() {
       webTestClient.get().uri {
-        it.path("/users/all").build()
+        it.path("/users/active").build()
       }
         .exchange()
         .expectStatus().isUnauthorized
@@ -477,7 +478,7 @@ class UserResourceIntTest : IntegrationTestBase() {
     fun `access forbidden when no role`() {
 
       webTestClient.get().uri {
-        it.path("/users/all").build()
+        it.path("/users/active").build()
       }
         .headers(setAuthorisation(roles = listOf()))
         .exchange()
@@ -488,7 +489,7 @@ class UserResourceIntTest : IntegrationTestBase() {
     fun `get user forbidden with wrong role`() {
 
       webTestClient.get().uri {
-        it.path("/users/all").build()
+        it.path("/users/active").build()
       }
         .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
         .exchange()
@@ -496,9 +497,9 @@ class UserResourceIntTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `get all users`() {
+    fun `get all active users`() {
       webTestClient.get().uri {
-        it.path("/users/all").build()
+        it.path("/users/active").build()
       }
         .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
         .exchange()
@@ -507,9 +508,8 @@ class UserResourceIntTest : IntegrationTestBase() {
         .jsonPath("$").value<JSONArray> {
           assertThat(it.map { m -> (m as Map<*, *>)["username"] })
             .contains("fred.smith")
-            .contains("frederica.jones")
             .contains("marco.rossi")
-            .hasSize(3)
+            .hasSize(2)
         }
     }
   }

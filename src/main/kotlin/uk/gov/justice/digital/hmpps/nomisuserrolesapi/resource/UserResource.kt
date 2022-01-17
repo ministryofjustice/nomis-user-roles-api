@@ -164,7 +164,7 @@ class UserResource(
   ): List<UserSummaryWithEmail> = userService.findUsersByFirstAndLastNames(firstName, lastName)
 
   @PreAuthorize("hasRole('ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
-  @GetMapping("/all")
+  @GetMapping("/active")
   @Operation(
     summary = "Get all active users",
     description = "Requires role ROLE_MANAGE_NOMIS_USER_ACCOUNT",
