@@ -43,6 +43,32 @@ class UserResourceTest {
   }
 
   @Test
+  fun `Get all Active Users`() {
+    val user1 = UserSummaryWithEmail(
+      username = "testuser1",
+      staffId = 1,
+      firstName = "John",
+      lastName = "Smith",
+      active = true,
+      activeCaseload = PrisonCaseload("MDI", "Moorland"),
+      email = "joe@bloggs.com"
+    )
+    val user2 = UserSummaryWithEmail(
+      username = "testuser2",
+      staffId = 2,
+      firstName = "Jane",
+      lastName = "Jones",
+      active = true,
+      activeCaseload = PrisonCaseload("MDI", "Moorland"),
+      email = "jane@jones.com"
+    )
+    whenever(userService.findActiveUsers()).thenReturn(listOf(user1, user2))
+
+    val activeUsers = userResource.findActiveUsers()
+    assertThat(activeUsers).hasSize(2)
+  }
+
+  @Test
   fun `Get user by first name and last name`() {
     val user = UserSummaryWithEmail(
       username = "testuser1",
