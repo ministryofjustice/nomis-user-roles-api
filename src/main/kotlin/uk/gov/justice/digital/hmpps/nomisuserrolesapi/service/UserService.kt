@@ -79,11 +79,6 @@ class UserService(
       .map { it.toUserSummaryWithEmail() }
 
   @Transactional(readOnly = true)
-  fun findActiveUsers(): List<UserSummaryWithEmail> =
-    userPersonDetailRepository.findByStaff_StatusEquals(Staff.STAFF_STATUS_ACTIVE)
-      .map { it.toUserSummaryWithEmail() }
-
-  @Transactional(readOnly = true)
   fun findAllByEmailAddress(emailAddress: String): List<UserDetail> =
     userPersonDetailRepository.findByStaff_EmailsEmail(emailAddress)
       .map(this::toUserDetail)
