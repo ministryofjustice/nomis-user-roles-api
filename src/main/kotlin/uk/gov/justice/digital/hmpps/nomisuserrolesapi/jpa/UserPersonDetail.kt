@@ -163,6 +163,7 @@ fun UserPersonDetail.toUserSummaryWithEmail() = UserSummaryWithEmail(
       name = caseload.name.capitalizeLeavingAbbreviations()
     )
   },
+  dpsRoleCount = this.dpsRoles.size,
   email = staff.primaryEmail()?.email,
 )
 

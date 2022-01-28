@@ -92,9 +92,9 @@ class UserService(
   }
 
   @Transactional(readOnly = true)
-  fun findUsersByFilter(pageRequest: Pageable, filter: UserFilter): Page<UserSummary> =
+  fun findUsersByFilter(pageRequest: Pageable, filter: UserFilter): Page<UserSummaryWithEmail> =
     userPersonDetailRepository.findAll(UserSpecification(filter), pageRequest.withSort(::mapUserSummarySortProperties))
-      .map { it.toUserSummary() }
+      .map { it.toUserSummaryWithEmail() }
 
   fun createGeneralUser(createUserRequest: CreateGeneralUserRequest): UserSummary {
 
