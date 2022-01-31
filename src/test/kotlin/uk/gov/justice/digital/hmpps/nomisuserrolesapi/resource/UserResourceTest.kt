@@ -51,6 +51,7 @@ class UserResourceTest {
       lastName = "Smith",
       active = true,
       activeCaseload = PrisonCaseload("MDI", "Moorland"),
+      dpsRoleCount = 3,
       email = "joe@bloggs.com",
     )
 

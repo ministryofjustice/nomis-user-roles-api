@@ -474,6 +474,7 @@ class UserResourceIntTest : IntegrationTestBase() {
             .lastName("MOULIN")
             .atPrison("WWI")
             .dpsRoles(listOf("CREATE_CATEGORISATION", "GLOBAL_SEARCH"))
+            .email("abella@justice.gov.uk")
             .buildAndSave()
           generalUser()
             .username("marco.rossi")
@@ -481,6 +482,7 @@ class UserResourceIntTest : IntegrationTestBase() {
             .lastName("ROSSI")
             .atPrisons(listOf("WWI", "BXI")).inactive()
             .dpsRoles(listOf("APPROVE_CATEGORISATION", "GLOBAL_SEARCH"))
+            .email("marco@justice.gov.uk")
             .buildAndSave()
           generalUser()
             .username("mark.bowlan")
@@ -488,6 +490,7 @@ class UserResourceIntTest : IntegrationTestBase() {
             .lastName("BOWLAN")
             .atPrison("BXI")
             .dpsRoles(listOf("APPROVE_CATEGORISATION", "CREATE_CATEGORISATION", "GLOBAL_SEARCH"))
+            .email("mark@justice.gov.uk")
             .buildAndSave()
           generalUser()
             .username("ella.dribble")
@@ -528,6 +531,20 @@ class UserResourceIntTest : IntegrationTestBase() {
           .jsonPath(matchByUserName + "dpsRoleCount", "abella.moulin").isEqualTo(2)
           .jsonPath(matchByUserName + "dpsRoleCount", "mark.bowlan").isEqualTo(3)
           .jsonPath(matchByUserName + "dpsRoleCount", "ella.dribble").isEqualTo(0)
+      }
+
+      @Test
+      internal fun `will return the email addresss`() {
+        webTestClient.get().uri("/users/")
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+          .exchange()
+          .expectStatus().isOk
+          .expectBody()
+          .jsonPath("$.totalElements").isEqualTo(4)
+          .jsonPath(matchByUserName + "email", "marco.rossi").isEqualTo("marco@justice.gov.uk")
+          .jsonPath(matchByUserName + "email", "abella.moulin").isEqualTo("abella@justice.gov.uk")
+          .jsonPath(matchByUserName + "email", "mark.bowlan").isEqualTo("mark@justice.gov.uk")
+          .jsonPath(matchByUserName + "email", "ella.dribble").isEqualTo(null)
       }
 
       @Test
