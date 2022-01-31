@@ -30,6 +30,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountProfile
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.DPS_CASELOAD
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff.Companion.STAFF_STATUS_ACTIVE
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.getUsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.AccountDetailRepository
@@ -45,6 +46,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.mapUserSum
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toStaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserRoleDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource.UserResource.UserWithEmail
 import java.time.LocalDateTime
 import java.util.EnumSet
 import java.util.function.Supplier
@@ -90,6 +92,16 @@ class UserService(
     else usersByEmail.union(userPersonDetailRepository.findAllById(usernames))
     return users.map(this::toUserDetail)
   }
+
+  @Transactional(readOnly = true)
+  fun findActiveUsers(pageRequest: Pageable): Page<UserWithEmail> =
+    userPersonDetailRepository.findByStaff_StatusEquals(STAFF_STATUS_ACTIVE, pageRequest)
+      .map {
+        UserWithEmail(
+          username = it.username,
+          email = it.staff.primaryEmail()?.email,
+        )
+      }
 
   @Transactional(readOnly = true)
   fun findUsersByFilter(pageRequest: Pageable, filter: UserFilter): Page<UserSummaryWithEmail> =

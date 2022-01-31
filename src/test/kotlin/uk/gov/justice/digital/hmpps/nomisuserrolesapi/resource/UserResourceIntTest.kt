@@ -434,6 +434,85 @@ class UserResourceIntTest : IntegrationTestBase() {
     }
   }
 
+  @DisplayName("GET /users/active")
+  @Nested
+  inner class GetActiveUsers {
+    private val matchByUserName = "$.content[?(@.username == '%s')]"
+
+    @BeforeEach
+    internal fun createUsers() {
+      with(dataBuilder) {
+        generalUser().username("marco.rossi")
+          .firstName("Marco")
+          .lastName("Rossi")
+          .email("marco@justice.gov.uk")
+          .atPrison("WWI")
+          .buildAndSave()
+        generalUser().username("fred.smith")
+          .firstName("Fred")
+          .lastName("Smith")
+          .email("fred@justice.gov.uk")
+          .atPrison("MDI")
+          .buildAndSave()
+        generalUser().username("frederica.jones")
+          .firstName("Frederica")
+          .lastName("Jones")
+          .email("fred@justice.gov.uk")
+          .atPrison("WWI")
+          .inactive()
+          .buildAndSave()
+      }
+    }
+
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    fun `access forbidden when no authority`() {
+      webTestClient.get().uri {
+        it.path("/users/active").build()
+      }
+        .exchange()
+        .expectStatus().isUnauthorized
+    }
+
+    @Test
+    fun `access forbidden when no role`() {
+
+      webTestClient.get().uri {
+        it.path("/users/active").build()
+      }
+        .headers(setAuthorisation(roles = listOf()))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `get user forbidden with wrong role`() {
+
+      webTestClient.get().uri {
+        it.path("/users/active").build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `get all active users`() {
+      webTestClient.get().uri {
+        it.path("/users/active").build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$.numberOfElements").isEqualTo(2)
+        .jsonPath(matchByUserName, "fred.smith").exists()
+        .jsonPath(matchByUserName, "marco.rossi").exists()
+    }
+  }
+
   @DisplayName("GET /users/")
   @Nested
   inner class GetUser {
