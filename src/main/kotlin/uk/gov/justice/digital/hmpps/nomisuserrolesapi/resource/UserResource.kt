@@ -203,6 +203,28 @@ class UserResource(
     @Parameter(description = "List of usernames.") @RequestBody usernames: List<String>?,
   ): List<UserDetail> = userService.findAllByEmailAddressAndUsernames(email, usernames)
 
+  @PreAuthorize("hasRole('ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
+  @GetMapping("/active")
+  @Operation(
+    summary = "Get all active users",
+    description = "Requires role ROLE_MANAGE_NOMIS_USER_ACCOUNT",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Pageable list of users and their email addresses"
+      )
+    ]
+  )
+  fun findActiveUsers(
+    @PageableDefault(sort = ["username"], direction = Sort.Direction.ASC)
+    pageRequest: Pageable
+  ): Page<UserWithEmail> = userService.findActiveUsers(pageRequest)
+
+  data class UserWithEmail(
+    val username: String,
+    val email: String?
+  )
+
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @GetMapping
   @Operation(
