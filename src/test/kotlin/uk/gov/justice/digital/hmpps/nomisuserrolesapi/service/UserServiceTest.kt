@@ -24,6 +24,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.AccountDeta
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.CaseloadRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserAndEmailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPasswordRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import java.time.LocalDateTime
@@ -31,6 +32,7 @@ import java.util.Optional
 
 internal class UserServiceTest {
   private val userPersonDetailRepository: UserPersonDetailRepository = mock()
+  private val userAndEmailRepository: UserAndEmailRepository = mock()
   private val caseloadRepository: CaseloadRepository = mock()
   private val accountDetailRepository: AccountDetailRepository = mock()
   private val staffRepository: StaffRepository = mock()
@@ -41,6 +43,7 @@ internal class UserServiceTest {
   private val userPasswordRepository: UserPasswordRepository = mock()
   private val userService: UserService = UserService(
     userPersonDetailRepository,
+    userAndEmailRepository,
     caseloadRepository,
     accountDetailRepository,
     staffRepository,

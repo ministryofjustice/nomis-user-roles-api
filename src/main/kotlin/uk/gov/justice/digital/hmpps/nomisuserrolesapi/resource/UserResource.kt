@@ -29,6 +29,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserAndEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
 import javax.validation.constraints.NotEmpty
 import javax.validation.constraints.Size
@@ -211,19 +212,10 @@ class UserResource(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Pageable list of users and their email addresses"
+        description = "List of active users and their email addresses"
       )
     ]
-  )
-  fun findActiveUsers(
-    @PageableDefault(sort = ["username"], direction = Sort.Direction.ASC)
-    pageRequest: Pageable
-  ): Page<UserWithEmail> = userService.findActiveUsers(pageRequest)
-
-  data class UserWithEmail(
-    val username: String,
-    val email: String?
-  )
+  ) fun findActiveUsers(): List<UserAndEmail> = userService.findActiveUsers()
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @GetMapping
