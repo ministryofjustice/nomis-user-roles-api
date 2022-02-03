@@ -437,7 +437,6 @@ class UserResourceIntTest : IntegrationTestBase() {
   @DisplayName("GET /users/active")
   @Nested
   inner class GetActiveUsers {
-    private val matchByUserName = "$.content[?(@.username == '%s')]"
 
     @BeforeEach
     internal fun createUsers() {
@@ -507,9 +506,12 @@ class UserResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("$.numberOfElements").isEqualTo(2)
-        .jsonPath(matchByUserName, "fred.smith").exists()
-        .jsonPath(matchByUserName, "marco.rossi").exists()
+        .jsonPath("$").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] })
+            .contains("fred.smith")
+            .contains("marco.rossi")
+            .hasSize(2)
+        }
     }
   }
 

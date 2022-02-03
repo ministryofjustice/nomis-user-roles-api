@@ -30,13 +30,14 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountProfile
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.DPS_CASELOAD
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff.Companion.STAFF_STATUS_ACTIVE
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.getUsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.AccountDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.CaseloadRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserAndEmail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserAndEmailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPasswordRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.changePasswordWithValidation
@@ -46,7 +47,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.mapUserSum
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toStaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserRoleDetail
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource.UserResource.UserWithEmail
 import java.time.LocalDateTime
 import java.util.EnumSet
 import java.util.function.Supplier
@@ -56,6 +56,7 @@ import java.util.stream.Collectors
 @Transactional
 class UserService(
   private val userPersonDetailRepository: UserPersonDetailRepository,
+  private val userAndEmailRepository: UserAndEmailRepository,
   private val caseloadRepository: CaseloadRepository,
   private val accountDetailRepository: AccountDetailRepository,
   private val staffRepository: StaffRepository,
@@ -94,14 +95,7 @@ class UserService(
   }
 
   @Transactional(readOnly = true)
-  fun findActiveUsers(pageRequest: Pageable): Page<UserWithEmail> =
-    userPersonDetailRepository.findByStaff_StatusEquals(STAFF_STATUS_ACTIVE, pageRequest)
-      .map {
-        UserWithEmail(
-          username = it.username,
-          email = it.staff.primaryEmail()?.email,
-        )
-      }
+  fun findActiveUsers(): List<UserAndEmail> = userAndEmailRepository.findActiveUsers()
 
   @Transactional(readOnly = true)
   fun findUsersByFilter(pageRequest: Pageable, filter: UserFilter): Page<UserSummaryWithEmail> =
