@@ -14,17 +14,19 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import java.util.regex.Pattern
 
-fun UserPersonDetail.toUserCaseloadDetail(): UserCaseloadDetail = UserCaseloadDetail(
+fun UserPersonDetail.toUserCaseloadDetail(removeDpsCaseload: Boolean = false): UserCaseloadDetail = UserCaseloadDetail(
   username = this.username,
   activeCaseload = this.activeCaseLoad?.toPrisonCaseload(),
   active = this.staff.isActive,
   accountType = this.type,
-  caseloads = this.caseloads.map { uc ->
-    PrisonCaseload(
-      id = uc.id.caseloadId,
-      name = uc.caseload.name.capitalizeLeavingAbbreviations()
-    )
-  }
+  caseloads = this.caseloads
+    .filter { !(removeDpsCaseload && it.caseload.isDpsCaseload()) }
+    .map { uc ->
+      PrisonCaseload(
+        id = uc.id.caseloadId,
+        name = uc.caseload.name.capitalizeLeavingAbbreviations()
+      )
+    }
 )
 
 val userSummaryToEntityPropertyMap = mapOf(

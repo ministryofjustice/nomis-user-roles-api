@@ -103,6 +103,7 @@ class MeResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("username").isEqualTo("AUTH_ADM")
         .jsonPath("activeCaseload.id").isEqualTo("BXI")
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "NWEB").doesNotExist()
         .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
         .jsonPath("$.caseloads[?(@.id == '%s')]", "WWI").exists()
     }
