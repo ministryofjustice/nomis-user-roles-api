@@ -151,12 +151,12 @@ class CaseloadAlreadyExistsException(message: String?) :
   }
 }
 
-fun UserPersonDetail.toUserSummaryWithEmail() = UserSummaryWithEmail(
+fun UserPersonDetail.toUserSummaryWithEmail(status: AccountStatus = AccountStatus.OPEN) = UserSummaryWithEmail(
   username = username,
   staffId = staff.staffId,
   firstName = staff.firstName.capitalizeFully(),
   lastName = staff.lastName.capitalizeFully(),
-  active = staff.isActive,
+  active = staff.isActive && status.isActive(),
   activeCaseload = activeCaseLoad?.let { caseload ->
     PrisonCaseload(
       id = caseload.id,
