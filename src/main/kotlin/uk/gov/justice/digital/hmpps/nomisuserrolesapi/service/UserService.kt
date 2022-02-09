@@ -435,7 +435,7 @@ class UserService(
   @Transactional(readOnly = true)
   fun getCaseloads(username: String): UserCaseloadDetail {
     return userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
-      .toUserCaseloadDetail()
+      .toUserCaseloadDetail(removeDpsCaseload = true)
   }
 
   fun removeCaseload(username: String, caseloadId: String): UserCaseloadDetail {
