@@ -21,6 +21,8 @@ enum class AccountStatus(
   EXPIRED_LOCKED(9, "EXPIRED & LOCKED", true, true, false, false),
   EXPIRED_GRACE_LOCKED(10, "EXPIRED(GRACE) & LOCKED", true, true, true, false);
 
+  fun isActive() = this == OPEN || this == EXPIRED_GRACE
+
   companion object {
     fun get(code: Int): AccountStatus = values().first { it.code == code }
 
