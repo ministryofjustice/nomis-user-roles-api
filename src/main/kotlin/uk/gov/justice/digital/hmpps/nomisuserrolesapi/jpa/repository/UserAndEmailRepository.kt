@@ -16,11 +16,11 @@ interface UserAndEmailRepository : JpaRepository<UserAndEmail, String> {
       "      INNER JOIN STAFF_MEMBERS sm ON sm.staff_id = sua.staff_id " +
       "      INNER JOIN internet_addresses ia ON  sm.staff_id = ia.owner_id " +
       "WHERE " +
-      "      ia.internet_address_class = 'EMAIL' AND ia.owner_class = 'STF' AND sm.status = 'ACTIVE' " +
+      "      ia.internet_address_class = 'EMAIL' AND ia.owner_class = 'STF' " +
       "GROUP BY username ORDER BY username",
     nativeQuery = true
   )
-  fun findActiveUsers(): List<UserAndEmail>
+  fun findUsersAndEmails(): List<UserAndEmail>
 }
 
 @Entity
