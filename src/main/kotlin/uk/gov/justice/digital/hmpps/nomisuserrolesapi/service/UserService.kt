@@ -95,7 +95,7 @@ class UserService(
   }
 
   @Transactional(readOnly = true)
-  fun findActiveUsers(): List<UserAndEmail> = userAndEmailRepository.findActiveUsers()
+  fun findUsersAndEmails(): List<UserAndEmail> = userAndEmailRepository.findUsersAndEmails()
 
   @Transactional(readOnly = true)
   fun findUsersByFilter(pageRequest: Pageable, filter: UserFilter): Page<UserSummaryWithEmail> =

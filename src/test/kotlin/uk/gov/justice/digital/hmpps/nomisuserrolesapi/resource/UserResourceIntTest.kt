@@ -434,9 +434,9 @@ class UserResourceIntTest : IntegrationTestBase() {
     }
   }
 
-  @DisplayName("GET /users/active")
+  @DisplayName("GET /users/emails")
   @Nested
-  inner class GetActiveUsers {
+  inner class GetUsersAndEmails {
 
     @BeforeEach
     internal fun createUsers() {
@@ -456,9 +456,9 @@ class UserResourceIntTest : IntegrationTestBase() {
         generalUser().username("frederica.jones")
           .firstName("Frederica")
           .lastName("Jones")
-          .email("fred@justice.gov.uk")
+          .status("INACT")
+          .email("frederica@justice.gov.uk")
           .atPrison("WWI")
-          .inactive()
           .buildAndSave()
       }
     }
@@ -469,7 +469,7 @@ class UserResourceIntTest : IntegrationTestBase() {
     @Test
     fun `access forbidden when no authority`() {
       webTestClient.get().uri {
-        it.path("/users/active").build()
+        it.path("/users/emails").build()
       }
         .exchange()
         .expectStatus().isUnauthorized
@@ -479,7 +479,7 @@ class UserResourceIntTest : IntegrationTestBase() {
     fun `access forbidden when no role`() {
 
       webTestClient.get().uri {
-        it.path("/users/active").build()
+        it.path("/users/emails").build()
       }
         .headers(setAuthorisation(roles = listOf()))
         .exchange()
@@ -490,7 +490,7 @@ class UserResourceIntTest : IntegrationTestBase() {
     fun `get user forbidden with wrong role`() {
 
       webTestClient.get().uri {
-        it.path("/users/active").build()
+        it.path("/users/emails").build()
       }
         .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
         .exchange()
@@ -498,9 +498,9 @@ class UserResourceIntTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `get all active users`() {
+    fun `get all usernames and their associated emails`() {
       webTestClient.get().uri {
-        it.path("/users/active").build()
+        it.path("/users/emails").build()
       }
         .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
         .exchange()
@@ -510,7 +510,8 @@ class UserResourceIntTest : IntegrationTestBase() {
           assertThat(it.map { m -> (m as Map<*, *>)["username"] })
             .contains("fred.smith")
             .contains("marco.rossi")
-            .hasSize(2)
+            .contains("frederica.jones")
+            .hasSize(3)
         }
     }
   }
