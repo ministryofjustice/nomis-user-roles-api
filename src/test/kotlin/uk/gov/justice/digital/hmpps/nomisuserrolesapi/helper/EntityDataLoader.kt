@@ -222,6 +222,11 @@ abstract class UserBuilder<T>(
     return this
   }
 
+  fun atPrisons(vararg prisonCodes: String): UserBuilder<T> {
+    this.prisonCodes = prisonCodes.asList()
+    return this
+  }
+
   fun atPrison(prisonCode: String): UserBuilder<T> {
     this.prisonCodes = listOf(prisonCode)
     return this
@@ -250,6 +255,11 @@ abstract class UserBuilder<T>(
 
   fun nomisRoles(roles: List<String>): UserBuilder<T> {
     this.nomsRoles = roles
+    return this
+  }
+
+  fun nomisRoles(vararg roles: String): UserBuilder<T> {
+    this.nomsRoles = roles.toList()
     return this
   }
 

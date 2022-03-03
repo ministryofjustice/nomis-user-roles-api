@@ -35,6 +35,8 @@ generic-service:
       JDBC_URL: "JDBC_URL"
       DB_USERNAME: "DB_USERNAME"
       DB_PASSWORD: "DB_PASSWORD"
+      REPORTING_CLIENT_ID: "REPORTING_CLIENT_ID"
+      REPORTING_CLIENT_SECRET: "REPORTING_CLIENT_SECRET"
 
   # Disabled for DSO AKS cluster
   allowlist: null

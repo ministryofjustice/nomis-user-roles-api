@@ -10,4 +10,5 @@ generic-service:
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     API_BASE_URL_OAUTH: https://sign-in-preprod.hmpps.service.justice.gov.uk/auth
+    API_BASE_URL_REPORTING: https://reporting.preprod.nomis.az.justice.gov.uk
 
