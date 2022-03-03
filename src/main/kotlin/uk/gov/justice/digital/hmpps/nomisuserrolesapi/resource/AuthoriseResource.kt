@@ -18,7 +18,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.ReportingAuthorisa
 @RestController
 @Validated
 @RequestMapping("/authorise", produces = [MediaType.APPLICATION_JSON_VALUE])
-class AuthorizeResource(
+class AuthoriseResource(
   private val authenticationFacade: AuthenticationFacade,
   private val reportingAuthorisationService: ReportingAuthorisationService
 ) {
