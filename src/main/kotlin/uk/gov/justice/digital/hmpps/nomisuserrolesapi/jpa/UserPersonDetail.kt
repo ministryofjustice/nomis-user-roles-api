@@ -112,7 +112,7 @@ data class UserPersonDetail(
     val userCaseload = caseloads.firstOrNull { caseload -> caseloadId == caseload.id.caseloadId } ?: throw CaseloadNotFoundException("Caseload cannot be removed as user does not have $caseloadId.")
 
     if (isUserGroupCaseload(userCaseload.caseload)) {
-      val userGroupMembersAssociatedWithCaseload = activeAndInactiveMemberOfUserGroups.filter { userGroupMember ->  isCaseloadForUserGroup(userCaseload.caseload, userGroupMember) }
+      val userGroupMembersAssociatedWithCaseload = activeAndInactiveMemberOfUserGroups.filter { userGroupMember -> isCaseloadForUserGroup(userCaseload.caseload, userGroupMember) }
       activeAndInactiveMemberOfUserGroups.removeAll(userGroupMembersAssociatedWithCaseload)
     }
 
@@ -121,7 +121,7 @@ data class UserPersonDetail(
 
   private fun isUserGroupCaseload(caseload: Caseload) = (type == UsageType.GENERAL) && !caseload.isDpsCaseload()
 
-  private fun isCaseloadForUserGroup(caseload: Caseload, userGroupMember: UserGroupMember) : Boolean {
+  private fun isCaseloadForUserGroup(caseload: Caseload, userGroupMember: UserGroupMember): Boolean {
     return caseload.userGroups.firstOrNull { groupCaseload -> groupCaseload.userGroup === userGroupMember.userGroup && userGroupMember.user === this } !== null
   }
 
