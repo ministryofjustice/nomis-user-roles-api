@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.service
 
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.http.HttpHeaders.ACCEPT
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
@@ -15,15 +16,11 @@ class ReportingApiService(
   private val config: ReportingConfiguration
 ) {
   fun getReportingUrl(username: String): ReportingUrlResponse =
-    webClient.post()
-      .uri("/reporting/get-url")
-      .bodyValue(
-        ReportingUrlRequest(
-          username = username,
-          clientId = config.client.id,
-          clientSecret = config.client.secret,
-        )
-      )
+    webClient.get()
+      .uri("/bipssorws/sso/logon/$username")
+      .header(ACCEPT, "application/json")
+      .header("X-NOMIS-REP-CLIENTID", config.client.id)
+      .header("X-NOMIS-REP-APIKEY", config.client.secret)
       .retrieve()
       .bodyToMono(ReportingUrlResponse::class.java)
       .onErrorMap(WebClientResponseException.NotFound::class.java) { it.mapTo(503) }
@@ -31,8 +28,7 @@ class ReportingApiService(
       .block()!!
 }
 
-data class ReportingUrlRequest(val username: String, val clientId: String, val clientSecret: String)
-data class ReportingUrlResponse(val url: String)
+data class ReportingUrlResponse(val fullURLEncodedLogonToken: String)
 
 fun WebClientResponseException.mapTo(status: Int): WebClientResponseException = WebClientResponseException.create(
   status,

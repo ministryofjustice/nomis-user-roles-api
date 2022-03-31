@@ -14,7 +14,7 @@ class ReportingAuthorisationService(
   fun tryGetAuthorisedUrl(username: String): ReportingAuthorisation =
     userService.getUserRoles(username = username, includeNomisRoles = true)
       .takeIf { it.canAccessNomisReports() }
-      ?.let { ReportingAuthorisation(reportingApiService.getReportingUrl(username).url) }
+      ?.let { ReportingAuthorisation(reportingApiService.getReportingUrl(username).fullURLEncodedLogonToken) }
       ?: throw AccessDeniedException(
         "User $username does not have access to Nomis reports"
       )

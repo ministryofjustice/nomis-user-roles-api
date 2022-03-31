@@ -18,7 +18,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.wiremock.Repor
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseload
 
 @ExtendWith(ReportingAuthenticationApiExtension::class)
-class UserAuthenticationIntTest : IntegrationTestBase() {
+class AuthoriseIntTest : IntegrationTestBase() {
   @Autowired
   private lateinit var dataBuilder: DataBuilder
 

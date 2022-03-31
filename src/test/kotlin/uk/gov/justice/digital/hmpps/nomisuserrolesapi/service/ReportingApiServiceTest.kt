@@ -48,7 +48,7 @@ internal class ReportingApiServiceTest {
 
       val response = service.getReportingUrl("username")
 
-      assertThat(response.url).isEqualTo("http://reporting-url")
+      assertThat(response.fullURLEncodedLogonToken).isEqualTo("http://reporting-url")
     }
 
     @Nested
