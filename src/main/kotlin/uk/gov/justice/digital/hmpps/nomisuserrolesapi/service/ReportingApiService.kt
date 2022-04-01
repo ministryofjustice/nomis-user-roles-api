@@ -16,7 +16,7 @@ class ReportingApiService(
   private val config: ReportingConfiguration
 ) {
   fun getReportingUrl(username: String): ReportingUrlResponse =
-    webClient.get()
+    webClient.post()
       .uri("/bipssorws/sso/logon/$username")
       .header(ACCEPT, "application/json")
       .header("X-NOMIS-REP-CLIENTID", config.client.id)
