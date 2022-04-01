@@ -17,10 +17,11 @@ import reactor.netty.http.client.HttpClient
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.utils.UserContext
 import java.time.Duration
 
-
 @Configuration
-class WebClientConfiguration(@Value("\${api.base.url.oauth}") val authbaseUri: String,
-                             @Value("\${api.base.timeout.oauth:2s}") val timeout: Duration) {
+class WebClientConfiguration(
+  @Value("\${api.base.url.oauth}") val authbaseUri: String,
+  @Value("\${api.base.timeout.oauth:2s}") val timeout: Duration
+) {
 
   @Bean
   fun webClient(builder: WebClient.Builder): WebClient {
