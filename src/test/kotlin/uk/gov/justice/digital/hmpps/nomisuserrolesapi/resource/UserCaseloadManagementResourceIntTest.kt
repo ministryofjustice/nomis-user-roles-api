@@ -197,6 +197,50 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `add multiple case loads to user`() {
+      webTestClient.get().uri("/users/CASELOAD_USER1/caseloads")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("username").isEqualTo("CASELOAD_USER1")
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "LEI").doesNotExist()
+
+      webTestClient.delete().uri("/users/CASELOAD_USER1/caseloads/BXI")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("username").isEqualTo("CASELOAD_USER1")
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").doesNotExist()
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "LEI").doesNotExist()
+
+      webTestClient.post().uri("/users/CASELOAD_USER1/caseloads/BXI")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isCreated
+        .expectBody()
+        .jsonPath("username").isEqualTo("CASELOAD_USER1")
+        .jsonPath("activeCaseload.id").isEqualTo("BXI")
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "LEI").doesNotExist()
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "NWEB").exists()
+
+      webTestClient.post().uri("/users/CASELOAD_USER1/caseloads/LEI")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isCreated
+        .expectBody()
+        .jsonPath("username").isEqualTo("CASELOAD_USER1")
+        .jsonPath("activeCaseload.id").isEqualTo("BXI")
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "LEI").exists()
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "NWEB").exists()
+
+    }
+
+    @Test
     fun `add none existing caseload to user`() {
       webTestClient.post().uri("/users/CASELOAD_USER1/caseloads/XXX")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))

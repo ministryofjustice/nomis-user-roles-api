@@ -126,11 +126,13 @@ data class UserPersonDetail(
   }
 
   private fun addUserGroup(userGroup: UserGroup) {
-    val member = UserGroupMember(
-      id = UserGroupMemberPk(userGroupCode = userGroup.id, username = this.username),
-      user = this, userGroup = userGroup
-    )
-    activeAndInactiveMemberOfUserGroups.add(member)
+    activeAndInactiveMemberOfUserGroups.firstOrNull { it.id.userGroupCode == userGroup.id && it.id.username == this.username } ?: run {
+      val member = UserGroupMember(
+        id = UserGroupMemberPk(userGroupCode = userGroup.id, username = this.username),
+        user = this, userGroup = userGroup
+      )
+      activeAndInactiveMemberOfUserGroups.add(member)
+    }
   }
 
   private fun addAdminUserGroup(userGroup: UserGroup) {
