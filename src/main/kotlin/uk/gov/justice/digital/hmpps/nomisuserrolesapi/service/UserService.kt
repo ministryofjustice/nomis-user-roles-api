@@ -95,7 +95,12 @@ class UserService(
   }
 
   @Transactional(readOnly = true)
-  fun findUsersAndEmails(): List<UserAndEmail> = userAndEmailRepository.findUsersAndEmails()
+  fun findUsersAndEmails(): List<UserAndEmail> {
+    log.info("Retrieving users and emails from database...")
+    val usersAndEmails = userAndEmailRepository.findUsersAndEmails()
+    log.info("Done retrieving users and emails from database...")
+    return usersAndEmails
+  }
 
   @Transactional(readOnly = true)
   fun findUsersByFilter(pageRequest: Pageable, filter: UserFilter): Page<UserSummaryWithEmail> =
