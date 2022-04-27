@@ -148,7 +148,7 @@ class UserResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `get user by first name and last name not found`() {
-      spec("Rossix").headers(setAuthorisation(roles = listOf("ROLE_USE_OF_FORCE")))
+      spec("Rossix").headers(setAuthorisation(roles = listOf("ROLE_STAFF_SEARCH")))
         .exchange()
         .expectStatus().isOk
         .expectBody().json("[]")
@@ -156,6 +156,17 @@ class UserResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `get user by first name and last name`() {
+      spec().headers(setAuthorisation(roles = listOf("ROLE_STAFF_SEARCH")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).contains("marco.rossi")
+        }
+    }
+
+    @Test
+    fun `get user by first name and last name with use-of-force role`() {
       spec().headers(setAuthorisation(roles = listOf("ROLE_USE_OF_FORCE")))
         .exchange()
         .expectStatus().isOk
@@ -167,7 +178,7 @@ class UserResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `get user returns email addresses too`() {
-      spec().headers(setAuthorisation(roles = listOf("ROLE_USE_OF_FORCE")))
+      spec().headers(setAuthorisation(roles = listOf("ROLE_STAFF_SEARCH")))
         .exchange()
         .expectStatus().isOk
         .expectBody()

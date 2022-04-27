@@ -140,11 +140,11 @@ class UserResource(
   ): StaffDetail =
     userService.findByStaffId(staffId)
 
-  @PreAuthorize("hasRole('ROLE_USE_OF_FORCE')")
+  @PreAuthorize("hasAnyRole('ROLE_USE_OF_FORCE', 'ROLE_STAFF_SEARCH')")
   @GetMapping("/staff")
   @Operation(
     summary = "Find users by first and last names",
-    description = "Requires role ROLE_USE_OF_FORCE",
+    description = "Requires role ROLE_USE_OF_FORCE or ROLE_STAFF_SEARCH",
     responses = [
       ApiResponse(
         responseCode = "200",
