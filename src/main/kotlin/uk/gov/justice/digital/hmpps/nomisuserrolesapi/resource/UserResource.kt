@@ -140,7 +140,7 @@ class UserResource(
   ): StaffDetail =
     userService.findByStaffId(staffId)
 
-  @PreAuthorize("hasRole('ROLE_USE_OF_FORCE') or hasRole('ROLE_STAFF_SEARCH')")
+  @PreAuthorize("hasAnyRole('ROLE_USE_OF_FORCE', 'ROLE_STAFF_SEARCH')")
   @GetMapping("/staff")
   @Operation(
     summary = "Find users by first and last names",
