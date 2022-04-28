@@ -425,8 +425,8 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("lastName").isEqualTo("USER1")
-        .jsonPath("firstName").isEqualTo("TEST")
+        .jsonPath("lastName").isEqualTo("User1")
+        .jsonPath("firstName").isEqualTo("Test")
 
       webTestClient.put().uri("/users/TEST_DATA_USER1/change-name")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
@@ -441,16 +441,16 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("lastName").isEqualTo("NEWLASTNAME")
-        .jsonPath("firstName").isEqualTo("NEWFIRSTNAME")
+        .jsonPath("lastName").isEqualTo("Newlastname")
+        .jsonPath("firstName").isEqualTo("Newfirstname")
 
       webTestClient.get().uri("/users/TEST_DATA_USER1")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("lastName").isEqualTo("NEWLASTNAME")
-        .jsonPath("firstName").isEqualTo("NEWFIRSTNAME")
+        .jsonPath("lastName").isEqualTo("Newlastname")
+        .jsonPath("firstName").isEqualTo("Newfirstname")
     }
   }
 

@@ -42,8 +42,8 @@ class MeResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("AUTH_ADM")
-        .jsonPath("firstName").isEqualTo("AUTH")
-        .jsonPath("lastName").isEqualTo("ADM")
+        .jsonPath("firstName").isEqualTo("Auth")
+        .jsonPath("lastName").isEqualTo("Adm")
         .jsonPath("staffId").exists()
     }
 

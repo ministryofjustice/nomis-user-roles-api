@@ -2,10 +2,7 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.data
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountDetail
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.*
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "User Information")
@@ -37,8 +34,8 @@ data class UserDetail(
     this(
       username = userPersonDetail.username,
       staffId = userPersonDetail.staff.staffId,
-      firstName = userPersonDetail.staff.firstName,
-      lastName = userPersonDetail.staff.lastName,
+      firstName = userPersonDetail.staff.firstName.capitalizeFully(),
+      lastName = userPersonDetail.staff.lastName.capitalizeFully(),
       activeCaseloadId = userPersonDetail.activeCaseLoad?.id,
       accountStatus = accountDetail.status,
       accountType = userPersonDetail.type,

@@ -48,7 +48,7 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           BodyInserters.fromValue(
             CreateGeneralUserRequest(
               username = "laauser1",
-              firstName = "laa",
+              firstName = "Laa",
               lastName = "User",
               email = "laa@test.com",
               defaultCaseloadId = "PVI"
@@ -61,8 +61,8 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           """
           {
           "username": "LAAUSER1",
-          "firstName": "LAA",
-          "lastName": "USER",
+          "firstName": "Laa",
+          "lastName": "User",
           "activeCaseloadId" : "PVI",
           "accountStatus": "EXPIRED",
           "primaryEmail": "laa@test.com",
@@ -81,7 +81,7 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           BodyInserters.fromValue(
             CreateGeneralUserRequest(
               username = "laa_user1",
-              firstName = "laa",
+              firstName = "Laa",
               lastName = "User",
               email = "laa@test.com",
               defaultCaseloadId = "WWI"
@@ -94,8 +94,8 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           """
           {
           "username": "LAA_USER1",
-          "firstName": "LAA",
-          "lastName": "USER",
+          "firstName": "Laa",
+          "lastName": "User",
           "activeCaseloadId" : "WWI",
           "accountStatus": "EXPIRED",
           "primaryEmail": "laa@test.com",
@@ -156,8 +156,8 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           """
           {
           "username": "TESTUSER2",
-          "firstName": "TEST",
-          "lastName": "USER",
+          "firstName": "Test",
+          "lastName": "User",
           "activeCaseloadId" : "CADM_I",
           "accountStatus": "EXPIRED",
           "primaryEmail": "test@test.com",
@@ -172,8 +172,8 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("TESTUSER2")
-        .jsonPath("firstName").isEqualTo("TEST")
-        .jsonPath("lastName").isEqualTo("USER")
+        .jsonPath("firstName").isEqualTo("Test")
+        .jsonPath("lastName").isEqualTo("User")
         .jsonPath("staffId").exists()
     }
 
@@ -210,8 +210,8 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
         .expectBody(StaffDetail::class.java)
         .returnResult().responseBody!!
 
-      assertThat(staffDetail.firstName).isEqualTo("TEST")
-      assertThat(staffDetail.lastName).isEqualTo("USER")
+      assertThat(staffDetail.firstName).isEqualTo("Test")
+      assertThat(staffDetail.lastName).isEqualTo("User")
       assertThat(staffDetail.primaryEmail).isEqualTo("test@test.com")
       assertThat(staffDetail.status).isEqualTo("ACTIVE")
 
@@ -233,8 +233,8 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("staffId").exists()
-        .jsonPath("firstName").isEqualTo("TEST")
-        .jsonPath("lastName").isEqualTo("USER")
+        .jsonPath("firstName").isEqualTo("Test")
+        .jsonPath("lastName").isEqualTo("User")
         .jsonPath("primaryEmail").isEqualTo("test@test.com")
         .jsonPath("status").isEqualTo("ACTIVE")
         .jsonPath("generalAccount.username").isEqualTo("TESTUSER5")

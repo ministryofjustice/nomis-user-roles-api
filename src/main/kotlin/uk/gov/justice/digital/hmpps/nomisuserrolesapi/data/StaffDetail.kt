@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.capitalizeFully
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserCaseloadDetail
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -20,8 +21,8 @@ data class StaffDetail(
   constructor(staff: Staff) :
     this(
       staffId = staff.staffId,
-      firstName = staff.firstName,
-      lastName = staff.lastName,
+      firstName = staff.firstName.capitalizeFully(),
+      lastName = staff.lastName.capitalizeFully(),
       status = staff.status,
       primaryEmail = staff.primaryEmail()?.email,
       generalAccount = staff.generalAccount()?.toUserCaseloadDetail(),
