@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
+import org.apache.commons.text.WordUtils
 import org.hibernate.Hibernate
 import org.hibernate.annotations.Where
 import javax.persistence.CascadeType
@@ -38,7 +39,7 @@ data class Staff(
   val emails: MutableList<EmailAddress> = mutableListOf(),
 ) {
 
-  fun fullName() = "$firstName $lastName"
+  fun fullName(): String = "$firstName $lastName".capitalizeFully()
 
   fun generalAccount(): UserPersonDetail? = users.firstOrNull { u -> UsageType.GENERAL == u.type }
 
@@ -73,3 +74,5 @@ data class Staff(
     return this::class.simpleName + "(staffId = $staffId )"
   }
 }
+
+fun String.capitalizeFully(): String = WordUtils.capitalizeFully(this)
