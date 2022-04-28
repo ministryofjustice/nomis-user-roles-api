@@ -2,7 +2,11 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.data
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.*
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.capitalizeFully
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "User Information")

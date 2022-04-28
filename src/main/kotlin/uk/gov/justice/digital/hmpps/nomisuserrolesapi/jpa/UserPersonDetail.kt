@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
-import org.apache.commons.text.WordUtils
 import org.hibernate.Hibernate
 import org.hibernate.annotations.Where
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.PrisonCaseload
