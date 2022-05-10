@@ -1,5 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
+import net.minidev.json.JSONArray
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -603,6 +605,145 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
     @Test
     fun `can add quotes around the names that will be ignored`() {
       webTestClient.post().uri("/users/remove-roles/APPROVE_CATEGORISATION")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(
+          BodyInserters.fromValue(
+            """
+          "ROLE_USER1",
+          'ROLE_USER2',
+          ROLE_USER3
+          """
+          )
+        )
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath(matchByUserName, "ROLE_USER1").exists()
+        .jsonPath(matchByUserName, "ROLE_USER2").exists()
+        .jsonPath(matchByUserName, "ROLE_USER3").exists()
+    }
+  }
+  @DisplayName("POST /users/add-roles/{roleCode}")
+  @Nested
+  inner class BulkAddRoleByUsernames {
+    private val matchByUserName = "$[?(@.username == '%s')]"
+    private val allRoleCodesForUserName = "$matchByUserName.dpsRoles[*].code"
+
+    @BeforeEach
+    internal fun createUsers() {
+      with(dataBuilder) {
+        generalUser()
+          .username("ROLE_USER1")
+          .dpsRoles(listOf("CREATE_CATEGORISATION", "GLOBAL_SEARCH"))
+          .nomisRoles(listOf("200"))
+          .buildAndSave()
+      }
+      with(dataBuilder) {
+        generalUser()
+          .username("ROLE_USER2")
+          .dpsRoles(listOf("CREATE_CATEGORISATION", "GLOBAL_SEARCH"))
+          .nomisRoles(listOf("200"))
+          .buildAndSave()
+      }
+      with(dataBuilder) {
+        generalUser()
+          .username("ROLE_USER3")
+          .dpsRoles(listOf("CREATE_CATEGORISATION"))
+          .nomisRoles(listOf("200"))
+          .buildAndSave()
+      }
+    }
+
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    fun `access forbidden when no authority`() {
+      webTestClient.post().uri("/users/add-roles/APPROVE_CATEGORISATION")
+        .body(BodyInserters.fromValue("ROLE_USER1,ROLE_USER2,ROLE_USER3"))
+        .exchange()
+        .expectStatus().isUnauthorized
+    }
+
+    @Test
+    fun `access forbidden when no role`() {
+      webTestClient.post().uri("/users/add-roles/APPROVE_CATEGORISATION")
+        .headers(setAuthorisation(roles = listOf()))
+        .body(BodyInserters.fromValue("ROLE_USER1,ROLE_USER2,ROLE_USER3"))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `add role forbidden with wrong role`() {
+      webTestClient.post().uri("/users/add-roles/APPROVE_CATEGORISATION")
+        .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
+        .body(BodyInserters.fromValue("ROLE_USER1,ROLE_USER2,ROLE_USER3"))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `add user role with username not found is ignored`() {
+      webTestClient.post().uri("/users/add-roles/APPROVE_CATEGORISATION")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue("ROLE_USER99"))
+        .exchange()
+        .expectStatus().isOk
+    }
+
+    @Test
+    fun `add role to users only adds role supplied`() {
+      webTestClient.post().uri("/users/add-roles/APPROVE_CATEGORISATION")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue("ROLE_USER1,ROLE_USER2,ROLE_USER3"))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath(allRoleCodesForUserName, "ROLE_USER1").value<JSONArray> {
+          assertThat(it).containsExactlyInAnyOrder("APPROVE_CATEGORISATION", "CREATE_CATEGORISATION", "GLOBAL_SEARCH")
+        }
+        .jsonPath(allRoleCodesForUserName, "ROLE_USER2").value<JSONArray> {
+          assertThat(it).containsExactlyInAnyOrder("APPROVE_CATEGORISATION", "CREATE_CATEGORISATION", "GLOBAL_SEARCH")
+        }
+        .jsonPath(allRoleCodesForUserName, "ROLE_USER3").value<JSONArray> {
+          assertThat(it).containsExactlyInAnyOrder("APPROVE_CATEGORISATION", "CREATE_CATEGORISATION")
+        }
+    }
+
+    @Test
+    fun `add role that already exists on user does not result in error `() {
+      webTestClient.post().uri("/users/add-roles/CREATE_CATEGORISATION")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue("ROLE_USER1,ROLE_USER2,ROLE_USER3"))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath(allRoleCodesForUserName, "ROLE_USER1").value<JSONArray> {
+          assertThat(it).containsExactlyInAnyOrder("CREATE_CATEGORISATION", "GLOBAL_SEARCH")
+        }
+        .jsonPath(allRoleCodesForUserName, "ROLE_USER2").value<JSONArray> {
+          assertThat(it).containsExactlyInAnyOrder("CREATE_CATEGORISATION", "GLOBAL_SEARCH")
+        }
+        .jsonPath(allRoleCodesForUserName, "ROLE_USER3").value<JSONArray> {
+          assertThat(it).containsExactlyInAnyOrder("CREATE_CATEGORISATION")
+        }
+    }
+    @Test
+    fun `add non-user role will return all users except the one not found`() {
+      webTestClient.post().uri("/users/add-roles/GLOBAL_SEARCH")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue("ROLE_USER1,ROLE_USER2,ROLE_USER4"))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath(matchByUserName, "ROLE_USER1").exists()
+        .jsonPath(matchByUserName, "ROLE_USER2").exists()
+        .jsonPath(matchByUserName, "ROLE_USER4").doesNotExist()
+    }
+    @Test
+    fun `can add quotes around the names that will be ignored`() {
+      webTestClient.post().uri("/users/add-roles/APPROVE_CATEGORISATION")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .body(
           BodyInserters.fromValue(

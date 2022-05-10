@@ -81,9 +81,7 @@ class UserRoleManagementResource(
     @PathVariable @Size(max = 30, min = 1, message = "username must be between 1 and 30") username: String,
     @Schema(name = "include-nomis-roles", description = "Include NOMIS roles", example = "false", required = false, defaultValue = "false")
     @RequestParam(name = "include-nomis-roles", required = false, defaultValue = "false") includeNomisRoles: Boolean = false,
-  ): UserRoleDetail {
-    return userService.getUserRoles(username, includeNomisRoles)
-  }
+  ): UserRoleDetail = userService.getUserRoles(username, includeNomisRoles)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @PostMapping("/{username}/roles/{roleCode}")
@@ -140,9 +138,7 @@ class UserRoleManagementResource(
     @PathVariable @Size(max = 30, min = 1, message = "Role code must be between 1 and 30") roleCode: String,
     @Schema(description = "Caseload Id", example = "NWEB", required = false, defaultValue = "NWEB")
     @RequestParam(required = false, defaultValue = "NWEB") @Size(max = 6, min = 3, message = "Caseload must be between 3-6 characters") caseloadId: String = DPS_CASELOAD,
-  ): UserRoleDetail {
-    return userService.addRoleToUser(username, roleCode, caseloadId)
-  }
+  ): UserRoleDetail = userService.addRoleToUser(username, roleCode, caseloadId)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @PostMapping("/{username}/roles")
@@ -199,9 +195,7 @@ class UserRoleManagementResource(
     @RequestParam(required = false, defaultValue = "NWEB") @Size(max = 6, min = 3, message = "Caseload must be between 3-6 characters") caseloadId: String = DPS_CASELOAD,
     @Schema(description = "Role Codes", required = true)
     @RequestBody @Valid roleCodes: List<String>,
-  ): UserRoleDetail {
-    return userService.addRolesToUser(username, roleCodes, caseloadId)
-  }
+  ): UserRoleDetail = userService.addRolesToUser(username, roleCodes, caseloadId)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @DeleteMapping("/{username}/roles/{roleCode}")
@@ -257,9 +251,7 @@ class UserRoleManagementResource(
     @PathVariable @Size(max = 30, min = 1, message = "Role code must be between 1 and 30") roleCode: String,
     @Schema(description = "Caseload Id", example = "NWEB", required = false, defaultValue = "NWEB")
     @RequestParam(required = false, defaultValue = "NWEB") @Size(max = 6, min = 3, message = "Caseload must be between 3-6 characters") caseloadId: String = DPS_CASELOAD,
-  ): UserRoleDetail {
-    return userService.removeRoleFromUser(username, roleCode, caseloadId)
-  }
+  ): UserRoleDetail = userService.removeRoleFromUser(username, roleCode, caseloadId)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @PostMapping("/remove-roles/{roleCode}")
@@ -309,9 +301,57 @@ class UserRoleManagementResource(
     @PathVariable @Size(max = 30, min = 1, message = "Role code must be between 1 and 30") roleCode: String,
     @Schema(description = "Users", example = "JSMITH_GEN,JMOHMAND_GEN", required = true)
     @RequestBody users: String,
-  ): List<UserRoleDetail> {
-    return userService.removeRoleFromUsers(users.asList(), roleCode)
-  }
+  ): List<UserRoleDetail> = userService.removeRoleFromUsers(users.asList(), roleCode)
+
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
+  @PostMapping("/add-roles/{roleCode}")
+  @Operation(
+    summary = "Bulk add a role to a group of users",
+    description = "If the user has this role already it is ignored. Any users not found will also be ignored but will not be returned in the response. Only DPS roles are added to the DPS caseload (NWEB). Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES",
+    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "User information with role details"
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to add a role from a user account",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class)
+          )
+        ]
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class)
+          )
+        ]
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to add a role this user account",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class)
+          )
+        ]
+      )
+    ]
+  )
+  fun bulkAddRoles(
+    @Schema(description = "Role Code", example = "GLOBAL_SEARCH", required = true)
+    @PathVariable @Size(max = 30, min = 1, message = "Role code must be between 1 and 30") roleCode: String,
+    @Schema(description = "Users", example = "JSMITH_GEN,JMOHMAND_GEN", required = true)
+    @RequestBody users: String,
+  ): List<UserRoleDetail> = userService.addRoleToUsers(users.asList(), roleCode)
 }
 
 private fun String.asList(): List<String> = this.split(",").map { it.removeQuotes().trim() }
