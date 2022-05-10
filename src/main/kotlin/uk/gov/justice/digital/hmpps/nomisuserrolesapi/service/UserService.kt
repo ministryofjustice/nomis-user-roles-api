@@ -106,7 +106,10 @@ class UserService(
   fun findUsersByFilter(pageRequest: Pageable, filter: UserFilter): Page<UserSummaryWithEmail> =
     userPersonDetailRepository.findAll(UserSpecification(filter), pageRequest.withSort(::mapUserSummarySortProperties))
       .map {
-        it.toUserSummaryWithEmail(accountDetailRepository.findById(it.username).orElse(AccountDetail(username = it.username, accountStatus = AccountStatus.OPEN.desc)).status)
+        it.toUserSummaryWithEmail(
+          accountDetailRepository.findById(it.username)
+            .orElse(AccountDetail(username = it.username, accountStatus = AccountStatus.OPEN.desc)).status
+        )
       }
 
   fun createGeneralUser(createUserRequest: CreateGeneralUserRequest): UserSummary {
@@ -498,7 +501,7 @@ class UserService(
     users.mapNotNull { userPersonDetailRepository.findByIdOrNull(it) }
       .map {
         it.also { user ->
-          kotlin.runCatching { user.removeRole(roleCode, DPS_CASELOAD) }
+          runCatching { user.removeRole(roleCode, DPS_CASELOAD) }
             .onFailure { error ->
               log.warn("Unable to remove role $roleCode from ${user.username}", error)
             }
@@ -653,6 +656,31 @@ class UserService(
 
   fun authenticateUser(username: String, password: String): Boolean =
     passwordEncoder.matches(password, userPasswordRepository.findByIdOrNull(username)?.password)
+
+  fun addRoleToUsers(users: List<String>, roleCode: String): List<UserRoleDetail> {
+    val role = roleRepository.findByCode(roleCode).orElseThrow { UserRoleNotFoundException("Role $roleCode not found") }
+
+    return users.mapNotNull { userPersonDetailRepository.findByIdOrNull(it) }
+      .map {
+        it.also { user ->
+          runCatching { user.addRole(role, DPS_CASELOAD) }
+            .onFailure { error -> log.warn("Unable to add role $roleCode from ${user.username}", error) }
+            .onSuccess {
+              telemetryClient.trackEvent(
+                "NURA-add-role-to-user",
+                mapOf(
+                  "username" to user.username,
+                  "role-code" to roleCode,
+                  "caseload" to DPS_CASELOAD,
+                  "admin" to authenticationFacade.currentUsername
+                ),
+                null
+              )
+            }
+        }
+          .toUserRoleDetail()
+      }
+  }
 }
 
 private fun Pageable.withSort(sortMapper: (sortProperty: String) -> String): Pageable {
