@@ -78,7 +78,7 @@ class UserRoleManagementResource(
   )
   fun getUserRoles(
     @Schema(description = "Username", example = "TEST_USER1", required = true)
-    @PathVariable @Size(max = 30, min = 1, message = "username must be between 1 and 30") username: String,
+    @PathVariable username: String,
     @Schema(name = "include-nomis-roles", description = "Include NOMIS roles", example = "false", required = false, defaultValue = "false")
     @RequestParam(name = "include-nomis-roles", required = false, defaultValue = "false") includeNomisRoles: Boolean = false,
   ): UserRoleDetail = userService.getUserRoles(username, includeNomisRoles)

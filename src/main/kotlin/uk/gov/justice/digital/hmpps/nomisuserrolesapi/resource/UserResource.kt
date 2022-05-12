@@ -103,7 +103,7 @@ class UserResource(
   )
   fun getUserDetails(
     @Schema(description = "Username", example = "testuser1", required = true)
-    @PathVariable @Size(max = 30, min = 1, message = "username must be between 1 and 30") username: String
+    @PathVariable username: String
   ): UserDetail =
     userService.findByUsername(username)
 

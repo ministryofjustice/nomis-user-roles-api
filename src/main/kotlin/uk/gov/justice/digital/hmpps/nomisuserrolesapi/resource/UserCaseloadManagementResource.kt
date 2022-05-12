@@ -75,7 +75,7 @@ class UserCaseloadManagementResource(
   )
   fun getUserCaseloads(
     @Schema(description = "Username", example = "TEST_USER1", required = true)
-    @PathVariable @Size(max = 30, min = 1, message = "username must be between 1 and 30") username: String
+    @PathVariable username: String
   ): UserCaseloadDetail {
     return userService.getCaseloads(username)
   }
