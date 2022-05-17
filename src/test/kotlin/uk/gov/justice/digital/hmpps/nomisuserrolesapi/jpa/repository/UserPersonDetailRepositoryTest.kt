@@ -508,6 +508,7 @@ class UserPersonDetailRepositoryTest {
           "LEOPOLDO.CHESED",
           "SAWYL.ALYCIA",
           "BOB.SAW",
+          "SAWYL.ELBERT",
         )
       }
 
@@ -527,24 +528,6 @@ class UserPersonDetailRepositoryTest {
           "IBRAGIM.MIHAIL",
           "MARIAN.CHESED",
         )
-      }
-
-      @Test
-      internal fun `there are some statuses eg SICK that can not be filtered`() {
-        val countAllUsersThatCanBeFiltered = repository.findAll(
-          UserSpecification(UserFilter(status = UserStatus.INACTIVE)),
-          PageRequest.of(0, 10)
-        ).totalElements +
-          repository.findAll(
-            UserSpecification(UserFilter(status = UserStatus.ACTIVE)),
-            PageRequest.of(0, 10)
-          ).totalElements
-        val countAllUsersRegardlessOfStatus = repository.findAll(
-          UserSpecification(UserFilter(status = UserStatus.ALL)),
-          PageRequest.of(0, 10)
-        ).totalElements
-
-        assertThat(countAllUsersRegardlessOfStatus).isGreaterThan(countAllUsersThatCanBeFiltered)
       }
     }
 

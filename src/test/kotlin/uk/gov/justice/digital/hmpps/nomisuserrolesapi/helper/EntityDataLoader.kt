@@ -59,7 +59,6 @@ class GeneralUserBuilder(
       userPersonDetail.copy(
         activeAndInactiveMemberOfUserGroups = generalUsersOf(prisonCodes),
         type = UsageType.GENERAL,
-        accountDetail = AccountDetail(accountStatus = AccountStatus.OPEN.desc),
         activeCaseLoad = prisonCodes.firstOrNull()?.let { caseloadRepository.findByIdOrNull(it) },
         caseloads = (prisonCodes + DPS_CASELOAD).map {
           UserCaseload(
