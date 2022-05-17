@@ -19,35 +19,33 @@ interface UserPersonDetailRepository :
   JpaRepository<UserPersonDetail, String>,
   JpaSpecificationExecutor<UserPersonDetail> {
 
-  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Modifying
   @Query(value = "call oms_utils.create_user(:username, :password, :profile)", nativeQuery = true)
   fun createUser(username: String, password: String, profile: String = AccountProfile.TAG_GENERAL.name)
 
-  @Modifying(clearAutomatically = true)
+  @Modifying
   @Query(value = "call oms_utils.expire_password(:username)", nativeQuery = true)
   fun expirePassword(username: String)
 
-  @Modifying(clearAutomatically = true)
+  @Modifying
   @Query(value = "call oms_utils.drop_user(:username)", nativeQuery = true)
   fun dropUser(username: String)
 
-  @Modifying(clearAutomatically = true)
+  @Modifying
   @Query(value = "call oms_utils.change_user_password(:username, :password)", nativeQuery = true)
   fun changePassword(username: String?, password: String?)
 
-  @Modifying(clearAutomatically = true)
+  @Modifying
   @Query(value = "call oms_utils.unlock_user(:username)", nativeQuery = true)
   fun unlockUser(username: String?)
 
-  @Modifying(clearAutomatically = true)
+  @Modifying
   @Query(value = "call oms_utils.lock_user(:username)", nativeQuery = true)
   fun lockUser(username: String?)
 
   fun findAllByStaff_FirstNameIgnoreCaseAndStaff_LastNameIgnoreCase(firstName: String, lastName: String): List<UserPersonDetail>
 
   fun findByStaff_EmailsEmail(emailAddress: String): List<UserPersonDetail>
-
-  fun findByStaff_StatusEquals(status: String, pageable: Pageable): Page<UserPersonDetail>
 }
 
 fun changePasswordWithValidation(
