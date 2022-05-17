@@ -12,6 +12,7 @@ import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateGeneralUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
 
 class UserResourceIntTest : IntegrationTestBase() {
   @Autowired
@@ -467,7 +468,7 @@ class UserResourceIntTest : IntegrationTestBase() {
         generalUser().username("frederica.jones")
           .firstName("Frederica")
           .lastName("Jones")
-          .status("INACT")
+          .status("LOCKED")
           .email("frederica@justice.gov.uk")
           .atPrison("WWI")
           .buildAndSave()
@@ -902,7 +903,7 @@ class UserResourceIntTest : IntegrationTestBase() {
               .username("another.user$it")
               .firstName("ANOTHER")
               .lastName("USER")
-              .inactive()
+              .status(AccountStatus.EXPIRED.desc)
               .atPrison("BXI")
               .buildAndSave()
           }
@@ -1031,8 +1032,8 @@ class UserResourceIntTest : IntegrationTestBase() {
           .exchange()
           .expectStatus().isOk
           .expectBody()
-          .jsonPath("$.content[0].username").isEqualTo("aaabella.moulin")
-          .jsonPath("$.content[0].active").isEqualTo(true)
+          .jsonPath("$.content[0].username").isEqualTo("another.user1")
+          .jsonPath("$.content[0].active").isEqualTo(false)
 
         webTestClient.get().uri {
           it.path("/users/")
@@ -1043,8 +1044,8 @@ class UserResourceIntTest : IntegrationTestBase() {
           .exchange()
           .expectStatus().isOk
           .expectBody()
-          .jsonPath("$.content[0].username").isEqualTo("another.user99")
-          .jsonPath("$.content[0].active").isEqualTo(false)
+          .jsonPath("$.content[0].username").isEqualTo("zabella.moulin")
+          .jsonPath("$.content[0].active").isEqualTo(true)
       }
 
       @Test

@@ -1,14 +1,6 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper
 
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Role
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseload
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadPk
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadRole
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadRoleIdentity
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.*
 import java.time.LocalDate
 
 fun userPersonalDetails(username: String = "raj.maki", caseLoadId: String = "WWI", roles: List<String> = listOf()) = UserPersonDetail(

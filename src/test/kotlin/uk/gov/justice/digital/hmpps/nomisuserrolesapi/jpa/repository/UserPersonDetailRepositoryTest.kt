@@ -425,7 +425,7 @@ class UserPersonDetailRepositoryTest {
     inner class StatusFilter {
       private val lsaAdministratorAtWandsworth = "RIZ.MARSHALL"
 
-      private fun createUserOf(username: String, status: String = "ACTIVE", prison: String = "WWI") =
+      private fun createUserOf(username: String, status: String = "OPEN", prison: String = "WWI") =
         dataBuilder.generalUser()
           .username(username.uppercase())
           .firstName(username.split(".")[0].uppercase())

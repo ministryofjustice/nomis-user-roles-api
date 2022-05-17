@@ -64,7 +64,6 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           "firstName": "Laa",
           "lastName": "User",
           "activeCaseloadId" : "PVI",
-          "accountStatus": "EXPIRED",
           "primaryEmail": "laa@test.com",
           "accountType": "ADMIN"
           }
@@ -97,7 +96,6 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           "firstName": "Laa",
           "lastName": "User",
           "activeCaseloadId" : "WWI",
-          "accountStatus": "EXPIRED",
           "primaryEmail": "laa@test.com",
           "accountType": "ADMIN"
           }
@@ -119,11 +117,11 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("generalAccount.username").isEqualTo("GENERALUSER1")
         .jsonPath("generalAccount.activeCaseload.id").isEqualTo("WWI")
-        .jsonPath("generalAccount.active").isEqualTo("true")
+        .jsonPath("generalAccount.active").isEqualTo("false")
         .jsonPath("generalAccount.accountType").isEqualTo("GENERAL")
         .jsonPath("adminAccount.username").isEqualTo("LAA_USER1")
         .jsonPath("adminAccount.activeCaseload.id").isEqualTo("WWI")
-        .jsonPath("adminAccount.active").isEqualTo("true")
+        .jsonPath("adminAccount.active").isEqualTo("false")
         .jsonPath("adminAccount.accountType").isEqualTo("ADMIN")
 
       webTestClient.get().uri { it.path("/users/").queryParam("nameFilter", "generaluser1").build() }
@@ -159,7 +157,6 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           "firstName": "Test",
           "lastName": "User",
           "activeCaseloadId" : "CADM_I",
-          "accountStatus": "EXPIRED",
           "primaryEmail": "test@test.com",
           "accountType": "ADMIN"
           }
@@ -218,13 +215,13 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
       assertThat(staffDetail.generalAccount).isNotNull
       assertThat(staffDetail.generalAccount?.username).isEqualTo("TESTUSER5")
       assertThat(staffDetail.generalAccount?.activeCaseload?.id).isEqualTo("BXI")
-      assertThat(staffDetail.generalAccount?.active).isEqualTo(true)
+      assertThat(staffDetail.generalAccount?.active).isEqualTo(false)
       assertThat(staffDetail.generalAccount?.accountType).isEqualTo(UsageType.GENERAL)
 
       assertThat(staffDetail.adminAccount).isNotNull
       assertThat(staffDetail.adminAccount?.username).isEqualTo("TESTUSER4")
       assertThat(staffDetail.adminAccount?.activeCaseload?.id).isEqualTo("CADM_I")
-      assertThat(staffDetail.adminAccount?.active).isEqualTo(true)
+      assertThat(staffDetail.adminAccount?.active).isEqualTo(false)
       assertThat(staffDetail.adminAccount?.accountType).isEqualTo(UsageType.ADMIN)
 
       webTestClient.get().uri("/users/staff/${staffDetail.staffId}")
@@ -239,11 +236,11 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
         .jsonPath("status").isEqualTo("ACTIVE")
         .jsonPath("generalAccount.username").isEqualTo("TESTUSER5")
         .jsonPath("generalAccount.activeCaseload.id").isEqualTo("BXI")
-        .jsonPath("generalAccount.active").isEqualTo("true")
+        .jsonPath("generalAccount.active").isEqualTo("false")
         .jsonPath("generalAccount.accountType").isEqualTo("GENERAL")
         .jsonPath("adminAccount.username").isEqualTo("TESTUSER4")
         .jsonPath("adminAccount.activeCaseload.id").isEqualTo("CADM_I")
-        .jsonPath("adminAccount.active").isEqualTo("true")
+        .jsonPath("adminAccount.active").isEqualTo("false")
         .jsonPath("adminAccount.accountType").isEqualTo("ADMIN")
     }
 

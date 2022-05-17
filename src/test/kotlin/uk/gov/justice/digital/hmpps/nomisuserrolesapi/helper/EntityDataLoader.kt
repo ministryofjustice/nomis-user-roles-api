@@ -2,6 +2,9 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper
 
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountProfile
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.DPS_CASELOAD
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
@@ -181,7 +184,8 @@ fun defaultPerson(): UserPersonDetail {
   return UserPersonDetail(
     username = "tony",
     staff = Staff(firstName = "John", lastName = "Smith", status = "ACTIVE"),
-    type = UsageType.GENERAL
+    type = UsageType.GENERAL,
+    accountDetail = AccountDetail(accountStatus = AccountStatus.OPEN.desc, profile = AccountProfile.TAG_GENERAL.name)
   )
 }
 
@@ -265,10 +269,10 @@ abstract class UserBuilder<T>(
     )
   }
 
-  fun inactive(): UserBuilder<T> = status(status = "INACT")
+  fun inactive(): UserBuilder<T> = status(status = "EXPIRED")
 
   fun status(status: String): UserBuilder<T> {
-    this.userPersonDetail = userPersonDetail.copy(staff = userPersonDetail.staff.copy(status = status))
+    this.userPersonDetail = userPersonDetail.copy(accountDetail = userPersonDetail.accountDetail?.copy(accountStatus = status))
     return this
   }
 }

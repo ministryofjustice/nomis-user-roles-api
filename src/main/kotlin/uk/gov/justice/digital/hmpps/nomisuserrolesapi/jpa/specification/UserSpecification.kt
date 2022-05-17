@@ -1,6 +1,8 @@
 import org.springframework.data.jpa.domain.Specification
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Role
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
@@ -39,6 +41,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     fun and(vararg predicates: Predicate) = criteriaBuilder.and(*predicates)
     fun like(x: Expression<String>, pattern: String) = criteriaBuilder.like(x, pattern)
     fun equal(x: Expression<String>, pattern: String) = criteriaBuilder.equal(x, pattern)
+    fun inList(x: Expression<String>, values: List<String>) = x.`in`(values)
 
     fun administeredBy(localAdministratorUsername: String): Predicate {
       return equal(
@@ -93,7 +96,9 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       }
 
     fun statusMatch(status: UserStatus): Predicate? =
-      status.databaseStatus()?.let { equal(get(UserPersonDetail::staff).get(Staff::status), it) }
+      status.databaseStatus()?.let {
+        inList(get(UserPersonDetail::accountDetail).get(AccountDetail::accountStatus), it)
+      }
 
     fun activeCaseload(caseloadId: String): Predicate =
       equal(get(UserPersonDetail::activeCaseLoad).get(Caseload::id), caseloadId)
@@ -157,10 +162,10 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
   }
 }
 
-private fun UserStatus.databaseStatus(): String? = when (this) {
+private fun UserStatus.databaseStatus(): List<String>? = when (this) {
   UserStatus.ALL -> null
-  UserStatus.ACTIVE -> "ACTIVE"
-  UserStatus.INACTIVE -> "INACT"
+  UserStatus.ACTIVE -> AccountStatus.activeStatuses().map { it.desc }
+  UserStatus.INACTIVE -> AccountStatus.inActiveStatuses().map { it.desc }
 }
 
 private fun String.spiltWords(): List<String> = this.split(",", " ")

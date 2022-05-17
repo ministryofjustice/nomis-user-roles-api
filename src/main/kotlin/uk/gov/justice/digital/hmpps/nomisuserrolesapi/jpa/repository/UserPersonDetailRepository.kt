@@ -19,27 +19,27 @@ interface UserPersonDetailRepository :
   JpaRepository<UserPersonDetail, String>,
   JpaSpecificationExecutor<UserPersonDetail> {
 
-  @Modifying
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
   @Query(value = "call oms_utils.create_user(:username, :password, :profile)", nativeQuery = true)
   fun createUser(username: String, password: String, profile: String = AccountProfile.TAG_GENERAL.name)
 
-  @Modifying
+  @Modifying(clearAutomatically = true)
   @Query(value = "call oms_utils.expire_password(:username)", nativeQuery = true)
   fun expirePassword(username: String)
 
-  @Modifying
+  @Modifying(clearAutomatically = true)
   @Query(value = "call oms_utils.drop_user(:username)", nativeQuery = true)
   fun dropUser(username: String)
 
-  @Modifying
+  @Modifying(clearAutomatically = true)
   @Query(value = "call oms_utils.change_user_password(:username, :password)", nativeQuery = true)
   fun changePassword(username: String?, password: String?)
 
-  @Modifying
+  @Modifying(clearAutomatically = true)
   @Query(value = "call oms_utils.unlock_user(:username)", nativeQuery = true)
   fun unlockUser(username: String?)
 
-  @Modifying
+  @Modifying(clearAutomatically = true)
   @Query(value = "call oms_utils.lock_user(:username)", nativeQuery = true)
   fun lockUser(username: String?)
 
