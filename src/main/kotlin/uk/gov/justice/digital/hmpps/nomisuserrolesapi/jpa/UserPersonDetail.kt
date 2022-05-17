@@ -11,6 +11,7 @@ import java.time.LocalDate.now
 import java.util.function.Supplier
 import javax.persistence.CascadeType
 import javax.persistence.Column
+import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
@@ -19,11 +20,14 @@ import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import javax.persistence.PrimaryKeyJoinColumn
+import javax.persistence.SecondaryTable
 import javax.persistence.Table
 
 @Suppress("DataClassEqualsAndHashCodeInspection")
 @Entity
 @Table(name = "STAFF_USER_ACCOUNTS")
+@SecondaryTable(name = "DBA_USERS", pkJoinColumns = [PrimaryKeyJoinColumn(name = "USERNAME")])
 data class UserPersonDetail(
   @Id
   @Column(name = "USERNAME", nullable = false)
@@ -65,7 +69,15 @@ data class UserPersonDetail(
 
   @Column(name = "ID_SOURCE")
   var idSource: String = "USER",
+
+  @Embedded
+  val accountDetail: AccountDetail? = AccountDetail(),
 ) {
+
+  fun isActive() = accountDetail?.isActive() ?: false
+
+  fun isEnabled() = accountDetail?.isEnabled() ?: false
+
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
@@ -164,12 +176,13 @@ class CaseloadAlreadyExistsException(message: String?) :
   }
 }
 
-fun UserPersonDetail.toUserSummaryWithEmail(status: AccountStatus = AccountStatus.OPEN) = UserSummaryWithEmail(
+fun UserPersonDetail.toUserSummaryWithEmail() = UserSummaryWithEmail(
   username = username,
   staffId = staff.staffId,
   firstName = staff.firstName.capitalizeFully(),
   lastName = staff.lastName.capitalizeFully(),
-  active = staff.isActive && status.isActive(),
+  active = isActive(),
+  status = accountDetail?.status,
   activeCaseload = activeCaseLoad?.let { caseload ->
     PrisonCaseload(
       id = caseload.id,
@@ -185,7 +198,7 @@ fun UserPersonDetail.toUserSummary(): UserSummary = UserSummary(
   staffId = this.staff.staffId,
   firstName = this.staff.firstName.capitalizeFully(),
   lastName = this.staff.lastName.capitalizeFully(),
-  active = this.staff.isActive,
+  active = isActive(),
   activeCaseload = this.activeCaseLoad?.let { caseload ->
     PrisonCaseload(
       id = caseload.id,

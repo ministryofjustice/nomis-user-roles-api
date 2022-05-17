@@ -17,7 +17,7 @@ import java.util.regex.Pattern
 fun UserPersonDetail.toUserCaseloadDetail(removeDpsCaseload: Boolean = false): UserCaseloadDetail = UserCaseloadDetail(
   username = this.username,
   activeCaseload = this.activeCaseLoad?.toPrisonCaseload(),
-  active = this.staff.isActive,
+  active = this.isActive(),
   accountType = this.type,
   caseloads = this.caseloads
     .filter { !(removeDpsCaseload && it.caseload.isDpsCaseload()) }
@@ -32,7 +32,7 @@ fun UserPersonDetail.toUserCaseloadDetail(removeDpsCaseload: Boolean = false): U
 val userSummaryToEntityPropertyMap = mapOf(
   "firstName" to "staff.firstName",
   "lastName" to "staff.lastName",
-  "status" to "staff.status",
+  "status" to "accountDetail.accountStatus",
   "activeCaseload" to "activeCaseLoad.id",
 )
 
@@ -50,7 +50,7 @@ fun Staff.toStaffDetail(): StaffDetail = StaffDetail(this)
 fun UserPersonDetail.toUserRoleDetail(includeNomisRoles: Boolean = false): UserRoleDetail = UserRoleDetail(
   username = this.username,
   activeCaseload = this.activeCaseLoad?.toPrisonCaseload(),
-  active = this.staff.isActive,
+  active = this.isActive(),
   accountType = this.type,
   dpsRoles = this.caseloads.filter { uc -> uc.caseload.isDpsCaseload() }
     .map { uc ->

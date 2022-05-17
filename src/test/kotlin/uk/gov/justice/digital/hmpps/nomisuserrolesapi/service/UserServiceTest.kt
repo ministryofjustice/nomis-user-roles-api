@@ -20,7 +20,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPassword
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.AccountDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.CaseloadRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
@@ -34,7 +33,6 @@ internal class UserServiceTest {
   private val userPersonDetailRepository: UserPersonDetailRepository = mock()
   private val userAndEmailRepository: UserAndEmailRepository = mock()
   private val caseloadRepository: CaseloadRepository = mock()
-  private val accountDetailRepository: AccountDetailRepository = mock()
   private val staffRepository: StaffRepository = mock()
   private val roleRepository: RoleRepository = mock()
   private val telemetryClient: TelemetryClient = mock()
@@ -45,7 +43,6 @@ internal class UserServiceTest {
     userPersonDetailRepository,
     userAndEmailRepository,
     caseloadRepository,
-    accountDetailRepository,
     staffRepository,
     roleRepository,
     telemetryClient,
@@ -84,12 +81,12 @@ internal class UserServiceTest {
     fun `isAccountNonLocked validate accountStatuses`() {
       val nonLockedAccountStatuses = setOf(AccountStatus.OPEN, AccountStatus.EXPIRED, AccountStatus.EXPIRED_GRACE)
       for (accountStatus in nonLockedAccountStatuses) {
-        assertThat(userService.isAccountNonLocked(accountStatus)).isTrue
+        assertThat(AccountDetail(accountStatus = accountStatus.desc).isAccountNonLocked()).isTrue
       }
 
       val lockedAccountStatuses = filterSetFromAccountStatuses(nonLockedAccountStatuses)
       for (accountStatus in lockedAccountStatuses) {
-        assertThat(userService.isAccountNonLocked(accountStatus)).isFalse
+        assertThat(AccountDetail(accountStatus = accountStatus.desc).isAccountNonLocked()).isFalse
       }
     }
 
@@ -97,74 +94,80 @@ internal class UserServiceTest {
     fun `isCredentialsNonExpired validate accountStatuses`() {
       val expiredAccountStatuses = setOf(AccountStatus.EXPIRED, AccountStatus.EXPIRED_LOCKED, AccountStatus.EXPIRED_LOCKED_TIMED)
       for (accountStatus in expiredAccountStatuses) {
-        assertThat(userService.isCredentialsNonExpired(AccountDetail("user", accountStatus = accountStatus.desc))).isFalse
+        assertThat(AccountDetail(accountStatus = accountStatus.desc).isCredentialsNonExpired()).isFalse
       }
 
       val notExpiredAccountStatuses = filterSetFromAccountStatuses(expiredAccountStatuses)
       for (accountStatus in notExpiredAccountStatuses) {
-        assertThat(userService.isCredentialsNonExpired(AccountDetail("user", accountStatus = accountStatus.desc))).isTrue
+        assertThat(AccountDetail(accountStatus = accountStatus.desc).isCredentialsNonExpired()).isTrue
       }
     }
 
     @Test
     fun `isCredentialsNonExpired validate passwordExpiry`() {
       val accountDetailPasswordExpired = AccountDetail(
-        "user",
+
         accountStatus = AccountStatus.OPEN.desc,
         AccountProfile.TAG_GENERAL.name,
         LocalDateTime.now().minusMinutes(1)
       )
-      assertThat(userService.isCredentialsNonExpired(accountDetailPasswordExpired)).isFalse
+      assertThat(accountDetailPasswordExpired.isCredentialsNonExpired()).isFalse
 
       val accountDetailPasswordValid = AccountDetail(
-        "user",
         accountStatus = AccountStatus.OPEN.desc,
         AccountProfile.TAG_GENERAL.name,
         LocalDateTime.now().plusMinutes(1)
       )
-      assertThat(userService.isCredentialsNonExpired(accountDetailPasswordValid)).isTrue
+      assertThat(accountDetailPasswordValid.isCredentialsNonExpired()).isTrue
     }
 
     @Test
     fun `isEnabled`() {
-      // Given
-      val activeUser = UserPersonDetail(
-        username = "raj.maki",
-        staff = Staff(
-          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
-          status = "ACTIVE"
-        ),
-        type = UsageType.GENERAL,
-        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)")
-      )
-      val inactiveUser = UserPersonDetail(
-        username = "raj.maki",
-        staff = Staff(
-          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
-          status = "INACTIVE"
-        ),
-        type = UsageType.GENERAL,
-        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)")
-      )
-
       // When - enabledAccountStatuses and active user
       val enabledAccountStatuses = setOf(AccountStatus.OPEN, AccountStatus.EXPIRED, AccountStatus.EXPIRED_GRACE)
       for (accountStatus in enabledAccountStatuses) {
-        assertThat(userService.isEnabled(activeUser, accountStatus)).isTrue
-      }
-      // When - enabledAccountStatuses and inactive user
-      for (accountStatus in enabledAccountStatuses) {
-        assertThat(userService.isEnabled(inactiveUser, accountStatus)).isFalse
-      }
+        val user = UserPersonDetail(
+          username = "raj.maki",
+          staff = Staff(
+            staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
+            status = "ACTIVE"
+          ),
+          type = UsageType.GENERAL,
+          activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
+          accountDetail = AccountDetail(accountStatus = accountStatus.desc)
+        )
 
+        assertThat(user.isEnabled()).isTrue
+      }
       // When - disabledAccountStatuses and active user
       val disabledAccountStatuses = filterSetFromAccountStatuses(enabledAccountStatuses)
       for (accountStatus in disabledAccountStatuses) {
-        assertThat(userService.isEnabled(activeUser, accountStatus)).isFalse
+        val user = UserPersonDetail(
+          username = "raj.maki",
+          staff = Staff(
+            staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
+            status = "ACTIVE"
+          ),
+          type = UsageType.GENERAL,
+          activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
+          accountDetail = AccountDetail(accountStatus = accountStatus.desc)
+        )
+        assertThat(user.isEnabled()).isFalse
       }
       // When - disabledAccountStatuses and inactive user
       for (accountStatus in disabledAccountStatuses) {
-        assertThat(userService.isEnabled(inactiveUser, accountStatus)).isFalse
+        val inactiveUser = UserPersonDetail(
+          username = "raj.maki",
+          staff = Staff(
+            staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
+            status = "INACTIVE"
+          ),
+          type = UsageType.GENERAL,
+          activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
+          accountDetail = AccountDetail(accountStatus = accountStatus.desc)
+        )
+
+        assertThat(inactiveUser.isEnabled()).isFalse
       }
     }
 
@@ -174,13 +177,13 @@ internal class UserServiceTest {
         "user",
         profile = AccountProfile.TAG_ADMIN.name
       )
-      assertThat(userService.isAdmin(accountDetailIsAdmin)).isTrue
+      assertThat(accountDetailIsAdmin.isAdmin()).isTrue
 
       val accountDetailIsNotAdmin = AccountDetail(
         "user",
         profile = AccountProfile.TAG_GENERAL.name
       )
-      assertThat(userService.isAdmin(accountDetailIsNotAdmin)).isFalse
+      assertThat(accountDetailIsNotAdmin.isAdmin()).isFalse
     }
 
     @Test
@@ -193,9 +196,10 @@ internal class UserServiceTest {
           status = "ACTIVE"
         ),
         type = UsageType.GENERAL,
-        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)")
+        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
+        accountDetail = AccountDetail(accountStatus = AccountStatus.OPEN.desc)
       )
-      assertThat(userService.isActive(activeUser)).isTrue
+      assertThat(activeUser.isActive()).isTrue
 
       val inactiveUser = UserPersonDetail(
         username = "raj.maki",
@@ -204,9 +208,23 @@ internal class UserServiceTest {
           status = "INACTIVE"
         ),
         type = UsageType.GENERAL,
-        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)")
+        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
+        accountDetail = AccountDetail(accountStatus = AccountStatus.LOCKED.desc)
       )
-      assertThat(userService.isActive(inactiveUser)).isFalse
+      assertThat(inactiveUser.isActive()).isFalse
+
+      // Given
+      val expiredUser = UserPersonDetail(
+        username = "raj.maki",
+        staff = Staff(
+          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
+          status = "ACTIVE"
+        ),
+        type = UsageType.GENERAL,
+        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
+        accountDetail = AccountDetail(accountStatus = AccountStatus.EXPIRED.desc)
+      )
+      assertThat(expiredUser.isActive()).isFalse
     }
 
     private fun filterSetFromAccountStatuses(accountStatusesToFilter: Set<AccountStatus>) =

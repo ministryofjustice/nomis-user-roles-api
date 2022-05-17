@@ -15,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupAdministrator
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupMember
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
@@ -425,7 +426,7 @@ class UserPersonDetailRepositoryTest {
     inner class StatusFilter {
       private val lsaAdministratorAtWandsworth = "RIZ.MARSHALL"
 
-      private fun createUserOf(username: String, status: String = "ACTIVE", prison: String = "WWI") =
+      private fun createUserOf(username: String, status: AccountStatus, prison: String = "WWI") =
         dataBuilder.generalUser()
           .username(username.uppercase())
           .firstName(username.split(".")[0].uppercase())
@@ -442,16 +443,16 @@ class UserPersonDetailRepositoryTest {
           .buildAndSave()
 
         listOf(
-          "IBRAGIM.MIHAIL" to "ACTIVE",
-          "MARIAN.CHESED" to "ACTIVE",
-          "LEOPOLDO.CHESED" to "INACT",
-          "SAWYL.ALYCIA" to "INACT",
-          "SAWYL.ELBERT" to "SICK",
+          "IBRAGIM.MIHAIL" to AccountStatus.OPEN,
+          "MARIAN.CHESED" to AccountStatus.EXPIRED_GRACE,
+          "LEOPOLDO.CHESED" to AccountStatus.LOCKED,
+          "SAWYL.ALYCIA" to AccountStatus.EXPIRED,
+          "SAWYL.ELBERT" to AccountStatus.EXPIRED_GRACE_LOCKED_TIMED,
         ).forEach { createUserOf(username = it.first, status = it.second) }
 
         listOf(
-          "SAW.MICKEN" to "ACTIVE",
-          "BOB.SAW" to "INACT",
+          "SAW.MICKEN" to AccountStatus.OPEN,
+          "BOB.SAW" to AccountStatus.LOCKED,
         ).forEach { createUserOf(username = it.first, status = it.second, "BXI") }
       }
 
@@ -507,6 +508,7 @@ class UserPersonDetailRepositoryTest {
           "LEOPOLDO.CHESED",
           "SAWYL.ALYCIA",
           "BOB.SAW",
+          "SAWYL.ELBERT",
         )
       }
 
@@ -526,24 +528,6 @@ class UserPersonDetailRepositoryTest {
           "IBRAGIM.MIHAIL",
           "MARIAN.CHESED",
         )
-      }
-
-      @Test
-      internal fun `there are some statuses eg SICK that can not be filtered`() {
-        val countAllUsersThatCanBeFiltered = repository.findAll(
-          UserSpecification(UserFilter(status = UserStatus.INACTIVE)),
-          PageRequest.of(0, 10)
-        ).totalElements +
-          repository.findAll(
-            UserSpecification(UserFilter(status = UserStatus.ACTIVE)),
-            PageRequest.of(0, 10)
-          ).totalElements
-        val countAllUsersRegardlessOfStatus = repository.findAll(
-          UserSpecification(UserFilter(status = UserStatus.ALL)),
-          PageRequest.of(0, 10)
-        ).totalElements
-
-        assertThat(countAllUsersRegardlessOfStatus).isGreaterThan(countAllUsersThatCanBeFiltered)
       }
     }
 

@@ -53,6 +53,7 @@ class UserResourceTest {
       activeCaseload = PrisonCaseload("MDI", "Moorland"),
       dpsRoleCount = 3,
       email = "joe@bloggs.com",
+      status = AccountStatus.OPEN
     )
 
     whenever(userService.findUsersByFirstAndLastNames(any(), any())).thenReturn(listOf(user))

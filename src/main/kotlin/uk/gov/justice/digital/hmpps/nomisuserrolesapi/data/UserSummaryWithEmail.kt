@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.data
 
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
 
 @Schema(description = "Summary User Information with Email Address")
 data class UserSummaryWithEmail(
@@ -14,6 +15,8 @@ data class UserSummaryWithEmail(
   val lastName: String,
   @Schema(description = "Account status indicator", example = "true")
   val active: Boolean,
+  @Schema(description = "Account status", example = "OPEN")
+  val status: AccountStatus?,
   @Schema(description = "Caseload that is currently active, typically the prison the user is currently working at")
   val activeCaseload: PrisonCaseload?,
   @Schema(description = "The count of DPS roles allocated to this staff member", example = "12")
