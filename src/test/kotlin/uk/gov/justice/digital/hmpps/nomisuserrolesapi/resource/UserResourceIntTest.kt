@@ -468,7 +468,7 @@ class UserResourceIntTest : IntegrationTestBase() {
         generalUser().username("frederica.jones")
           .firstName("Frederica")
           .lastName("Jones")
-          .status("LOCKED")
+          .status(AccountStatus.LOCKED)
           .email("frederica@justice.gov.uk")
           .atPrison("WWI")
           .buildAndSave()
@@ -903,7 +903,7 @@ class UserResourceIntTest : IntegrationTestBase() {
               .username("another.user$it")
               .firstName("ANOTHER")
               .lastName("USER")
-              .status(AccountStatus.EXPIRED.desc)
+              .status(AccountStatus.EXPIRED)
               .atPrison("BXI")
               .buildAndSave()
           }

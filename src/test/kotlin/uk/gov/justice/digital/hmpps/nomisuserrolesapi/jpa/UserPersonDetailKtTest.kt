@@ -17,7 +17,8 @@ internal class UserPersonDetailKtTest {
         username = "raj.maki",
         staff = Staff(staffId = 99, firstName = "RAJ", lastName = "MAKI", status = "ACTIVE"),
         type = UsageType.GENERAL,
-        activeCaseLoad = Caseload("WWI", "WANDSWORTH (HMP)")
+        activeCaseLoad = Caseload("WWI", "WANDSWORTH (HMP)"),
+        accountDetail = AccountDetail(accountStatus = AccountStatus.OPEN.desc)
       )
 
       val data = entity.toUserSummary()
@@ -36,7 +37,8 @@ internal class UserPersonDetailKtTest {
         username = "raj.maki",
         staff = Staff(staffId = 99, firstName = "RAJ BOB", lastName = "MAKI", status = "ACTIVE"),
         type = UsageType.GENERAL,
-        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)")
+        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
+        accountDetail = AccountDetail(accountStatus = AccountStatus.OPEN.desc)
       )
 
       val data = entity.toUserSummary()
@@ -78,7 +80,8 @@ internal class UserPersonDetailKtTest {
         username = "raj.maki",
         staff = Staff(staffId = 99, firstName = "RAJ", lastName = "MAKI", status = "ACTIVE"),
         type = UsageType.GENERAL,
-        activeCaseLoad = Caseload("WWI", "WANDSWORTH (HMP)")
+        activeCaseLoad = Caseload("WWI", "WANDSWORTH (HMP)"),
+        accountDetail = AccountDetail(accountStatus = AccountStatus.OPEN.desc)
       )
 
       val data = entity.toUserSummaryWithEmail()

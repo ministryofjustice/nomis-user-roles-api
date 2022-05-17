@@ -59,6 +59,7 @@ class GeneralUserBuilder(
       userPersonDetail.copy(
         activeAndInactiveMemberOfUserGroups = generalUsersOf(prisonCodes),
         type = UsageType.GENERAL,
+        accountDetail = AccountDetail(accountStatus = AccountStatus.OPEN.desc),
         activeCaseLoad = prisonCodes.firstOrNull()?.let { caseloadRepository.findByIdOrNull(it) },
         caseloads = (prisonCodes + DPS_CASELOAD).map {
           UserCaseload(
@@ -269,10 +270,10 @@ abstract class UserBuilder<T>(
     )
   }
 
-  fun inactive(): UserBuilder<T> = status(status = "EXPIRED")
+  fun inactive(): UserBuilder<T> = status(status = AccountStatus.LOCKED)
 
-  fun status(status: String): UserBuilder<T> {
-    this.userPersonDetail = userPersonDetail.copy(accountDetail = userPersonDetail.accountDetail?.copy(accountStatus = status))
+  fun status(status: AccountStatus): UserBuilder<T> {
+    this.userPersonDetail = userPersonDetail.copy(accountDetail = userPersonDetail.accountDetail?.copy(accountStatus = status.desc))
     return this
   }
 }
