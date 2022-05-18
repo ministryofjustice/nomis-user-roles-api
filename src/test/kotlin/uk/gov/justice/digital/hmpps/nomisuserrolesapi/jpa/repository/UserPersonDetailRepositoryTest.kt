@@ -249,12 +249,13 @@ class UserPersonDetailRepositoryTest {
       private val lsaAdministratorAtBrixton = "bobbly.made"
       private val lsaAdministratorAtBrixtonAndWandsworth = "micky.bishop"
 
-      private fun createUppercaseUserOf(firsName: String, lastName: String, prison: String = "WWI") =
+      private fun createUppercaseUserOf(firstName: String, lastName: String, prison: String = "WWI") =
         dataBuilder.generalUser()
-          .username("$firsName.$lastName".uppercase())
-          .firstName(firsName.uppercase())
+          .username("$firstName.$lastName".uppercase())
+          .firstName(firstName.uppercase())
           .lastName(lastName.uppercase())
           .atPrison(prison)
+          .email("$firstName-$lastName@digital.justice.gov.uk")
           .buildAndSave()
 
       @BeforeEach
@@ -292,6 +293,14 @@ class UserPersonDetailRepositoryTest {
           .username("JOHN.SMITH")
           .firstName("XXXXX")
           .lastName("XXXXX")
+          .atPrison("WWI")
+          .buildAndSave()
+
+        dataBuilder.generalUser()
+          .username("JOEBLOGGS")
+          .firstName("XXXXX")
+          .lastName("XXXXX")
+          .email("Joe.Bloggs@digital.justice.gov.uk")
           .atPrison("WWI")
           .buildAndSave()
       }
@@ -342,6 +351,21 @@ class UserPersonDetailRepositoryTest {
           repository.findAll(UserSpecification(UserFilter(name = "john.sm")), PageRequest.of(0, 10))
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactly(
           "JOHN.SMITH"
+        )
+      }
+
+      @Test
+      internal fun `will match partial email address case insensitive`() {
+        val usersMatchingSawylAlycia =
+          repository.findAll(UserSpecification(UserFilter(name = "sawyl-alycia")), PageRequest.of(0, 10))
+        assertThat(usersMatchingSawylAlycia.content).extracting<String>(UserPersonDetail::username).containsExactly(
+          "SAWYL.ALYCIA",
+        )
+
+        val usersMatchingJoeBloggs =
+          repository.findAll(UserSpecification(UserFilter(name = "jOe.bLoGGs@digital")), PageRequest.of(0, 10))
+        assertThat(usersMatchingJoeBloggs.content).extracting<String>(UserPersonDetail::username).containsExactly(
+          "JOEBLOGGS",
         )
       }
 
