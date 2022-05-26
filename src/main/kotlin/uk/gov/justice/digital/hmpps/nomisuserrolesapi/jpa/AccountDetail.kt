@@ -24,8 +24,10 @@ data class AccountDetail(
   private val accountProfile: AccountProfile
     get() = AccountProfile.valueOf(profile.uppercase())
 
-  fun isAccountNonLocked(): Boolean =
-    AccountStatus.values().filter { !it.isLocked }.contains(status)
+  fun isAccountNonLocked(): Boolean = !isLocked()
+
+  fun isLocked(): Boolean =
+    AccountStatus.values().filter { it.isLocked }.contains(status)
 
   fun isCredentialsNonExpired(): Boolean {
     val statusNonExpired =
@@ -34,7 +36,11 @@ data class AccountDetail(
   }
 
   fun isEnabled(): Boolean {
-    return AccountStatus.values().filter { !it.isLocked }.contains(status)
+    return isAccountNonLocked()
+  }
+
+  fun isExpired(): Boolean {
+    return AccountStatus.values().filter { it.isExpired }.contains(status)
   }
 
   fun isActive(): Boolean {

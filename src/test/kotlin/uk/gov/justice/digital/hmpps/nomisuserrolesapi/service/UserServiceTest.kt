@@ -227,6 +227,112 @@ internal class UserServiceTest {
       assertThat(expiredUser.isActive()).isFalse
     }
 
+    @Test
+    fun `isExpired`() {
+      // Given
+      val activeUser = UserPersonDetail(
+        username = "raj.maki",
+        staff = Staff(
+          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
+          status = "ACTIVE"
+        ),
+        type = UsageType.GENERAL,
+        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
+        accountDetail = AccountDetail(accountStatus = AccountStatus.OPEN.desc)
+      )
+      assertThat(activeUser.accountDetail?.isExpired()).isFalse
+
+      val graceUser = UserPersonDetail(
+        username = "raj.maki",
+        staff = Staff(
+          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
+          status = "INACTIVE"
+        ),
+        type = UsageType.GENERAL,
+        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
+        accountDetail = AccountDetail(accountStatus = AccountStatus.EXPIRED_GRACE.desc)
+      )
+      assertThat(graceUser.accountDetail?.isExpired()).isTrue
+
+      val inactiveUser = UserPersonDetail(
+        username = "raj.maki",
+        staff = Staff(
+          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
+          status = "INACTIVE"
+        ),
+        type = UsageType.GENERAL,
+        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
+        accountDetail = AccountDetail(accountStatus = AccountStatus.LOCKED.desc)
+      )
+      assertThat(inactiveUser.accountDetail?.isExpired()).isFalse
+
+      // Given
+      val expiredUser = UserPersonDetail(
+        username = "raj.maki",
+        staff = Staff(
+          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
+          status = "ACTIVE"
+        ),
+        type = UsageType.GENERAL,
+        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
+        accountDetail = AccountDetail(accountStatus = AccountStatus.EXPIRED.desc)
+      )
+      assertThat(expiredUser.accountDetail?.isExpired()).isTrue
+    }
+
+    @Test
+    fun `isLocked`() {
+      // Given
+      val activeUser = UserPersonDetail(
+        username = "raj.maki",
+        staff = Staff(
+          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
+          status = "ACTIVE"
+        ),
+        type = UsageType.GENERAL,
+        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
+        accountDetail = AccountDetail(accountStatus = AccountStatus.OPEN.desc)
+      )
+      assertThat(activeUser.accountDetail?.isAccountNonLocked()).isTrue
+
+      val graceUser = UserPersonDetail(
+        username = "raj.maki",
+        staff = Staff(
+          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
+          status = "ACTIVE"
+        ),
+        type = UsageType.GENERAL,
+        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
+        accountDetail = AccountDetail(accountStatus = AccountStatus.EXPIRED_GRACE.desc)
+      )
+      assertThat(graceUser.accountDetail?.isAccountNonLocked()).isTrue
+
+      val inactiveUser = UserPersonDetail(
+        username = "raj.maki",
+        staff = Staff(
+          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
+          status = "INACTIVE"
+        ),
+        type = UsageType.GENERAL,
+        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
+        accountDetail = AccountDetail(accountStatus = AccountStatus.LOCKED.desc)
+      )
+      assertThat(inactiveUser.accountDetail?.isAccountNonLocked()).isFalse
+
+      // Given
+      val expiredUser = UserPersonDetail(
+        username = "raj.maki",
+        staff = Staff(
+          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
+          status = "ACTIVE"
+        ),
+        type = UsageType.GENERAL,
+        activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
+        accountDetail = AccountDetail(accountStatus = AccountStatus.EXPIRED.desc)
+      )
+      assertThat(expiredUser.accountDetail?.isAccountNonLocked()).isTrue
+    }
+
     private fun filterSetFromAccountStatuses(accountStatusesToFilter: Set<AccountStatus>) =
       AccountStatus.values().filterNot { accountStatusesToFilter.contains(it) }
   }
