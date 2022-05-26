@@ -17,6 +17,10 @@ data class UserSummaryWithEmail(
   val active: Boolean,
   @Schema(description = "Account status", example = "OPEN")
   val status: AccountStatus?,
+  @Schema(description = "Indicates that an account is locked.", example = "false")
+  val locked: Boolean = false,
+  @Schema(description = "Indicates that an account is expired", example = "false")
+  val expired: Boolean = false,
   @Schema(description = "Caseload that is currently active, typically the prison the user is currently working at")
   val activeCaseload: PrisonCaseload?,
   @Schema(description = "The count of DPS roles allocated to this staff member", example = "12")

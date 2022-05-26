@@ -183,6 +183,8 @@ fun UserPersonDetail.toUserSummaryWithEmail() = UserSummaryWithEmail(
   lastName = staff.lastName.capitalizeFully(),
   active = isActive(),
   status = accountDetail?.status,
+  locked = accountDetail?.isLocked() ?: false,
+  expired = accountDetail?.isExpired() ?: false,
   activeCaseload = activeCaseLoad?.let { caseload ->
     PrisonCaseload(
       id = caseload.id,
