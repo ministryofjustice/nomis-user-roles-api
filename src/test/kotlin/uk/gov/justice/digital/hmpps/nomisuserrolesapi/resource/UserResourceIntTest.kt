@@ -817,7 +817,8 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(1)
           .jsonPath("$.content[0].dpsRoleCount").isEqualTo(0)
-          .jsonPath("$.content[0].activeCaseload").isEqualTo(null)
+          .jsonPath("$.content[0].activeCaseload.id").isEqualTo("BXI")
+          .jsonPath("$.content[0].activeCaseload.name").isEqualTo("Brixton (HMP)")
           .jsonPath(matchByUserName, "marco.rossi").exists()
       }
       @Test

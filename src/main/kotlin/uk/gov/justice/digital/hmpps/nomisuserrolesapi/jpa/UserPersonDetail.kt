@@ -245,7 +245,12 @@ fun UserPersonDetail.toDownloadUserSummaryWithEmail() = UserSummaryWithEmail(
   status = accountDetail?.status,
   locked = accountDetail?.isLocked() ?: false,
   expired = accountDetail?.isExpired() ?: false,
-  activeCaseload = null,
+  activeCaseload = activeCaseLoad?.let { caseload ->
+    PrisonCaseload(
+      id = caseload.id,
+      name = caseload.name.capitalizeLeavingAbbreviations()
+    )
+  },
   dpsRoleCount = 0,
   email = staff.primaryEmail()?.email,
 )
