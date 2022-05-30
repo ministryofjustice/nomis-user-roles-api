@@ -13,6 +13,9 @@ api:
 spring:
   flyway:
     enabled: true
+    properties:
+      hibernate:
+        format_sql: true
 
   datasource:
     url: 'jdbc:h2:mem:nomis-db;MODE=Oracle'
