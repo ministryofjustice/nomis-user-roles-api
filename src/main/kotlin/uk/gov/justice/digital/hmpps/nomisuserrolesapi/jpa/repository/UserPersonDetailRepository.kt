@@ -46,7 +46,7 @@ interface UserPersonDetailRepository :
   fun lockUser(username: String?)
 
   @EntityGraph(value = "user-person-detail-download-graph", type = EntityGraph.EntityGraphType.LOAD)
-  override fun findAll(speci: Specification<UserPersonDetail>, pageRequest: Pageable): Page<UserPersonDetail>
+  override fun findAll(speci: Specification<UserPersonDetail>?, pageRequest: Pageable): Page<UserPersonDetail>
 
   fun findAllByStaff_FirstNameIgnoreCaseAndStaff_LastNameIgnoreCase(firstName: String, lastName: String): List<UserPersonDetail>
 
