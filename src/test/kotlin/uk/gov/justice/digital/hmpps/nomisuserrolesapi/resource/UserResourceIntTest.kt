@@ -809,6 +809,19 @@ class UserResourceIntTest : IntegrationTestBase() {
       }
 
       @Test
+      fun `they can download with filter by user name`() {
+        webTestClient.get().uri { it.path("/users/download/").queryParam("nameFilter", "mar").build() }
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
+          .exchange()
+          .expectStatus().isOk
+          .expectBody()
+          .jsonPath("$.numberOfElements").isEqualTo(1)
+          .jsonPath("$.content[0].dpsRoleCount").isEqualTo(0)
+          .jsonPath("$.content[0].activeCaseload.id").isEqualTo("BXI")
+          .jsonPath("$.content[0].activeCaseload.name").isEqualTo("Brixton (HMP)")
+          .jsonPath(matchByUserName, "marco.rossi").exists()
+      }
+      @Test
       fun `they can filter by account status`() {
         webTestClient.get().uri { it.path("/users/").queryParam("status", "ACTIVE").build() }
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))

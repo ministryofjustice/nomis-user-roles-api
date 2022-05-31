@@ -38,6 +38,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserAndEmai
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPasswordRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.changePasswordWithValidation
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.toDownloadUserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.toUserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.toUserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.mapUserSummarySortProperties
@@ -101,6 +102,13 @@ class UserService(
     userPersonDetailRepository.findAll(UserSpecification(filter), pageRequest.withSort(::mapUserSummarySortProperties))
       .map {
         it.toUserSummaryWithEmail()
+      }
+
+  @Transactional(readOnly = true)
+  fun downloadUserByFilter(pageRequest: Pageable, filter: UserFilter): Page<UserSummaryWithEmail> =
+    userPersonDetailRepository.findAll(UserSpecification(filter), pageRequest.withSort(::mapUserSummarySortProperties))
+      .map {
+        it.toDownloadUserSummaryWithEmail()
       }
 
   fun createGeneralUser(createUserRequest: CreateGeneralUserRequest): UserSummary {
