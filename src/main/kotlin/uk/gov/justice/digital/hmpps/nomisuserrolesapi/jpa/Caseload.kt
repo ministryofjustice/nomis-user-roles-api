@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
 import org.hibernate.Hibernate
+import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.Type
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -14,6 +15,7 @@ const val DPS_CASELOAD = "NWEB"
 
 @Entity
 @Table(name = "CASELOADS")
+@BatchSize(size = 100)
 data class Caseload(
   @Id
   @Column(name = "CASELOAD_ID", nullable = false)

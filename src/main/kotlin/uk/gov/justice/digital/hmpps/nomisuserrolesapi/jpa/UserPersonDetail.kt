@@ -68,8 +68,8 @@ data class UserPersonDetail(
   @Column(name = "USERNAME", nullable = false)
   val username: String,
 
-  @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-  @JoinColumn(name = "STAFF_ID")
+  @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "STAFF_ID", nullable = false)
   val staff: Staff,
 
   @OneToMany(fetch = FetchType.LAZY)
@@ -105,7 +105,8 @@ data class UserPersonDetail(
   val type: UsageType,
 
   @JoinColumn(name = "WORKING_CASELOAD_ID", nullable = true)
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
+  @BatchSize(size = 100)
   var activeCaseLoad: Caseload? = null,
 
   @Column(name = "ID_SOURCE")
@@ -245,7 +246,7 @@ fun UserPersonDetail.toDownloadUserSummaryWithEmail() = UserSummaryWithEmail(
   status = accountDetail?.status,
   locked = accountDetail?.isLocked() ?: false,
   expired = accountDetail?.isExpired() ?: false,
-  activeCaseload = activeCaseLoad?.let { caseload ->
+  activeCaseload = this.activeCaseLoad?.let { caseload ->
     PrisonCaseload(
       id = caseload.id,
       name = caseload.name.capitalizeLeavingAbbreviations()
