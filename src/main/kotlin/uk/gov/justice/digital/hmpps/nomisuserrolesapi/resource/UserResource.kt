@@ -322,8 +322,7 @@ class UserResource(
       example = "MDI"
     )
     @RequestParam(value = "caseload", required = false) caseload: String?,
-  ): Page<UserSummaryWithEmail> = userService.downloadUserByFilter(
-    pageRequest,
+  ): List<UserSummaryWithEmail> = userService.downloadUserByFilter(
     UserFilter(
       localAdministratorUsername = localAdministratorUsernameWhenNotCentralAdministrator(),
       name = nameFilter.nonBlank(),

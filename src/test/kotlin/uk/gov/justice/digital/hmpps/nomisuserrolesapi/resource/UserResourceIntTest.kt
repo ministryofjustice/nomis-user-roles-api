@@ -814,12 +814,23 @@ class UserResourceIntTest : IntegrationTestBase() {
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
           .exchange()
           .expectStatus().isOk
-          .expectBody()
-          .jsonPath("$.numberOfElements").isEqualTo(1)
-          .jsonPath("$.content[0].dpsRoleCount").isEqualTo(0)
-          .jsonPath("$.content[0].activeCaseload.id").isEqualTo("BXI")
-          .jsonPath("$.content[0].activeCaseload.name").isEqualTo("Brixton (HMP)")
-          .jsonPath(matchByUserName, "marco.rossi").exists()
+          .expectBody().json(
+            """
+                             [{
+                                "username": "marco.rossi",
+                                "firstName": "Marco",
+                                "lastName": "Rossi",
+                                "status": "LOCKED",
+                                "expired": false,
+                                "locked": true,                                
+                                "activeCaseload": {
+                                  "id": "BXI",
+                                  "name": "Brixton (HMP)"
+                              },
+                                  "dpsRoleCount": 0
+                            }]
+                            """
+          )
       }
       @Test
       fun `they can filter by account status`() {
