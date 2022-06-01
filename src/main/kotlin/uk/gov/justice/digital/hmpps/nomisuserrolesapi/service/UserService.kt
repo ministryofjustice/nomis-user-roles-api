@@ -105,8 +105,8 @@ class UserService(
       }
 
   @Transactional(readOnly = true)
-  fun downloadUserByFilter(pageRequest: Pageable, filter: UserFilter): Page<UserSummaryWithEmail> =
-    userPersonDetailRepository.findAll(UserSpecification(filter), pageRequest.withSort(::mapUserSummarySortProperties))
+  fun downloadUserByFilter(filter: UserFilter): List<UserSummaryWithEmail> =
+    userPersonDetailRepository.findAll(UserSpecification(filter))
       .map {
         it.toDownloadUserSummaryWithEmail()
       }

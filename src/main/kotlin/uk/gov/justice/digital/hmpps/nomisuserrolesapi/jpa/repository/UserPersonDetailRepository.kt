@@ -1,7 +1,5 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository
 
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
@@ -44,10 +42,8 @@ interface UserPersonDetailRepository :
   @Modifying
   @Query(value = "call oms_utils.lock_user(:username)", nativeQuery = true)
   fun lockUser(username: String?)
-
   @EntityGraph(value = "user-person-detail-download-graph", type = EntityGraph.EntityGraphType.LOAD)
-  override fun findAll(speci: Specification<UserPersonDetail>?, pageRequest: Pageable): Page<UserPersonDetail>
-
+  override fun findAll(speci: Specification<UserPersonDetail>?): List<UserPersonDetail>
   fun findAllByStaff_FirstNameIgnoreCaseAndStaff_LastNameIgnoreCase(firstName: String, lastName: String): List<UserPersonDetail>
 
   fun findByStaff_EmailsEmail(emailAddress: String): List<UserPersonDetail>
