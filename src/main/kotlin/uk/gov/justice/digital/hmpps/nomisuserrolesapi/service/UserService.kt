@@ -18,6 +18,8 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateAdminUserReques
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateGeneralUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedAdminUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedGeneralUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedLocalAdminUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLocalAdminUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
@@ -27,6 +29,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountProfile
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.DPS_CASELOAD
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.CENTRAL_ADMIN_CASELOAD
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.getUsageType
@@ -178,7 +181,7 @@ class UserService(
     }
 
     val userPersonDetail =
-      createUserAccount(staffAccount, createUserRequest.username, defaultCaseloadId = "CADM_I", admin = true)
+      createAdminUserAccount(staffAccount, createUserRequest.username)
 
     createSchemaUser(createUserRequest.username, AccountProfile.TAG_ADMIN)
 
@@ -206,7 +209,7 @@ class UserService(
     }
 
     val userPersonDetail =
-      createUserAccount(staffAccount, linkedUserRequest.username, defaultCaseloadId = "CADM_I", admin = true)
+      createAdminUserAccount(staffAccount, linkedUserRequest.username)
     createSchemaUser(linkedUserRequest.username, AccountProfile.TAG_ADMIN)
 
     telemetryClient.trackEvent(
@@ -223,7 +226,7 @@ class UserService(
     return userPersonDetail.toUserSummary()
   }
 
-  fun createLocalAdminUser(createUserRequest: CreateGeneralUserRequest): UserSummary {
+  fun createLocalAdminUser(createUserRequest: CreateLocalAdminUserRequest): UserSummary {
 
     checkIfAccountAlreadyExists(createUserRequest.username)
 
@@ -234,12 +237,10 @@ class UserService(
       throw UserAlreadyExistsException("Admin user already exists for this staff member")
     }
 
-    val userPersonDetail = createUserAccount(
+    val userPersonDetail = createLocalAdminUserAccount(
       staffAccount,
       createUserRequest.username,
-      defaultCaseloadId = createUserRequest.defaultCaseloadId,
-      admin = true,
-      laaAdmin = true
+      localAdminUserGroup = createUserRequest.localAdminGroup
     )
 
     createSchemaUser(createUserRequest.username, AccountProfile.TAG_ADMIN)
@@ -256,7 +257,7 @@ class UserService(
     return userPersonDetail.toUserSummary()
   }
 
-  fun linkLocalAdminAccount(linkedUsername: String, linkedUserRequest: CreateLinkedGeneralUserRequest): UserSummary {
+  fun linkLocalAdminAccount(linkedUsername: String, linkedUserRequest: CreateLinkedLocalAdminUserRequest): UserSummary {
     checkIfAccountAlreadyExists(linkedUserRequest.username)
 
     val staffAccount = userPersonDetailRepository.findById(linkedUsername).map { it.staff }
@@ -266,12 +267,10 @@ class UserService(
       throw UserAlreadyExistsException("Admin user already exists for this staff member")
     }
 
-    val userPersonDetail = createUserAccount(
+    val userPersonDetail = createLocalAdminUserAccount(
       staffAccount,
       linkedUserRequest.username,
-      defaultCaseloadId = linkedUserRequest.defaultCaseloadId,
-      admin = true,
-      laaAdmin = true
+      localAdminUserGroup = linkedUserRequest.localAdminGroup
     )
     createSchemaUser(linkedUserRequest.username, AccountProfile.TAG_ADMIN)
 
@@ -585,15 +584,13 @@ class UserService(
   private fun createUserAccount(
     staffAccount: Staff,
     username: String,
-    defaultCaseloadId: String,
-    admin: Boolean = false,
-    laaAdmin: Boolean = false
+    defaultCaseloadId: String
   ): UserPersonDetail {
 
     val userPersonDetail = UserPersonDetail(
       username = username.uppercase(),
       staff = staffAccount,
-      type = getUsageType(admin),
+      type = getUsageType(false),
       accountDetail = null
     )
     caseloadRepository.findById(DPS_CASELOAD)
@@ -607,11 +604,56 @@ class UserService(
 
     userPersonDetail.setDefaultCaseload(defaultCaseload.id)
 
-    if (admin && laaAdmin) {
-      userPersonDetail.addToAdminUserGroup(defaultCaseload)
-    }
+    userPersonDetailRepository.saveAndFlush(userPersonDetail)
+    return userPersonDetail
+  }
+
+  private fun createAdminUserAccount(
+    staffAccount: Staff,
+    username: String
+  ): UserPersonDetail {
+
+    val userPersonDetail = setupUserPersonDetailForAdmins(username, staffAccount)
 
     userPersonDetailRepository.saveAndFlush(userPersonDetail)
+    return userPersonDetail
+  }
+
+  private fun createLocalAdminUserAccount(
+    staffAccount: Staff,
+    username: String,
+    localAdminUserGroup: String
+  ): UserPersonDetail {
+
+    val userPersonDetail = setupUserPersonDetailForAdmins(username, staffAccount)
+
+    val userGroup = caseloadRepository.findById(localAdminUserGroup)
+      .orElseThrow(CaseloadNotFoundException("Admin User group for this caseload $localAdminUserGroup not found"))
+    userPersonDetail.addToAdminUserGroup(userGroup)
+
+    userPersonDetailRepository.saveAndFlush(userPersonDetail)
+    return userPersonDetail
+  }
+
+  private fun setupUserPersonDetailForAdmins(
+    username: String,
+    staffAccount: Staff
+  ): UserPersonDetail {
+    val userPersonDetail = UserPersonDetail(
+      username = username.uppercase(),
+      staff = staffAccount,
+      type = getUsageType(true),
+      accountDetail = null
+    )
+    caseloadRepository.findById(DPS_CASELOAD)
+      .ifPresent {
+        userPersonDetail.addCaseload(it)
+      }
+    caseloadRepository.findById(CENTRAL_ADMIN_CASELOAD)
+      .ifPresent {
+        userPersonDetail.addCaseload(it)
+        userPersonDetail.setDefaultCaseload(it.id)
+      }
     return userPersonDetail
   }
 

@@ -20,6 +20,8 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateAdminUserReques
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateGeneralUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedAdminUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedGeneralUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedLocalAdminUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLocalAdminUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
@@ -114,7 +116,7 @@ class UserAccountResource(
     ]
   )
   fun createLocalAdminUser(
-    @RequestBody @Valid createLocalAdminUserRequest: CreateGeneralUserRequest
+    @RequestBody @Valid createLocalAdminUserRequest: CreateLocalAdminUserRequest
   ): UserDetail {
     val user = userService.createLocalAdminUser(createLocalAdminUserRequest)
     return userService.findByUsername(username = user.username)
@@ -250,7 +252,7 @@ class UserAccountResource(
   fun linkLocalAdminAccount(
     @Schema(description = "Attach account to an existing general user account", example = "testuser2", required = true)
     @PathVariable @Size(max = 30, min = 1, message = "Username must be between 1 and 30") linkedUsername: String,
-    @RequestBody @Valid linkedLocalAdminUserRequest: CreateLinkedGeneralUserRequest
+    @RequestBody @Valid linkedLocalAdminUserRequest: CreateLinkedLocalAdminUserRequest
   ): StaffDetail {
     val linkedUser = userService.linkLocalAdminAccount(linkedUsername, linkedLocalAdminUserRequest)
     return userService.findByStaffId(linkedUser.staffId)
