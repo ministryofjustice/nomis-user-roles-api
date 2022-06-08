@@ -89,7 +89,7 @@ class UserAccountResource(
       content = [
         Content(
           mediaType = "application/json",
-          schema = Schema(implementation = CreateGeneralUserRequest::class)
+          schema = Schema(implementation = CreateLocalAdminUserRequest::class)
         )
       ]
     ),
@@ -223,7 +223,7 @@ class UserAccountResource(
       content = [
         Content(
           mediaType = "application/json",
-          schema = Schema(implementation = CreateLinkedGeneralUserRequest::class)
+          schema = Schema(implementation = CreateLinkedLocalAdminUserRequest::class)
         )
       ]
     ),
