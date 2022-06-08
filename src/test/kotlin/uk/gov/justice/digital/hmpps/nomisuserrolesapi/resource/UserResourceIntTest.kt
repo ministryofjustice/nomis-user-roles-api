@@ -752,11 +752,26 @@ class UserResourceIntTest : IntegrationTestBase() {
           generalUser().username("ella.dribble").firstName("ELLA").lastName("DRIBBLE").atPrisons(listOf("WWI", "BXI"))
             .inactive().buildAndSave()
           generalUser().username("mark.bowlan").firstName("MARK").lastName("BOWLAN").atPrison("BXI").buildAndSave()
+          // Staff with multiple email Ids
+          generalUser().username("dave.rossi").firstName("dave").lastName("rossi")
+            .addEmail("dave@1digital.justice.gov.uk").addEmail("dave@2digital.justice.gov.uk")
+            .addEmail("dave@3digital.justice.gov.uk").atPrisons(listOf("BXI", "WWI")).buildAndSave()
         }
       }
 
       @AfterEach
       internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+      @Test
+      fun `they can filter by user name with multiple emails`() {
+        webTestClient.get().uri { it.path("/users/").queryParam("status", "ALL").queryParam("nameFilter", "dav").build() }
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
+          .exchange()
+          .expectStatus().isOk
+          .expectBody()
+          .jsonPath("$.numberOfElements").isEqualTo(1)
+          .jsonPath(matchByUserName, "dave.rossi").exists()
+      }
 
       @Test
       fun `they can call the endpoint with the ROLE_MAINTAIN_ACCESS_ROLES role`() {
@@ -765,8 +780,9 @@ class UserResourceIntTest : IntegrationTestBase() {
           .exchange()
           .expectStatus().isOk
           .expectBody()
-          .jsonPath("$.numberOfElements").isEqualTo(3)
+          .jsonPath("$.numberOfElements").isEqualTo(4)
           .jsonPath(matchByUserName, "marco.rossi").exists()
+          .jsonPath(matchByUserName, "dave.rossi").exists()
           .jsonPath(matchByUserName, "abella.moulin").exists()
           .jsonPath(matchByUserName, "ella.dribble").exists()
           .jsonPath(matchByUserName + "active", "abella.moulin").isEqualTo(true)
@@ -789,8 +805,9 @@ class UserResourceIntTest : IntegrationTestBase() {
           .exchange()
           .expectStatus().isOk
           .expectBody()
-          .jsonPath("$.numberOfElements").isEqualTo(5)
+          .jsonPath("$.numberOfElements").isEqualTo(6)
           .jsonPath(matchByUserName, "marco.rossi").exists()
+          .jsonPath(matchByUserName, "dave.rossi").exists()
           .jsonPath(matchByUserName, "abella.moulin").exists()
           .jsonPath(matchByUserName, "mark.bowlan").exists()
           .jsonPath(matchByUserName, "jane.lsa.wwi").exists()
@@ -839,7 +856,7 @@ class UserResourceIntTest : IntegrationTestBase() {
           .exchange()
           .expectStatus().isOk
           .expectBody()
-          .jsonPath("$.numberOfElements").isEqualTo(1)
+          .jsonPath("$.numberOfElements").isEqualTo(2)
           .jsonPath(matchByUserName, "abella.moulin").exists()
       }
 
@@ -850,8 +867,9 @@ class UserResourceIntTest : IntegrationTestBase() {
           .exchange()
           .expectStatus().isOk
           .expectBody()
-          .jsonPath("$.numberOfElements").isEqualTo(1)
+          .jsonPath("$.numberOfElements").isEqualTo(2)
           .jsonPath(matchByUserName, "marco.rossi").exists()
+          .jsonPath(matchByUserName, "dave.rossi").exists()
       }
 
       @Test
@@ -861,8 +879,9 @@ class UserResourceIntTest : IntegrationTestBase() {
           .exchange()
           .expectStatus().isOk
           .expectBody()
-          .jsonPath("$.numberOfElements").isEqualTo(2)
+          .jsonPath("$.numberOfElements").isEqualTo(3)
           .jsonPath(matchByUserName, "marco.rossi").exists()
+          .jsonPath(matchByUserName, "dave.rossi").exists()
           .jsonPath(matchByUserName, "ella.dribble").exists()
       }
     }

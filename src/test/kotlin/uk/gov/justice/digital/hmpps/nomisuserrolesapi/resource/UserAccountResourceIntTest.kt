@@ -9,6 +9,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateAdminUserReques
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateGeneralUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedAdminUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedGeneralUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLocalAdminUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
@@ -46,12 +47,12 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .body(
           BodyInserters.fromValue(
-            CreateGeneralUserRequest(
+            CreateLocalAdminUserRequest(
               username = "laauser1",
               firstName = "Laa",
               lastName = "User",
               email = "laa@test.com",
-              defaultCaseloadId = "PVI"
+              localAdminGroup = "PVI"
             )
           )
         )
@@ -63,7 +64,7 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           "username": "LAAUSER1",
           "firstName": "Laa",
           "lastName": "User",
-          "activeCaseloadId" : "PVI",
+          "activeCaseloadId" : "CADM_I",
           "primaryEmail": "laa@test.com",
           "accountType": "ADMIN"
           }
@@ -78,12 +79,12 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .body(
           BodyInserters.fromValue(
-            CreateGeneralUserRequest(
+            CreateLocalAdminUserRequest(
               username = "laa_user1",
               firstName = "Laa",
               lastName = "User",
               email = "laa@test.com",
-              defaultCaseloadId = "WWI"
+              localAdminGroup = "WWI"
             )
           )
         )
@@ -95,7 +96,7 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           "username": "LAA_USER1",
           "firstName": "Laa",
           "lastName": "User",
-          "activeCaseloadId" : "WWI",
+          "activeCaseloadId" : "CADM_I",
           "primaryEmail": "laa@test.com",
           "accountType": "ADMIN"
           }
@@ -120,7 +121,7 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
         .jsonPath("generalAccount.active").isEqualTo("false")
         .jsonPath("generalAccount.accountType").isEqualTo("GENERAL")
         .jsonPath("adminAccount.username").isEqualTo("LAA_USER1")
-        .jsonPath("adminAccount.activeCaseload.id").isEqualTo("WWI")
+        .jsonPath("adminAccount.activeCaseload.id").isEqualTo("CADM_I")
         .jsonPath("adminAccount.active").isEqualTo("false")
         .jsonPath("adminAccount.accountType").isEqualTo("ADMIN")
 

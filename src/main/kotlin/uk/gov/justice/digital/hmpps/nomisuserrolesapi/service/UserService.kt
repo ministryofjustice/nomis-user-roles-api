@@ -4,6 +4,7 @@ import UserSpecification
 import com.microsoft.applicationinsights.TelemetryClient
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -28,8 +29,8 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountProfile
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.DPS_CASELOAD
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.CENTRAL_ADMIN_CASELOAD
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.DPS_CASELOAD
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.getUsageType
@@ -101,12 +102,14 @@ class UserService(
   }
 
   @Transactional(readOnly = true)
-  fun findUsersByFilter(pageRequest: Pageable, filter: UserFilter): Page<UserSummaryWithEmail> =
-    userPersonDetailRepository.findAll(UserSpecification(filter), pageRequest.withSort(::mapUserSummarySortProperties))
+  fun findUsersByFilter(pageRequest: Pageable, filter: UserFilter): Page<UserSummaryWithEmail> {
+    val userSpecification =
+      userPersonDetailRepository.findAll(UserSpecification(filter), pageRequest.withSort(::mapUserSummarySortProperties))
+    return PageImpl(userSpecification.content.distinct(), pageRequest, userSpecification.totalElements)
       .map {
         it.toUserSummaryWithEmail()
       }
-
+  }
   @Transactional(readOnly = true)
   fun downloadUserByFilter(filter: UserFilter): List<UserSummaryWithEmail> =
     userPersonDetailRepository.findAll(UserSpecification(filter))
