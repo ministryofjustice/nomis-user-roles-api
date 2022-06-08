@@ -6,6 +6,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountProfile
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.DPS_CASELOAD
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.EmailAddress
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseload
@@ -70,7 +71,14 @@ class GeneralUserBuilder(
             caseload = caseloadRepository.findByIdOrNull(it)!!,
             user = userPersonDetail,
             roles = mutableListOf(),
-          ).let { userCaseload -> userCaseload.copy(roles = asRoles(userCaseload, if (it == DPS_CASELOAD) dpsRoles else nomsRoles)) }
+          ).let { userCaseload ->
+            userCaseload.copy(
+              roles = asRoles(
+                userCaseload,
+                if (it == DPS_CASELOAD) dpsRoles else nomsRoles
+              )
+            )
+          }
         }.toMutableList()
       )
     return this
@@ -247,6 +255,11 @@ abstract class UserBuilder<T>(
     return this
   }
 
+  fun addEmail(email: String): UserBuilder<T> {
+    this.userPersonDetail.staff.emails.add(EmailAddress(email = email, staff = userPersonDetail.staff))
+    return this
+  }
+
   fun dpsRoles(roles: List<String>): UserBuilder<T> {
     this.dpsRoles = roles
     return this
@@ -272,7 +285,8 @@ abstract class UserBuilder<T>(
   fun inactive(): UserBuilder<T> = status(status = AccountStatus.LOCKED)
 
   fun status(status: AccountStatus): UserBuilder<T> {
-    this.userPersonDetail = userPersonDetail.copy(accountDetail = userPersonDetail.accountDetail?.copy(accountStatus = status.desc))
+    this.userPersonDetail =
+      userPersonDetail.copy(accountDetail = userPersonDetail.accountDetail?.copy(accountStatus = status.desc))
     return this
   }
 }
