@@ -18,7 +18,48 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
 
   @Nested
   @DisplayName("POST /users")
-  inner class MaintainUsers {
+  inner class CreateUsers {
+
+    @Test
+    fun `an admin database user can be created`() {
+
+      webTestClient.post().uri("/users/admin-account")
+        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
+        .body(
+          BodyInserters.fromValue(
+            CreateAdminUserRequest(
+              username = "testuser2",
+              firstName = "Test",
+              lastName = "U'ser",
+              email = "test@test.com"
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().isCreated
+        .expectBody().json(
+          """
+          {
+          "username": "TESTUSER2",
+          "firstName": "Test",
+          "lastName": "U'ser",
+          "activeCaseloadId" : "CADM_I",
+          "primaryEmail": "test@test.com",
+          "accountType": "ADMIN"
+          }
+          """
+        )
+
+      webTestClient.get().uri("/users/TESTUSER2")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("username").isEqualTo("TESTUSER2")
+        .jsonPath("firstName").isEqualTo("Test")
+        .jsonPath("lastName").isEqualTo("U'ser")
+        .jsonPath("staffId").exists()
+    }
 
     @Test
     fun `a database user cannot be created without correct role`() {
@@ -50,7 +91,7 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
             CreateLocalAdminUserRequest(
               username = "laauser1",
               firstName = "Laa",
-              lastName = "User",
+              lastName = "U'ser",
               email = "laa@test.com",
               localAdminGroup = "PVI"
             )
@@ -63,7 +104,7 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           {
           "username": "LAAUSER1",
           "firstName": "Laa",
-          "lastName": "User",
+          "lastName": "U'ser",
           "activeCaseloadId" : "CADM_I",
           "primaryEmail": "laa@test.com",
           "accountType": "ADMIN"
@@ -73,7 +114,43 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `an local admin user can be linked to  general database user can local admin can search for general user`() {
+    fun `a general user can be created`() {
+
+      webTestClient.post().uri("/users/general-account")
+        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
+        .body(
+          BodyInserters.fromValue(
+            CreateGeneralUserRequest(
+              username = "testgenuser",
+              firstName = "Test",
+              lastName = "U'ser",
+              defaultCaseloadId = "BXI",
+              email = "testgen@test.com"
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().isCreated
+        .expectBody().json(
+          """
+          {
+          "username": "TESTGENUSER",
+          "firstName": "Test",
+          "lastName": "U'ser",
+          "activeCaseloadId" : "BXI",
+          "primaryEmail": "testgen@test.com",
+          "accountType": "GENERAL"
+          }
+          """
+        )
+    }
+  }
+
+  @Nested
+  @DisplayName("POST /users/link...")
+  inner class LinkUsers {
+    @Test
+    fun `a local admin user can be linked to  general database user can local admin can search for general user`() {
 
       webTestClient.post().uri("/users/local-admin-account")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
@@ -132,47 +209,6 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("$.numberOfElements").isEqualTo(1)
         .jsonPath("$.content[?(@.username == '%s')]", "GENERALUSER1").exists()
-    }
-
-    @Test
-    fun `a admin database user can be created`() {
-
-      webTestClient.post().uri("/users/admin-account")
-        .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
-        .body(
-          BodyInserters.fromValue(
-            CreateAdminUserRequest(
-              username = "testuser2",
-              firstName = "Test",
-              lastName = "User",
-              email = "test@test.com"
-            )
-          )
-        )
-        .exchange()
-        .expectStatus().isCreated
-        .expectBody().json(
-          """
-          {
-          "username": "TESTUSER2",
-          "firstName": "Test",
-          "lastName": "User",
-          "activeCaseloadId" : "CADM_I",
-          "primaryEmail": "test@test.com",
-          "accountType": "ADMIN"
-          }
-          """
-        )
-
-      webTestClient.get().uri("/users/TESTUSER2")
-        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
-        .exchange()
-        .expectStatus().isOk
-        .expectBody()
-        .jsonPath("username").isEqualTo("TESTUSER2")
-        .jsonPath("firstName").isEqualTo("Test")
-        .jsonPath("lastName").isEqualTo("User")
-        .jsonPath("staffId").exists()
     }
 
     @Test
