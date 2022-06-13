@@ -12,6 +12,7 @@ import javax.persistence.OneToMany
 import javax.persistence.Table
 
 const val DPS_CASELOAD = "NWEB"
+const val CENTRAL_ADMIN_CASELOAD = "CADM_I"
 
 @Entity
 @Table(name = "CASELOADS")

@@ -8,8 +8,8 @@ import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(description = "Admin User Information creation")
-data class CreateAdminUserRequest(
+@Schema(description = "Local Admin User Information creation")
+data class CreateLocalAdminUserRequest(
   @Schema(description = "Username", example = "TESTUSER1", required = true) @field:Size(
     max = 30,
     min = 1,
@@ -30,4 +30,9 @@ data class CreateAdminUserRequest(
     message = "Not a valid email address"
   ) val email: String,
 
+  @Schema(description = "Default local admin group (prison) to manage users", example = "MDI", required = true) @field:Size(
+    max = 6,
+    min = 3,
+    message = "Admin group must be between 3-6 characters"
+  ) @NotBlank val localAdminGroup: String,
 )
