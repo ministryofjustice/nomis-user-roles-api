@@ -167,10 +167,11 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     }
 
     filter.roleCodes.takeIf { it.isEmpty().not() }?.run {
-      filter.inclusiveRoles?.run {
+      if (filter.inclusiveRoles == true) {
         predicates.add(inclusiveRoles(filter.roleCodes))
+      } else {
+        predicates.add(roles(this))
       }
-        ?: predicates.add(roles(this))
     }
 
     return criteriaBuilder.and(*predicates.toTypedArray())

@@ -742,7 +742,7 @@ class UserResourceIntTest : IntegrationTestBase() {
           it.path("/users/")
             .queryParam("accessRoles", "CREATE_CATEGORISATION")
             .queryParam("accessRoles", "GLOBAL_SEARCH")
-            .queryParam("inclusiveRoles", "true")
+            .queryParam("inclusiveRoles", true)
             .build()
         }
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))

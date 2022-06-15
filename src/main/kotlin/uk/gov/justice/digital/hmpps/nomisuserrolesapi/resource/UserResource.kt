@@ -271,10 +271,10 @@ class UserResource(
       example = "MDI"
     )
     @RequestParam(value = "caseload", required = false) caseload: String?,
-    @RequestParam(value = "inclusiveRoles", required = false)@Parameter(
+    @RequestParam(value = "inclusiveRoles", required = false, defaultValue = "false")@Parameter(
       description = "Returns result inclusive of selected roles",
       example = "true"
-    ) inclusiveRoles: String?,
+    ) inclusiveRoles: Boolean = false,
   ): Page<UserSummaryWithEmail> = userService.findUsersByFilter(
     pageRequest,
     UserFilter(
@@ -330,7 +330,7 @@ class UserResource(
     @RequestParam(value = "inclusiveRoles", required = false)@Parameter(
       description = "Returns result inclusive of selected roles",
       example = "true"
-    ) inclusiveRoles: String?,
+    ) inclusiveRoles: Boolean?,
   ): List<UserSummaryWithEmail> = userService.downloadUserByFilter(
     UserFilter(
       localAdministratorUsername = localAdministratorUsernameWhenNotCentralAdministrator(),

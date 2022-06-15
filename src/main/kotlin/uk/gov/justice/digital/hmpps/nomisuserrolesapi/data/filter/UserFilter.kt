@@ -10,5 +10,5 @@ data class UserFilter(
   val caseloadId: String? = null,
   val roleCodes: List<String> = listOf(),
   val nomisRoleCode: String? = null,
-  var inclusiveRoles: String? = null
+  var inclusiveRoles: Boolean? = null
 )
