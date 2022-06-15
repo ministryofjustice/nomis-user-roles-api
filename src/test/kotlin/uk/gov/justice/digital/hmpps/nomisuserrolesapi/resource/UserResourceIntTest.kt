@@ -735,6 +735,25 @@ class UserResourceIntTest : IntegrationTestBase() {
           .jsonPath(matchByUserName, "mark.bowlan").exists()
           .jsonPath(matchByUserName, "abella.moulin").exists()
       }
+
+      @Test
+      fun `they can filter by with inclusive role`() {
+        webTestClient.get().uri {
+          it.path("/users/")
+            .queryParam("accessRoles", "CREATE_CATEGORISATION")
+            .queryParam("accessRoles", "GLOBAL_SEARCH")
+            .queryParam("inclusiveRoles", "true")
+            .build()
+        }
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+          .exchange()
+          .expectStatus().isOk
+          .expectBody()
+          .jsonPath("$.numberOfElements").isEqualTo(3)
+          .jsonPath(matchByUserName, "mark.bowlan").exists()
+          .jsonPath(matchByUserName, "abella.moulin").exists()
+          .jsonPath(matchByUserName, "marco.rossi").exists()
+      }
     }
 
     @Nested

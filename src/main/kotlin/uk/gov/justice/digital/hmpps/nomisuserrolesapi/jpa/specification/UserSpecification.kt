@@ -135,6 +135,9 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
         }.toTypedArray()
       )
 
+    fun inclusiveRoles(roleCodes: List<String>): Predicate =
+      join(UserPersonDetail::dpsRoles).get(UserCaseloadRole::role).get(Role::code).`in`(roleCodes)
+
     filter.localAdministratorUsername?.run {
       predicates.add(administeredBy(this))
     }
@@ -164,7 +167,10 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     }
 
     filter.roleCodes.takeIf { it.isEmpty().not() }?.run {
-      predicates.add(roles(this))
+      filter.inclusiveRoles?.run {
+        predicates.add(inclusiveRoles(filter.roleCodes))
+      }
+        ?: predicates.add(roles(this))
     }
 
     return criteriaBuilder.and(*predicates.toTypedArray())
