@@ -437,6 +437,44 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `can change name of a user that includes an hyphen in fist and lastname  name`() {
+      webTestClient.put().uri("/users/TEST_DATA_USER1/change-name")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(
+          BodyInserters.fromValue(
+            NameDetail(
+              firstName = "Sarah-Louise",
+              lastName = "O'NeilLastName",
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("firstName").isEqualTo("Sarah-louise")
+        .jsonPath("lastName").isEqualTo("O'neillastname")
+    }
+
+    @Test
+    fun `1can change name of a user that includes an forward apostrophe in lastname  name`() {
+      webTestClient.put().uri("/users/TEST_DATA_USER1/change-name")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(
+          BodyInserters.fromValue(
+            NameDetail(
+              firstName = "April",
+              lastName = "O’shea",
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("firstName").isEqualTo("April")
+        .jsonPath("lastName").isEqualTo("O’shea")
+    }
+
+    @Test
     fun `can change name of a user that does exist`() {
 
       webTestClient.get().uri("/users/TEST_DATA_USER1")

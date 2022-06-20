@@ -312,12 +312,12 @@ class UserManagementResource(
 data class NameDetail(
   @Schema(description = "First name of the user", example = "John", required = true)
   @field:Pattern(
-    regexp = "^[A-Za-z]{1,35}$",
+    regexp = "^[A-Za-z'’-]{1,35}$",
     message = "First name must consist of alphabetical characters only and a max 35 chars"
   ) val firstName: String,
   @Schema(description = "Last name of the user", example = "Smith", required = true)
   @field:Pattern(
-    regexp = "^[A-Za-z']{1,35}$",
+    regexp = "^[A-Za-z'’-]{1,35}$",
     message = "Last name must consist of alphabetical characters or an apostrophe only and a max 35 chars"
   ) val lastName: String,
 )
