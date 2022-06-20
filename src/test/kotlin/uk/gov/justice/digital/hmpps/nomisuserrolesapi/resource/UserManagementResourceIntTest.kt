@@ -414,7 +414,26 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().is4xxClientError
         .expectBody()
         .jsonPath("userMessage")
-        .isEqualTo("Validation failure: Last name must consist of alphabetical characters only and a max 35 chars")
+        .isEqualTo("Validation failure: Last name must consist of alphabetical characters or an apostrophe only and a max 35 chars")
+    }
+
+    @Test
+    fun `can change name of a user that includes an apostrophe in last name`() {
+      webTestClient.put().uri("/users/TEST_DATA_USER1/change-name")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(
+          BodyInserters.fromValue(
+            NameDetail(
+              firstName = "Newfirstname",
+              lastName = "O'NeilLastName",
+            )
+          )
+        )
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("firstName").isEqualTo("Newfirstname")
+        .jsonPath("lastName").isEqualTo("O'neillastname")
     }
 
     @Test

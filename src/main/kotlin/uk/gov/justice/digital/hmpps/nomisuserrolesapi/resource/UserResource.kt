@@ -271,6 +271,10 @@ class UserResource(
       example = "MDI"
     )
     @RequestParam(value = "caseload", required = false) caseload: String?,
+    @RequestParam(value = "inclusiveRoles", required = false, defaultValue = "false")@Parameter(
+      description = "Returns result inclusive of selected roles",
+      example = "true"
+    ) inclusiveRoles: Boolean = false,
   ): Page<UserSummaryWithEmail> = userService.findUsersByFilter(
     pageRequest,
     UserFilter(
@@ -280,7 +284,8 @@ class UserResource(
       activeCaseloadId = activeCaseload.nonBlank(),
       caseloadId = caseload.nonBlank(),
       roleCodes = accessRoles ?: listOf(),
-      nomisRoleCode = nomisRole
+      nomisRoleCode = nomisRole,
+      inclusiveRoles = inclusiveRoles
     ),
   )
 
@@ -322,6 +327,10 @@ class UserResource(
       example = "MDI"
     )
     @RequestParam(value = "caseload", required = false) caseload: String?,
+    @RequestParam(value = "inclusiveRoles", required = false)@Parameter(
+      description = "Returns result inclusive of selected roles",
+      example = "true"
+    ) inclusiveRoles: Boolean?,
   ): List<UserSummaryWithEmail> = userService.downloadUserByFilter(
     UserFilter(
       localAdministratorUsername = localAdministratorUsernameWhenNotCentralAdministrator(),
@@ -330,7 +339,8 @@ class UserResource(
       activeCaseloadId = activeCaseload.nonBlank(),
       caseloadId = caseload.nonBlank(),
       roleCodes = accessRoles ?: listOf(),
-      nomisRoleCode = nomisRole
+      nomisRoleCode = nomisRole,
+      inclusiveRoles = inclusiveRoles
     ),
   )
 
