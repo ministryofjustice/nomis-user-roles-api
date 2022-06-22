@@ -395,7 +395,7 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().is4xxClientError
         .expectBody()
         .jsonPath("userMessage")
-        .isEqualTo("Validation failure: First name must consist of alphabetical characters only and a max 35 chars")
+        .isEqualTo("Validation failure: First name must consist of alphabetical characters, hyphen or an apostrophe only and a max 35 chars")
     }
 
     @Test
@@ -414,7 +414,7 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().is4xxClientError
         .expectBody()
         .jsonPath("userMessage")
-        .isEqualTo("Validation failure: Last name must consist of alphabetical characters or an apostrophe only and a max 35 chars")
+        .isEqualTo("Validation failure: Last name must consist of alphabetical characters, hyphen or an apostrophe only and a max 35 chars")
     }
 
     @Test
@@ -456,7 +456,7 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `1can change name of a user that includes an forward apostrophe in lastname  name`() {
+    fun `can change name of a user that includes an forward apostrophe in lastname  name`() {
       webTestClient.put().uri("/users/TEST_DATA_USER1/change-name")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .body(
@@ -468,10 +468,10 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
           )
         )
         .exchange()
-        .expectStatus().isOk
+        .expectStatus().is4xxClientError
         .expectBody()
-        .jsonPath("firstName").isEqualTo("April")
-        .jsonPath("lastName").isEqualTo("O’shea")
+        .jsonPath("userMessage")
+        .isEqualTo("Validation failure: Last name must consist of alphabetical characters, hyphen or an apostrophe only and a max 35 chars")
     }
 
     @Test
