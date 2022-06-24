@@ -9,6 +9,12 @@ api:
   base:
     url:
       oauth: http://localhost:8090/auth
+      reporting: http://localhost:8081
+
+reporting:
+  client:
+    id: "reporting-client"
+    secret: "reporting-secret"
 
 spring:
   flyway:
