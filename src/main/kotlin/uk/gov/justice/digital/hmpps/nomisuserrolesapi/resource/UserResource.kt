@@ -215,7 +215,8 @@ class UserResource(
         description = "List of usernames and their email addresses"
       )
     ]
-  ) fun findUsersAndEmails(): List<UserAndEmail> = userService.findUsersAndEmails()
+  )
+  fun findUsersAndEmails(): List<UserAndEmail> = userService.findUsersAndEmails()
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @GetMapping
@@ -271,10 +272,14 @@ class UserResource(
       example = "MDI"
     )
     @RequestParam(value = "caseload", required = false) caseload: String?,
-    @RequestParam(value = "inclusiveRoles", required = false, defaultValue = "false")@Parameter(
+    @RequestParam(value = "inclusiveRoles", required = false, defaultValue = "false") @Parameter(
       description = "Returns result inclusive of selected roles",
       example = "true"
     ) inclusiveRoles: Boolean = false,
+    @RequestParam(value = "showOnlyLSAs", required = false, defaultValue = "false") @Parameter(
+      description = "Returns all active LSAs",
+      example = "true"
+    ) showOnlyLSAs: Boolean = false,
   ): Page<UserSummaryWithEmail> = userService.findUsersByFilter(
     pageRequest,
     UserFilter(
@@ -285,7 +290,8 @@ class UserResource(
       caseloadId = caseload.nonBlank(),
       roleCodes = accessRoles ?: listOf(),
       nomisRoleCode = nomisRole,
-      inclusiveRoles = inclusiveRoles
+      inclusiveRoles = inclusiveRoles,
+      showOnlyLSAs = showOnlyLSAs
     ),
   )
 
@@ -327,10 +333,14 @@ class UserResource(
       example = "MDI"
     )
     @RequestParam(value = "caseload", required = false) caseload: String?,
-    @RequestParam(value = "inclusiveRoles", required = false)@Parameter(
+    @RequestParam(value = "inclusiveRoles", required = false) @Parameter(
       description = "Returns result inclusive of selected roles",
       example = "true"
     ) inclusiveRoles: Boolean?,
+    @RequestParam(value = "showOnlyLSAs", required = false, defaultValue = "false") @Parameter(
+      description = "Returns all active LSAs",
+      example = "true"
+    ) showOnlyLSAs: Boolean = false,
   ): List<UserSummaryWithEmail> = userService.downloadUserByFilter(
     UserFilter(
       localAdministratorUsername = localAdministratorUsernameWhenNotCentralAdministrator(),
@@ -340,7 +350,8 @@ class UserResource(
       caseloadId = caseload.nonBlank(),
       roleCodes = accessRoles ?: listOf(),
       nomisRoleCode = nomisRole,
-      inclusiveRoles = inclusiveRoles
+      inclusiveRoles = inclusiveRoles,
+      showOnlyLSAs = showOnlyLSAs
     ),
   )
 
