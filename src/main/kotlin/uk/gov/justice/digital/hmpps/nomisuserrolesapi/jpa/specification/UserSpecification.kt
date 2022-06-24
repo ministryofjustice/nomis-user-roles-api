@@ -59,6 +59,19 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       )
     }
 
+    fun localAuthorityOfAdminGroup(activeCaseloadId: String): Predicate {
+      return equal(
+        join(UserPersonDetail::administratorOfUserGroups)
+          .join(UserGroup::id)
+          .get(UserGroupAdministratorPk::userGroupCode),
+        activeCaseloadId
+      )
+    }
+
+    fun lsaOnly() =
+      join(UserPersonDetail::administratorOfUserGroups)
+        .join(UserGroup::id)
+
     fun nameMatch(name: String): Predicate =
       if (name.isFullName()) {
         or(
@@ -151,14 +164,24 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     }
 
     filter.activeCaseloadId?.run {
-      predicates.add(activeCaseload(this))
+      if (filter.showOnlyLSAs == false) {
+        predicates.add(activeCaseload(this))
+      }
+    }
+
+    filter.showOnlyLSAs.takeIf { it == true }?.run {
+      filter.activeCaseloadId?.run {
+        predicates.add(localAuthorityOfAdminGroup(filter.activeCaseloadId))
+      } ?: lsaOnly()
     }
 
     filter.caseloadId?.run {
-      filter.nomisRoleCode?.run {
-        predicates.add(nomisRoles(filter.caseloadId, this))
+      if (filter.showOnlyLSAs == false) {
+        filter.nomisRoleCode?.run {
+          predicates.add(nomisRoles(filter.caseloadId, this))
+        }
+          ?: predicates.add(caseload(this))
       }
-        ?: predicates.add(caseload(this))
     }
 
     filter.nomisRoleCode?.run {
