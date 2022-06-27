@@ -169,7 +169,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       }
     }
 
-    filter.showOnlyLSAs.takeIf { it == true }?.run {
+    if (filter.showOnlyLSAs == true) {
       filter.activeCaseloadId?.run {
         predicates.add(localAuthorityOfAdminGroup(filter.activeCaseloadId))
       } ?: lsaOnly()
