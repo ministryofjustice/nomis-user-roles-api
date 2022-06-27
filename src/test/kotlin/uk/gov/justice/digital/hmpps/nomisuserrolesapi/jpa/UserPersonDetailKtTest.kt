@@ -136,7 +136,7 @@ internal class UserPersonDetailKtTest {
 
       val data = entity.toUserSummaryWithEmail()
 
-      assertThat(data.email).isEqualTo("bloggs@justice.gov.uk")
+      assertThat(data.email).isEqualTo("joe@bob.com")
     }
   }
 }
