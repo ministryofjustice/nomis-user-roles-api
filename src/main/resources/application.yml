@@ -51,9 +51,9 @@ spring:
   datasource:
     hikari:
       pool-name: Nomis-User-CP
-      connectionTimeout: 1000
+      connectionTimeout: 2000
       validationTimeout:  500
-      maximum-pool-size: 10
+      maximum-pool-size: 20
 
 
 server:
