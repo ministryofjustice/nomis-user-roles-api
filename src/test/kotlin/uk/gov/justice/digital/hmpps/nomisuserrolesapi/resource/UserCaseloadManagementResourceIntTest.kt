@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.IntegrationTestBase
 
@@ -83,7 +84,7 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
   @DisplayName("POST /users/{username}/caseloads/{caseloadId}")
   @Nested
-  inner class AddCaseloadsByUsername {
+  inner class AddCaseloadByUsername {
     @BeforeEach
     internal fun createUsers() {
       with(dataBuilder) {
@@ -125,7 +126,7 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `add caseloads not found`() {
+    fun `add caseload not found`() {
 
       webTestClient.post().uri("/users/dummy/caseloads/LEI")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
@@ -210,6 +211,108 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
     fun `add existing caseload to user`() {
       webTestClient.post().uri("/users/CASELOAD_USER1/caseloads/BXI")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().is4xxClientError
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo("Caseload already exists: Caseload BXI already added to this user")
+    }
+  }
+
+  @DisplayName("POST /users/{username}/caseloads")
+  @Nested
+  inner class AddListOfCaseloadsByUsername {
+    @BeforeEach
+    internal fun createUsers() {
+      with(dataBuilder) {
+        generalUser()
+          .username("CASELOAD_USER1")
+          .firstName("MARK")
+          .lastName("BOWLAN")
+          .atPrison("BXI")
+          .buildAndSave()
+      }
+    }
+
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    fun `access forbidden when no authority`() {
+      webTestClient.post().uri("/users/CASELOAD_USER1/caseloads")
+        .exchange()
+        .expectStatus().isUnauthorized
+    }
+
+    @Test
+    fun `access forbidden when no role`() {
+      webTestClient.post().uri("/users/CASELOAD_USER1/caseloads")
+        .body(BodyInserters.fromValue(listOf("MDI", "LEI")))
+        .headers(setAuthorisation(roles = listOf()))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `add caseloads to user forbidden with wrong role`() {
+
+      webTestClient.post().uri("/users/CASELOAD_USER1/caseloads")
+        .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
+        .body(BodyInserters.fromValue(listOf("MDI", "LEI")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `add caseloads user not found`() {
+
+      webTestClient.post().uri("/users/dummy/caseloads")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue(listOf("MDI", "LEI")))
+        .exchange()
+        .expectStatus().isNotFound
+    }
+
+    @Test
+    fun `add caseloads to user`() {
+
+      webTestClient.get().uri("/users/CASELOAD_USER1/caseloads")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("username").isEqualTo("CASELOAD_USER1")
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "MDI").doesNotExist()
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "LEI").doesNotExist()
+
+      webTestClient.post().uri("/users/CASELOAD_USER1/caseloads")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue(listOf("MDI", "LEI")))
+        .exchange()
+        .expectStatus().isCreated
+        .expectBody()
+        .jsonPath("username").isEqualTo("CASELOAD_USER1")
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "MDI").exists()
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "LEI").exists()
+    }
+
+    @Test
+    fun `add non-existent caseload to user`() {
+      webTestClient.post().uri("/users/CASELOAD_USER1/caseloads")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue(listOf("MDI", "XXX")))
+        .exchange()
+        .expectStatus().is4xxClientError
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo("Caseload not found: Caseload XXX not found")
+    }
+
+    @Test
+    fun `add existing caseload to user`() {
+      webTestClient.post().uri("/users/CASELOAD_USER1/caseloads")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue(listOf("BXI", "LEI")))
         .exchange()
         .expectStatus().is4xxClientError
         .expectBody()
