@@ -421,10 +421,7 @@ class UserService(
     return user.toUserCaseloadDetail()
   }
 
-  fun addCaseloadToUser(username: String, caseloadId: String): UserCaseloadDetail {
-    val user =
-      userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
-
+  private fun addCaseload(user: UserPersonDetail, caseloadId: String): UserCaseloadDetail {
     val caseload = caseloadRepository.findById(caseloadId)
       .orElseThrow(CaseloadNotFoundException("Caseload $caseloadId not found"))
 
@@ -433,13 +430,24 @@ class UserService(
     telemetryClient.trackEvent(
       "NURA-add-caseload",
       mapOf(
-        "username" to username,
+        "username" to user.username,
         "caseload" to caseloadId,
         "admin" to authenticationFacade.currentUsername
       ),
       null
     )
 
+    return user.toUserCaseloadDetail()
+  }
+
+  fun addCaseloadToUser(username: String, caseloadId: String): UserCaseloadDetail {
+    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    return addCaseload(user, caseloadId)
+  }
+
+  fun addCaseloadsToUser(username: String, caseloadIds: List<String>): UserCaseloadDetail {
+    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    caseloadIds.forEach { addCaseload(user, it) }
     return user.toUserCaseloadDetail()
   }
 
