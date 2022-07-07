@@ -82,13 +82,13 @@ class UserCaseloadManagementResource(
     return userService.getCaseloads(username)
   }
 
-  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @PostMapping("/{username}/caseloads/{caseloadId}")
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(
     summary = "Add a caseload to the specified user account",
-    description = "Adds a caseload to a user, caseload must exist. Cannot add an existing caseload to the same user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES",
-    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
+    description = "Adds a caseload to a user, caseload must exist. Cannot add an existing caseload to the same user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
+    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
         responseCode = "201",
@@ -139,13 +139,13 @@ class UserCaseloadManagementResource(
     return userService.addCaseloadToUser(username, caseloadId)
   }
 
-  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @PostMapping("/{username}/caseloads")
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(
     summary = "Add multiple caseloads to the specified user account",
-    description = "Adds caseloads to a user, caseloads must exist. Cannot add an existing caseload to the same user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES",
-    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
+    description = "Adds caseloads to a user, caseloads must exist. Cannot add an existing caseload to the same user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
+    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
         responseCode = "201",
@@ -251,12 +251,12 @@ class UserCaseloadManagementResource(
     return userService.setDefaultCaseload(username, defaultCaseloadId)
   }
 
-  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @DeleteMapping("/{username}/caseloads/{caseloadId}")
   @Operation(
     summary = "Remove a caseload from a user",
-    description = "The user must already have the caseload to be removed. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES",
-    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
+    description = "The user must already have the caseload to be removed. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
+    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
         responseCode = "200",
