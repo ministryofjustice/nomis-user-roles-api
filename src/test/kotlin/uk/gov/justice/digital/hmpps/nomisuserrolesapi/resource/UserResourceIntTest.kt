@@ -1220,4 +1220,142 @@ class UserResourceIntTest : IntegrationTestBase() {
         .expectStatus().isNotFound
     }
   }
+
+  @Nested
+  inner class GetLSAsOnly {
+    @BeforeEach
+    internal fun createUsers() {
+      dataBuilder.localAdministrator()
+        .username("RIZ.MARSHALL")
+        .firstName("RIZ")
+        .lastName("MARSHALL")
+        .atPrison("WWI")
+        .buildAndSave()
+
+      dataBuilder.localAdministrator()
+        .username("TOM.MARSHALL")
+        .firstName("TOM")
+        .lastName("MARSHALL")
+        .atPrison("WWI")
+        .buildAndSave()
+
+      dataBuilder.localAdministrator()
+        .username("TIM.MARSHALL")
+        .firstName("TIM")
+        .lastName("MARSHALL")
+        .atPrison("LEI")
+        .buildAndSave()
+
+      dataBuilder.localAdministrator()
+        .username("TIM.SMITH")
+        .firstName("TIM")
+        .lastName("SMITH")
+        .atPrison("LEI")
+        .buildAndSave()
+
+      with(dataBuilder) {
+        generalUser().username("marco.rossi")
+          .firstName("Marco")
+          .lastName("Rossi")
+          .email("marco@justice.gov.uk")
+          .atPrison("LEI")
+          .buildAndSave()
+      }
+
+      with(dataBuilder) {
+        generalUser().username("tom.cruse")
+          .firstName("Tom")
+          .lastName("Cruse")
+          .email("tom@justice.gov.uk")
+          .atPrison("WWI")
+          .buildAndSave()
+      }
+    }
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    fun `they can filter by with LSAs Only`() {
+
+      webTestClient.get().uri {
+
+        it.path("/users/")
+          .queryParam("showOnlyLSAs", true)
+          .build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$.totalElements").isEqualTo(4)
+        .jsonPath("$.content").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).contains(
+            "RIZ.MARSHALL",
+            "TOM.MARSHALL",
+            "TIM.MARSHALL",
+            "TIM.SMITH"
+          )
+        }
+    }
+
+    @Test
+    fun `they can filter by with LSAs Only with active caseload`() {
+
+      webTestClient.get().uri {
+        it.path("/users/")
+          .queryParam("activeCaseload", "LEI")
+          .queryParam("showOnlyLSAs", true)
+          .build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$.totalElements").isEqualTo(2)
+        .jsonPath("$.content").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).contains("TIM.MARSHALL", "TIM.SMITH")
+        }
+    }
+
+    @Test
+    fun `they can download filter by with LSAs Only`() {
+
+      webTestClient.get().uri {
+
+        it.path("/users/download/")
+          .queryParam("showOnlyLSAs", true)
+          .build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).contains(
+            "RIZ.MARSHALL",
+            "TOM.MARSHALL",
+            "TIM.MARSHALL",
+            "TIM.SMITH"
+          )
+        }
+    }
+
+    @Test
+    fun `they can download filter by with LSAs Only with active caseload`() {
+
+      webTestClient.get().uri {
+        it.path("/users/download/")
+          .queryParam("activeCaseload", "LEI")
+          .queryParam("showOnlyLSAs", true)
+          .build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).contains("TIM.MARSHALL", "TIM.SMITH")
+        }
+    }
+  }
 }

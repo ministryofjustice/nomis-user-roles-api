@@ -69,8 +69,8 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
         .body(
           BodyInserters.fromValue(
             CreateGeneralUserRequest(
-              username = "testuser2",
-              firstName = "Test",
+              username = "testuser-'2",
+              firstName = "Test-User'",
               lastName = "User",
               defaultCaseloadId = "BXI",
               email = "test@test.com"
@@ -90,8 +90,8 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           BodyInserters.fromValue(
             CreateLocalAdminUserRequest(
               username = "laauser1",
-              firstName = "Laa",
-              lastName = "U'ser",
+              firstName = "Laa-ln'",
+              lastName = "U'ser-ls",
               email = "laa@test.com",
               localAdminGroup = "PVI"
             )
@@ -103,8 +103,8 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           """
           {
           "username": "LAAUSER1",
-          "firstName": "Laa",
-          "lastName": "U'ser",
+          "firstName": "Laa-ln'",
+          "lastName": "U'ser-ls",
           "activeCaseloadId" : "CADM_I",
           "primaryEmail": "laa@test.com",
           "accountType": "ADMIN"
@@ -220,8 +220,8 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           BodyInserters.fromValue(
             CreateAdminUserRequest(
               username = "testuser4",
-              firstName = "Test",
-              lastName = "User",
+              firstName = "Test-'fn",
+              lastName = "User'-ln",
               email = "test@test.com"
             )
           )
@@ -244,8 +244,8 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
         .expectBody(StaffDetail::class.java)
         .returnResult().responseBody!!
 
-      assertThat(staffDetail.firstName).isEqualTo("Test")
-      assertThat(staffDetail.lastName).isEqualTo("User")
+      assertThat(staffDetail.firstName).isEqualTo("Test-'fn")
+      assertThat(staffDetail.lastName).isEqualTo("User'-ln")
       assertThat(staffDetail.primaryEmail).isEqualTo("test@test.com")
       assertThat(staffDetail.status).isEqualTo("ACTIVE")
 
@@ -267,8 +267,8 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("staffId").exists()
-        .jsonPath("firstName").isEqualTo("Test")
-        .jsonPath("lastName").isEqualTo("User")
+        .jsonPath("firstName").isEqualTo("Test-'fn")
+        .jsonPath("lastName").isEqualTo("User'-ln")
         .jsonPath("primaryEmail").isEqualTo("test@test.com")
         .jsonPath("status").isEqualTo("ACTIVE")
         .jsonPath("generalAccount.username").isEqualTo("TESTUSER5")

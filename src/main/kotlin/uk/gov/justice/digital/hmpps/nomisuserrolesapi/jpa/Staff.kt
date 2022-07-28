@@ -36,7 +36,7 @@ data class Staff(
 
   @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   @Where(clause = "OWNER_CLASS = 'STF' AND INTERNET_ADDRESS_CLASS = 'EMAIL'")
-  val emails: MutableList<EmailAddress> = mutableListOf(),
+  val emails: MutableSet<EmailAddress> = mutableSetOf(),
 ) {
 
   fun fullName(): String = "$firstName $lastName".capitalizeFully()

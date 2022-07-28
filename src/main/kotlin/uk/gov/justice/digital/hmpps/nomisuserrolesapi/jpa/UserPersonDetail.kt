@@ -37,10 +37,8 @@ import javax.persistence.Table
 @NamedEntityGraph(
   name = "user-person-detail-download-graph",
   attributeNodes = [
-    NamedAttributeNode("username"), NamedAttributeNode(
-      value = "staff",
-      subgraph = "staff-subgraph"
-    )
+    NamedAttributeNode("username"), NamedAttributeNode(value = "administratorOfUserGroups"),
+    NamedAttributeNode(value = "staff", subgraph = "staff-subgraph")
   ],
   subgraphs = [
     NamedSubgraph(
@@ -59,6 +57,12 @@ import javax.persistence.Table
       attributeNodes = [
         NamedAttributeNode(value = "userType"),
         NamedAttributeNode(value = "type"), NamedAttributeNode(value = "email")
+      ]
+    ),
+    NamedSubgraph(
+      name = "usergroup-admin-subgraph",
+      attributeNodes = [
+        NamedAttributeNode(value = "id"), NamedAttributeNode(value = "active")
       ]
     )
   ]
