@@ -103,13 +103,19 @@ class UserService(
 
   @Transactional(readOnly = true)
   fun findUsersByFilter(pageRequest: Pageable, filter: UserFilter): Page<UserSummaryWithEmail> {
+    val updatePageRequest: Pageable = if (filter.inclusiveRoles == true) {
+      pageRequest.withSort { "username" }
+    } else {
+      pageRequest.withSort(::mapUserSummarySortProperties)
+    }
     val userSpecification =
-      userPersonDetailRepository.findAll(UserSpecification(filter), pageRequest.withSort(::mapUserSummarySortProperties))
+      userPersonDetailRepository.findAll(UserSpecification(filter), updatePageRequest)
     return PageImpl(userSpecification.content.distinct(), pageRequest, userSpecification.totalElements)
       .map {
         it.toUserSummaryWithEmail()
       }
   }
+
   @Transactional(readOnly = true)
   fun downloadUserByFilter(filter: UserFilter): List<UserSummaryWithEmail> =
     userPersonDetailRepository.findAll(UserSpecification(filter))
@@ -441,12 +447,14 @@ class UserService(
   }
 
   fun addCaseloadToUser(username: String, caseloadId: String): UserCaseloadDetail {
-    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    val user =
+      userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
     return addCaseload(user, caseloadId)
   }
 
   fun addCaseloadsToUser(username: String, caseloadIds: List<String>): UserCaseloadDetail {
-    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    val user =
+      userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
     caseloadIds.forEach { addCaseload(user, it) }
     return user.toUserCaseloadDetail()
   }
