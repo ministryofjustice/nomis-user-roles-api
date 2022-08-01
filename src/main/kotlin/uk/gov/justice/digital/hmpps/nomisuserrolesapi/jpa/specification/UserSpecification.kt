@@ -1,3 +1,4 @@
+
 import org.springframework.data.jpa.domain.Specification
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
@@ -38,9 +39,17 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     fun <PROP> Path<*>.get(prop: KProperty1<*, PROP>): Path<PROP> = this.get(prop.name)
     fun <PROP> Root<*>.get(prop: KProperty1<*, PROP>): Path<PROP> = this.get(prop.name)
     fun <PROP> get(prop: KProperty1<*, PROP>): Path<PROP> = root.get(prop)
-    fun <FROM, TO> join(prop: KProperty1<FROM, List<TO>>, joinType: JoinType = JoinType.INNER): Join<FROM, TO> = root.join(prop.name, joinType)
-    fun <FROM, TO> join(prop: KProperty1<FROM, TO>, joinType: JoinType = JoinType.INNER): Join<FROM, TO> = root.join(prop.name, joinType)
-    fun <FROM, TO, NEXT> Join<FROM, TO>.join(prop: KProperty1<*, NEXT>, joinType: JoinType = JoinType.INNER): Join<TO, NEXT> = this.join(prop.name, joinType)
+    fun <FROM, TO> join(prop: KProperty1<FROM, List<TO>>, joinType: JoinType = JoinType.INNER): Join<FROM, TO> =
+      root.join(prop.name, joinType)
+
+    fun <FROM, TO> join(prop: KProperty1<FROM, TO>, joinType: JoinType = JoinType.INNER): Join<FROM, TO> =
+      root.join(prop.name, joinType)
+
+    fun <FROM, TO, NEXT> Join<FROM, TO>.join(
+      prop: KProperty1<*, NEXT>,
+      joinType: JoinType = JoinType.INNER
+    ): Join<TO, NEXT> = this.join(prop.name, joinType)
+
     fun or(vararg predicates: Predicate) = criteriaBuilder.or(*predicates)
     fun and(vararg predicates: Predicate) = criteriaBuilder.and(*predicates)
     fun like(x: Expression<String>, pattern: String) = criteriaBuilder.like(x, pattern)
@@ -138,7 +147,10 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
 
     fun nomisRoles(roleCode: String): Predicate =
       and(
-        equal(join(UserPersonDetail::caseloads).join(UserCaseload::roles).get(UserCaseloadRole::role).get(Role::code), roleCode)
+        equal(
+          join(UserPersonDetail::caseloads).join(UserCaseload::roles).get(UserCaseloadRole::role).get(Role::code),
+          roleCode
+        )
       )
 
     fun roles(roleCodes: List<String>): Predicate =
@@ -148,8 +160,10 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
         }.toTypedArray()
       )
 
-    fun inclusiveRoles(roleCodes: List<String>): Predicate =
-      join(UserPersonDetail::dpsRoles).get(UserCaseloadRole::role).get(Role::code).`in`(roleCodes)
+    fun inclusiveRoles(roleCodes: List<String>): Predicate {
+      query.distinct(true)
+      return join(UserPersonDetail::dpsRoles).get(UserCaseloadRole::role).get(Role::code).`in`(roleCodes)
+    }
 
     filter.localAdministratorUsername?.run {
       predicates.add(administeredBy(this))
@@ -195,6 +209,17 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       } else {
         predicates.add(roles(this))
       }
+    }
+    if (filter.inclusiveRoles == false) {
+      query.orderBy(
+        criteriaBuilder.asc(root.get(UserPersonDetail::staff).get(Staff::lastName)),
+        criteriaBuilder.asc(root.get(UserPersonDetail::staff).get(Staff::firstName)),
+        criteriaBuilder.asc(root.get(UserPersonDetail::username))
+      )
+    } else {
+      query.orderBy(
+        criteriaBuilder.asc(root.get(UserPersonDetail::username))
+      )
     }
 
     return criteriaBuilder.and(*predicates.toTypedArray())

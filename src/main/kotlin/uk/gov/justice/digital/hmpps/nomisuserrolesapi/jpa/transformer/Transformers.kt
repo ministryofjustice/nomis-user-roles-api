@@ -30,8 +30,6 @@ fun UserPersonDetail.toUserCaseloadDetail(removeDpsCaseload: Boolean = false): U
 )
 
 val userSummaryToEntityPropertyMap = mapOf(
-  "firstName" to "staff.firstName",
-  "lastName" to "staff.lastName",
   "status" to "accountDetail.accountStatus",
   "activeCaseload" to "activeCaseLoad.id",
 )
