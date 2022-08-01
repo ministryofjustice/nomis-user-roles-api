@@ -210,18 +210,6 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
         predicates.add(roles(this))
       }
     }
-    if (filter.inclusiveRoles == false) {
-      query.orderBy(
-        criteriaBuilder.asc(root.get(UserPersonDetail::staff).get(Staff::lastName)),
-        criteriaBuilder.asc(root.get(UserPersonDetail::staff).get(Staff::firstName)),
-        criteriaBuilder.asc(root.get(UserPersonDetail::username))
-      )
-    } else {
-      query.orderBy(
-        criteriaBuilder.asc(root.get(UserPersonDetail::username))
-      )
-    }
-
     return criteriaBuilder.and(*predicates.toTypedArray())
   }
 }

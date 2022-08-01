@@ -236,7 +236,7 @@ class UserResource(
     ]
   )
   fun getUsers(
-    @PageableDefault(direction = Sort.Direction.ASC)
+    @PageableDefault(sort = ["lastName", "firstName"], direction = Sort.Direction.ASC)
     pageRequest: Pageable,
     @RequestParam(value = "nameFilter", required = false)
     @Parameter(

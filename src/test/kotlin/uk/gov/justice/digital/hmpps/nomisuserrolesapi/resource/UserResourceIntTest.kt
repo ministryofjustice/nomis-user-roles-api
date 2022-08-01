@@ -4,7 +4,6 @@ import net.minidev.json.JSONArray
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -977,7 +976,6 @@ class UserResourceIntTest : IntegrationTestBase() {
       internal fun deleteUsers() = dataBuilder.deleteAllUsers()
 
       @Test
-      @Disabled("Only ascending order by lastname, firstname supported!!")
       internal fun `can order by first name, last name ascending`() {
         webTestClient.get().uri {
           it.path("/users/")
@@ -1001,7 +999,6 @@ class UserResourceIntTest : IntegrationTestBase() {
       }
 
       @Test
-      @Disabled("Only ascending order by lastname, firstname supported!")
       internal fun `can order by last name, first name descending`() {
         webTestClient.get().uri {
           it.path("/users/")
