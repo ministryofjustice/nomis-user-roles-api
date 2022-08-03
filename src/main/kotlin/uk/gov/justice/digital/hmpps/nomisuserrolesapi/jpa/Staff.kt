@@ -29,7 +29,7 @@ data class Staff(
   var lastName: String,
 
   @Column(name = "STATUS")
-  val status: String,
+  val status: String = StaffStatus.INACT.desc,
 
   @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   var users: List<UserPersonDetail> = listOf(),

@@ -143,7 +143,8 @@ data class UserPersonDetail(
   }
 
   fun setDefaultCaseload(caseloadId: String) {
-    activeCaseLoad = findCaseloadById(caseloadId) ?: throw CaseloadNotFoundException("Default caseload cannot be set as user does not have $caseloadId.")
+    activeCaseLoad = findCaseloadById(caseloadId)
+      ?: throw CaseloadNotFoundException("Default caseload cannot be set as user does not have $caseloadId.")
   }
 
   fun addCaseload(caseload: Caseload) {
@@ -166,10 +167,16 @@ data class UserPersonDetail(
   }
 
   fun removeCaseload(caseloadId: String) {
-    val userCaseload = caseloads.firstOrNull { caseload -> caseloadId == caseload.id.caseloadId } ?: throw CaseloadNotFoundException("Caseload cannot be removed as user does not have $caseloadId.")
+    val userCaseload = caseloads.firstOrNull { caseload -> caseloadId == caseload.id.caseloadId }
+      ?: throw CaseloadNotFoundException("Caseload cannot be removed as user does not have $caseloadId.")
 
     if (isUserGroupCaseload(userCaseload.caseload)) {
-      val userGroupMembersAssociatedWithCaseload = activeAndInactiveMemberOfUserGroups.filter { userGroupMember -> isCaseloadForUserGroup(userCaseload.caseload, userGroupMember) }
+      val userGroupMembersAssociatedWithCaseload = activeAndInactiveMemberOfUserGroups.filter { userGroupMember ->
+        isCaseloadForUserGroup(
+          userCaseload.caseload,
+          userGroupMember
+        )
+      }
       activeAndInactiveMemberOfUserGroups.removeAll(userGroupMembersAssociatedWithCaseload)
     }
 
@@ -183,13 +190,14 @@ data class UserPersonDetail(
   }
 
   private fun addUserGroup(userGroup: UserGroup) {
-    activeAndInactiveMemberOfUserGroups.firstOrNull { it.id.userGroupCode == userGroup.id && it.id.username == this.username } ?: run {
-      val member = UserGroupMember(
-        id = UserGroupMemberPk(userGroupCode = userGroup.id, username = this.username),
-        user = this, userGroup = userGroup
-      )
-      activeAndInactiveMemberOfUserGroups.add(member)
-    }
+    activeAndInactiveMemberOfUserGroups.firstOrNull { it.id.userGroupCode == userGroup.id && it.id.username == this.username }
+      ?: run {
+        val member = UserGroupMember(
+          id = UserGroupMemberPk(userGroupCode = userGroup.id, username = this.username),
+          user = this, userGroup = userGroup
+        )
+        activeAndInactiveMemberOfUserGroups.add(member)
+      }
   }
 
   private fun addAdminUserGroup(userGroup: UserGroup) {
@@ -239,6 +247,7 @@ fun UserPersonDetail.toUserSummaryWithEmail() = UserSummaryWithEmail(
   },
   dpsRoleCount = this.dpsRoles.size,
   email = staff.primaryEmail()?.email,
+  staffStatus = StaffStatus.get(staff.status),
 )
 
 fun UserPersonDetail.toDownloadUserSummaryWithEmail() = UserSummaryWithEmail(
@@ -258,6 +267,7 @@ fun UserPersonDetail.toDownloadUserSummaryWithEmail() = UserSummaryWithEmail(
   },
   dpsRoleCount = 0,
   email = staff.primaryEmail()?.email,
+  staffStatus = StaffStatus.get(staff.status),
 )
 
 fun UserPersonDetail.toUserSummary(): UserSummary = UserSummary(
