@@ -33,7 +33,7 @@ data class UserDetail(
   @Schema(description = "User is enabled flag", required = true) val enabled: Boolean,
   @Schema(description = "User is admin flag", required = false) val admin: Boolean?,
   @Schema(description = "User is active flag", required = true) val active: Boolean,
-  @Schema(description = "Staff Status", example = "ACTIVE", required = true) val staffStatus: StaffStatus?,
+  @Schema(description = "Staff Status", example = "ACTIVE", required = true) val staffStatus: StaffStatus,
 ) {
   constructor(
     userPersonDetail: UserPersonDetail
