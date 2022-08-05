@@ -10,7 +10,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.PrisonCaseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.StaffStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
 
 class UserResourceTest {
@@ -33,7 +32,7 @@ class UserResourceTest {
     enabled = true,
     admin = false,
     active = true,
-    staffStatus = StaffStatus.ACTIVE
+    staffStatus = "ACTIVE"
   )
 
   @Test
@@ -56,7 +55,7 @@ class UserResourceTest {
       dpsRoleCount = 3,
       email = "joe@bloggs.com",
       status = AccountStatus.OPEN,
-      staffStatus = StaffStatus.ACTIVE
+      staffStatus = "ACTIVE"
     )
 
     whenever(userService.findUsersByFirstAndLastNames(any(), any())).thenReturn(listOf(user))

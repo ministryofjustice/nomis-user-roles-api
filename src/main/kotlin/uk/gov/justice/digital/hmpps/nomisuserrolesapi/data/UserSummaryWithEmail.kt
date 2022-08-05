@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.data
 
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.StaffStatus
 
 @Schema(description = "Summary User Information with Email Address")
 data class UserSummaryWithEmail(
@@ -29,5 +28,5 @@ data class UserSummaryWithEmail(
   @Schema(description = "Primary email address of user - normally justice.gov.uk one if available otherwise first one in list", example = "joe.bloggs@justice.gov.uk")
   val email: String?,
   @Schema(description = "Staff status", example = "ACTIVE")
-  val staffStatus: StaffStatus?,
+  val staffStatus: String?,
 )

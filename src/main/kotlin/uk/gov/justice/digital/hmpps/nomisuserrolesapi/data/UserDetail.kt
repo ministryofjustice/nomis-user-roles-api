@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.data
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.StaffStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.capitalizeFully
@@ -33,7 +32,7 @@ data class UserDetail(
   @Schema(description = "User is enabled flag", required = true) val enabled: Boolean,
   @Schema(description = "User is admin flag", required = false) val admin: Boolean?,
   @Schema(description = "User is active flag", required = true) val active: Boolean,
-  @Schema(description = "Staff Status", example = "ACTIVE", required = true) val staffStatus: StaffStatus,
+  @Schema(description = "Staff Status", example = "ACTIVE", required = false) val staffStatus: String?,
 ) {
   constructor(
     userPersonDetail: UserPersonDetail
@@ -53,6 +52,6 @@ data class UserDetail(
       enabled = userPersonDetail.isEnabled(),
       admin = userPersonDetail.accountDetail?.isAdmin(),
       active = userPersonDetail.isActive(),
-      staffStatus = StaffStatus.get(userPersonDetail.staff.status),
+      staffStatus = userPersonDetail.staff.status,
     )
 }
