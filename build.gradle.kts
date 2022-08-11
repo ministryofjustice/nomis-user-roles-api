@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.3.4-beta"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.4.1"
   kotlin("plugin.spring") version "1.7.10"
   kotlin("plugin.jpa") version "1.7.10"
   idea
@@ -21,7 +21,7 @@ dependencies {
   implementation("commons-codec:commons-codec:1.15")
 
   implementation("org.flywaydb:flyway-core:8.5.13")
-  implementation("com.vladmihalcea:hibernate-types-52:2.16.2")
+  implementation("com.vladmihalcea:hibernate-types-52:2.17.3")
 
   implementation("javax.transaction:javax.transaction-api:1.3")
   implementation("javax.xml.bind:jaxb-api:2.3.1")

@@ -31,7 +31,8 @@ class UserResourceTest {
     credentialsNonExpired = true,
     enabled = true,
     admin = false,
-    active = true
+    active = true,
+    staffStatus = "ACTIVE"
   )
 
   @Test
@@ -53,7 +54,8 @@ class UserResourceTest {
       activeCaseload = PrisonCaseload("MDI", "Moorland"),
       dpsRoleCount = 3,
       email = "joe@bloggs.com",
-      status = AccountStatus.OPEN
+      status = AccountStatus.OPEN,
+      staffStatus = "ACTIVE"
     )
 
     whenever(userService.findUsersByFirstAndLastNames(any(), any())).thenReturn(listOf(user))
