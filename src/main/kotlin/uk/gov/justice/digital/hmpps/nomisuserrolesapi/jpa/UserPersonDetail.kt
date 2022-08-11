@@ -239,6 +239,7 @@ fun UserPersonDetail.toUserSummaryWithEmail() = UserSummaryWithEmail(
   },
   dpsRoleCount = this.dpsRoles.size,
   email = staff.primaryEmail()?.email,
+  staffStatus = staff.status,
 )
 
 fun UserPersonDetail.toDownloadUserSummaryWithEmail() = UserSummaryWithEmail(
@@ -258,6 +259,7 @@ fun UserPersonDetail.toDownloadUserSummaryWithEmail() = UserSummaryWithEmail(
   },
   dpsRoleCount = 0,
   email = staff.primaryEmail()?.email,
+  staffStatus = staff.status,
 )
 
 fun UserPersonDetail.toUserSummary(): UserSummary = UserSummary(

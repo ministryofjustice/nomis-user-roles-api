@@ -27,4 +27,6 @@ data class UserSummaryWithEmail(
   val dpsRoleCount: Int,
   @Schema(description = "Primary email address of user - normally justice.gov.uk one if available otherwise first one in list", example = "joe.bloggs@justice.gov.uk")
   val email: String?,
+  @Schema(description = "Staff status", example = "ACTIVE")
+  val staffStatus: String?,
 )
