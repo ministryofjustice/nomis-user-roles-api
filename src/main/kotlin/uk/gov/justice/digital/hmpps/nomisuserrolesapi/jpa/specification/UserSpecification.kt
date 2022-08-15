@@ -2,29 +2,9 @@
 import org.springframework.data.jpa.domain.Specification
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountDetail
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.EmailAddress
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Role
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseload
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadPk
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadRole
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroup
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupAdministrator
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupAdministratorPk
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupMember
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
-import javax.persistence.criteria.CriteriaBuilder
-import javax.persistence.criteria.CriteriaQuery
-import javax.persistence.criteria.Expression
-import javax.persistence.criteria.Join
-import javax.persistence.criteria.JoinType
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.*
+import javax.persistence.criteria.*
 import javax.persistence.criteria.JoinType.LEFT
-import javax.persistence.criteria.Path
-import javax.persistence.criteria.Predicate
-import javax.persistence.criteria.Root
 import kotlin.reflect.KProperty1
 
 class UserSpecification(private val filter: UserFilter) : Specification<UserPersonDetail> {
@@ -56,6 +36,13 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     fun equal(x: Expression<String>, pattern: String) = criteriaBuilder.equal(x, pattern)
     fun inList(x: Expression<String>, values: List<String>) = x.`in`(values)
     fun upper(x: Expression<String>) = criteriaBuilder.upper(x)
+    fun exists(x: Subquery<*>) = criteriaBuilder.not(criteriaBuilder.exists(x))
+
+    val subQuery = query.subquery(Int::class.java)
+    val admin: Root<UserGroupAdministrator> = subQuery.from(UserGroupAdministrator::class.java)
+    subQuery
+      .select(criteriaBuilder.literal(1))
+      .where(criteriaBuilder.equal(admin.get(UserGroupAdministrator::user), root))
 
     fun administeredBy(localAdministratorUsername: String): Predicate {
       return equal(
@@ -77,9 +64,9 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       )
     }
 
-    fun lsaOnly() =
-      join(UserPersonDetail::administratorOfUserGroups)
-        .join(UserGroup::id)
+    fun lsaOnly() = exists(subQuery)
+//      join(UserPersonDetail::administratorOfUserGroups)
+//        .join(UserGroup::id)
 
     fun nameMatch(name: String): Predicate =
       if (name.isFullName()) {
@@ -186,7 +173,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     if (filter.showOnlyLSAs == true) {
       filter.activeCaseloadId?.run {
         predicates.add(localAuthorityOfAdminGroup(filter.activeCaseloadId))
-      } ?: lsaOnly()
+      } ?: predicates.add(lsaOnly())
     }
 
     filter.caseloadId?.run {
