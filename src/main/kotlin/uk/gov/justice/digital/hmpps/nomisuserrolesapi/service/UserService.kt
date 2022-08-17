@@ -369,7 +369,8 @@ class UserService(
   }
 
   fun lockUser(username: String) {
-    userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    user.staff.status = Staff.STAFF_STATUS_INACTIVE
     userPersonDetailRepository.lockUser(username)
 
     telemetryClient.trackEvent(
@@ -383,7 +384,8 @@ class UserService(
   }
 
   fun unlockUser(username: String) {
-    userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    user.staff.status = Staff.STAFF_STATUS_ACTIVE
     userPersonDetailRepository.unlockUser(username)
 
     telemetryClient.trackEvent(
