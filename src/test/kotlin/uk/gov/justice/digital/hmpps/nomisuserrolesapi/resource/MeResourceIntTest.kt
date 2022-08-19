@@ -23,7 +23,7 @@ class MeResourceIntTest : IntegrationTestBase() {
           .username("AUTH_ADM")
           .firstName("AUTH")
           .lastName("ADM")
-          .atPrisons(listOf("BXI", "WWI"))
+          .atPrisons("BXI", "WWI")
           .dpsRoles(listOf("CREATE_CATEGORISATION", "GLOBAL_SEARCH"))
           .nomisRoles(listOf("300", "200"))
           .buildAndSave()

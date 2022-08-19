@@ -1,4 +1,3 @@
-
 import org.springframework.data.jpa.domain.Specification
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
@@ -21,6 +20,7 @@ import javax.persistence.criteria.CriteriaQuery
 import javax.persistence.criteria.Expression
 import javax.persistence.criteria.Join
 import javax.persistence.criteria.JoinType
+import javax.persistence.criteria.JoinType.INNER
 import javax.persistence.criteria.JoinType.LEFT
 import javax.persistence.criteria.Path
 import javax.persistence.criteria.Predicate
@@ -39,15 +39,15 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     fun <PROP> Path<*>.get(prop: KProperty1<*, PROP>): Path<PROP> = this.get(prop.name)
     fun <PROP> Root<*>.get(prop: KProperty1<*, PROP>): Path<PROP> = this.get(prop.name)
     fun <PROP> get(prop: KProperty1<*, PROP>): Path<PROP> = root.get(prop)
-    fun <FROM, TO> join(prop: KProperty1<FROM, List<TO>>, joinType: JoinType = JoinType.INNER): Join<FROM, TO> =
+    fun <FROM, TO> join(prop: KProperty1<FROM, List<TO>>, joinType: JoinType = INNER): Join<FROM, TO> =
       root.join(prop.name, joinType)
 
-    fun <FROM, TO> join(prop: KProperty1<FROM, TO>, joinType: JoinType = JoinType.INNER): Join<FROM, TO> =
+    fun <FROM, TO> join(prop: KProperty1<FROM, TO>, joinType: JoinType = INNER): Join<FROM, TO> =
       root.join(prop.name, joinType)
 
     fun <FROM, TO, NEXT> Join<FROM, TO>.join(
       prop: KProperty1<*, NEXT>,
-      joinType: JoinType = JoinType.INNER
+      joinType: JoinType = INNER
     ): Join<TO, NEXT> = this.join(prop.name, joinType)
 
     fun or(vararg predicates: Predicate) = criteriaBuilder.or(*predicates)
@@ -56,6 +56,17 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     fun equal(x: Expression<String>, pattern: String) = criteriaBuilder.equal(x, pattern)
     fun inList(x: Expression<String>, values: List<String>) = x.`in`(values)
     fun upper(x: Expression<String>) = criteriaBuilder.upper(x)
+
+    // Facilitates query for existence of rows in another table linked to the STAFF_USER_ACCOUNTS table
+    fun <T> exists(aClass: Class<T>, subQueryPredicate: (Root<T>) -> Predicate): Predicate {
+      val subQuery = query.subquery(Int::class.java)
+      val subQueryRoot: Root<T> = subQuery.from(aClass)
+      return criteriaBuilder.exists(
+        subQuery
+          .select(criteriaBuilder.literal(1))
+          .where(subQueryPredicate(subQueryRoot))
+      )
+    }
 
     fun administeredBy(localAdministratorUsername: String): Predicate {
       return equal(
@@ -68,18 +79,23 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       )
     }
 
-    fun localAuthorityOfAdminGroup(activeCaseloadId: String): Predicate {
-      return equal(
-        join(UserPersonDetail::administratorOfUserGroups)
-          .join(UserGroup::id)
-          .get(UserGroupAdministratorPk::userGroupCode),
-        activeCaseloadId
+    fun localAuthorityOfAdminGroup(activeCaseloadId: String): Predicate =
+      exists(UserGroupAdministrator::class.java) { subQueryRoot ->
+        and(
+          criteriaBuilder.equal(subQueryRoot.get(UserGroupAdministrator::user), root),
+          criteriaBuilder.equal(
+            subQueryRoot.get(UserGroupAdministrator::userGroup).get(UserGroup::id),
+            activeCaseloadId
+          ),
+        )
+      }
+
+    fun lsaOnly(): Predicate = exists(UserGroupAdministrator::class.java) { subQueryRoot ->
+      and(
+        criteriaBuilder.equal(subQueryRoot.get(UserGroupAdministrator::user), root),
+        criteriaBuilder.isNotNull(subQueryRoot.get(UserGroupAdministrator::userGroup))
       )
     }
-
-    fun lsaOnly() =
-      join(UserPersonDetail::administratorOfUserGroups)
-        .join(UserGroup::id)
 
     fun nameMatch(name: String): Predicate =
       if (name.isFullName()) {
@@ -186,7 +202,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     if (filter.showOnlyLSAs == true) {
       filter.activeCaseloadId?.run {
         predicates.add(localAuthorityOfAdminGroup(filter.activeCaseloadId))
-      } ?: lsaOnly()
+      } ?: predicates.add(lsaOnly())
     }
 
     filter.caseloadId?.run {

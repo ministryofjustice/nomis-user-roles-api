@@ -24,7 +24,7 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
           .username("CASELOAD_USER1")
           .firstName("CASELOAD")
           .lastName("USER1")
-          .atPrisons(listOf("BXI", "WWI"))
+          .atPrisons("BXI", "WWI")
           .buildAndSave()
       }
     }
@@ -330,7 +330,7 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
           .username("CASELOAD_USER1")
           .firstName("MARK")
           .lastName("BOWLAN")
-          .atPrisons(listOf("BXI", "WWI"))
+          .atPrisons("BXI", "WWI")
           .buildAndSave()
       }
     }
@@ -414,7 +414,7 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
           .username("CASELOAD_USER1")
           .firstName("MARK")
           .lastName("BOWLAN")
-          .atPrisons(listOf("BXI", "WWI"))
+          .atPrisons("BXI", "WWI")
           .dpsRoles(listOf("APPROVE_CATEGORISATION", "CREATE_CATEGORISATION", "GLOBAL_SEARCH"))
           .nomisRoles(listOf("200"))
           .buildAndSave()
