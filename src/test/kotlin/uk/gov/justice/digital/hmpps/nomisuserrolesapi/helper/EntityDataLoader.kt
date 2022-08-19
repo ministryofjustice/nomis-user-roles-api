@@ -234,10 +234,8 @@ abstract class UserBuilder<T>(
     return this
   }
 
-  fun atPrison(prisonCode: String): UserBuilder<T> {
-    this.prisonCodes = listOf(prisonCode)
-    return this
-  }
+  fun atPrisons(vararg prisonCodes: String): UserBuilder<T> = atPrisons(prisonCodes.toList())
+  fun atPrison(prisonCode: String): UserBuilder<T> = atPrisons(prisonCode)
 
   fun firstName(firstName: String): UserBuilder<T> {
     this.userPersonDetail = userPersonDetail.copy(staff = userPersonDetail.staff.copy(firstName = firstName))

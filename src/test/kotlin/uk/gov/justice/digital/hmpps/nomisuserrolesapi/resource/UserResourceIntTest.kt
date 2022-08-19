@@ -574,7 +574,7 @@ class UserResourceIntTest : IntegrationTestBase() {
             .username("marco.rossi")
             .firstName("MARCO")
             .lastName("ROSSI")
-            .atPrisons(listOf("WWI", "BXI")).inactive()
+            .atPrisons("WWI", "BXI").inactive()
             .dpsRoles(listOf("APPROVE_CATEGORISATION", "GLOBAL_SEARCH"))
             .email("marco@justice.gov.uk")
             .buildAndSave()
@@ -590,7 +590,7 @@ class UserResourceIntTest : IntegrationTestBase() {
             .username("ella.dribble")
             .firstName("ELLA")
             .lastName("DRIBBLE")
-            .atPrisons(listOf("BXI", "WWI"))
+            .atPrisons("BXI", "WWI")
             .inactive()
             .dpsRoles(listOf()).buildAndSave()
         }
@@ -766,15 +766,15 @@ class UserResourceIntTest : IntegrationTestBase() {
 
           generalUser().username("abella.moulin").firstName("ABELLA").lastName("MOULIN").atPrison("WWI").buildAndSave()
           // first prison is set to active caseload
-          generalUser().username("marco.rossi").firstName("MARCO").lastName("ROSSI").atPrisons(listOf("BXI", "WWI"))
+          generalUser().username("marco.rossi").firstName("MARCO").lastName("ROSSI").atPrisons("BXI", "WWI")
             .inactive().buildAndSave()
-          generalUser().username("ella.dribble").firstName("ELLA").lastName("DRIBBLE").atPrisons(listOf("WWI", "BXI"))
+          generalUser().username("ella.dribble").firstName("ELLA").lastName("DRIBBLE").atPrisons("WWI", "BXI")
             .inactive().buildAndSave()
           generalUser().username("mark.bowlan").firstName("MARK").lastName("BOWLAN").atPrison("BXI").buildAndSave()
           // Staff with multiple email Ids
           generalUser().username("dave.rossi").firstName("dave").lastName("rossi")
             .addEmail("dave@1digital.justice.gov.uk").addEmail("dave@2digital.justice.gov.uk")
-            .addEmail("dave@3digital.justice.gov.uk").atPrisons(listOf("BXI", "WWI")).buildAndSave()
+            .addEmail("dave@3digital.justice.gov.uk").atPrisons("BXI", "WWI").buildAndSave()
         }
       }
 
@@ -1275,7 +1275,7 @@ class UserResourceIntTest : IntegrationTestBase() {
     internal fun deleteUsers() = dataBuilder.deleteAllUsers()
 
     @Test
-    fun `they can filter by with LSAs Only`() {
+    fun `they can filter by LSAs Only`() {
 
       webTestClient.get().uri {
 
@@ -1299,6 +1299,30 @@ class UserResourceIntTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `pagination of LSA users reports the correct number of results`() {
+
+      dataBuilder.localAdministrator()
+        .username("LSA_AT_MULTIPLE_PRISONS")
+        .firstName("MULTIPLE")
+        .lastName("PRISONS")
+        .atPrisons("WWI", "LEI")
+        .buildAndSave()
+
+      webTestClient.get().uri {
+
+        it.path("/users/")
+          .queryParam("size", "5")
+          .queryParam("showOnlyLSAs", true)
+          .build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$.totalElements").isEqualTo(5)
+    }
+
+    @Test
     fun `they can filter by with LSAs Only with active caseload`() {
 
       webTestClient.get().uri {
@@ -1313,7 +1337,10 @@ class UserResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("$.totalElements").isEqualTo(2)
         .jsonPath("$.content").value<JSONArray> {
-          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).contains("TIM.MARSHALL", "TIM.SMITH")
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).containsExactlyInAnyOrder(
+            "TIM.MARSHALL",
+            "TIM.SMITH"
+          )
         }
     }
 
@@ -1331,7 +1358,7 @@ class UserResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("$").value<JSONArray> {
-          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).contains(
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).containsExactlyInAnyOrder(
             "RIZ.MARSHALL",
             "TOM.MARSHALL",
             "TIM.MARSHALL",
@@ -1354,7 +1381,10 @@ class UserResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("$").value<JSONArray> {
-          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).contains("TIM.MARSHALL", "TIM.SMITH")
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).containsExactlyInAnyOrder(
+            "TIM.MARSHALL",
+            "TIM.SMITH"
+          )
         }
     }
   }

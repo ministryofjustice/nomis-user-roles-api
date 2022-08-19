@@ -170,7 +170,7 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
           .firstName("TEST")
           .lastName("USER1")
           .email("test@test.com")
-          .atPrisons(listOf("BXI"))
+          .atPrison("BXI")
           .buildAndSave()
       }
     }
@@ -339,7 +339,7 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
           .firstName("TEST")
           .lastName("USER1")
           .email("test@test.com")
-          .atPrisons(listOf("BXI"))
+          .atPrison("BXI")
           .buildAndSave()
       }
     }
