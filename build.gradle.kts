@@ -20,7 +20,7 @@ dependencies {
   implementation("org.apache.commons:commons-text:1.9")
   implementation("commons-codec:commons-codec:1.15")
 
-  implementation("org.flywaydb:flyway-core:9.2.3")
+  implementation("org.flywaydb:flyway-core")
   implementation("com.vladmihalcea:hibernate-types-52:2.19.0")
 
   implementation("javax.transaction:javax.transaction-api:1.3")
