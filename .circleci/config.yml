@@ -122,8 +122,7 @@ workflows:
           slack_channel: << pipeline.parameters.alerts-slack-channel >>
           context:
             - hmpps-common-vars
-      # currently disabled as no support for jdk 18 or kotlin 1.7
- - hmpps/veracode_pipeline_scan:
+      - hmpps/veracode_pipeline_scan:
           slack_channel: << pipeline.parameters.alerts-slack-channel >>
           context:
             - veracode-credentials
