@@ -29,7 +29,7 @@ data class Staff(
   var lastName: String,
 
   @Column(name = "STATUS")
-  val status: String,
+  var status: String,
 
   @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   var users: List<UserPersonDetail> = listOf(),
@@ -52,6 +52,7 @@ data class Staff(
 
   companion object {
     internal const val STAFF_STATUS_ACTIVE = "ACTIVE"
+    internal const val STAFF_STATUS_INACTIVE = "INACT"
   }
 
   fun setEmail(email: String) {

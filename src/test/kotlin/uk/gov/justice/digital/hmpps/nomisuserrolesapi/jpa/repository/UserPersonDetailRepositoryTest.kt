@@ -88,7 +88,7 @@ class UserPersonDetailRepositoryTest {
         .buildAndSave()
       dataBuilder.generalUser()
         .username("steve.wwi.bxi")
-        .atPrisons(listOf("WWI", "BXI"))
+        .atPrisons("WWI", "BXI")
         .buildAndSave()
       dataBuilder.generalUser()
         .username("claire.bxi")
@@ -104,7 +104,7 @@ class UserPersonDetailRepositoryTest {
     internal fun `can read a local administrator user that administers general users at multiple prisons`() {
       dataBuilder.localAdministrator()
         .username("jane.bubbles.wwi.bxi")
-        .atPrisons(listOf("WWI", "BXI"))
+        .atPrisons("WWI", "BXI")
         .buildAndSave()
 
       dataBuilder.localAdministrator()
@@ -142,7 +142,7 @@ class UserPersonDetailRepositoryTest {
 
       dataBuilder.localAdministrator()
         .username("jane.bubbles.wwi.bxi")
-        .atPrisons(listOf("WWI", "BXI"))
+        .atPrisons("WWI", "BXI")
         .build()
         .transform { user ->
           user.copy(
@@ -272,7 +272,7 @@ class UserPersonDetailRepositoryTest {
 
         dataBuilder.localAdministrator()
           .username(lsaAdministratorAtBrixtonAndWandsworth)
-          .atPrisons(listOf("BXI", "WWI"))
+          .atPrisons("BXI", "WWI")
           .buildAndSave()
 
         listOf(
