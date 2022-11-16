@@ -1,7 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.7"
-  kotlin("plugin.spring") version "1.7.20"
-  kotlin("plugin.jpa") version "1.7.20"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.6.0-beta"
+  kotlin("plugin.spring") version "1.7.21"
+  kotlin("plugin.jpa") version "1.7.21"
   idea
 }
 
@@ -26,13 +26,13 @@ dependencies {
   implementation("javax.transaction:javax.transaction-api:1.3")
   implementation("javax.xml.bind:jaxb-api:2.3.1")
 
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.4")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.0")
 
   implementation("org.springdoc:springdoc-openapi-ui:1.6.12")
   implementation("org.springdoc:springdoc-openapi-kotlin:1.6.12")
   implementation("org.springdoc:springdoc-openapi-data-rest:1.6.12")
 
-  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.4")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.0")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
 
   implementation("com.zaxxer:HikariCP:5.0.1")
@@ -45,7 +45,7 @@ dependencies {
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
-  testImplementation("org.mockito:mockito-inline:4.8.1")
+  testImplementation("org.mockito:mockito-inline:4.9.0")
 }
 
 java {
