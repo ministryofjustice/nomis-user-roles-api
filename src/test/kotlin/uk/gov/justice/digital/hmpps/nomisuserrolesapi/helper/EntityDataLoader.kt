@@ -106,7 +106,7 @@ class LocalAdministratorBuilder(
       groupCaseloadRepository.findAllById_Caseload(caseload).map {
         UserGroupAdministrator(
           UserGroupAdministratorPk(it.userGroup.id, this.userPersonDetail.username),
-          active = true,
+          active = this.userPersonDetail.isActive(),
           userGroup = it.userGroup,
           user = this.userPersonDetail,
         )
