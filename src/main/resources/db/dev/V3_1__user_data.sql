@@ -511,17 +511,15 @@ VALUES (138250, 'STF', 4, null, null, 'EMAIL', 'Phillips@BobJustice.gov.uk',
     to_timestamp('06-DEC-18 16.08.43.742717000', 'DD-MON-RR HH24.MI.SSXFF'), 'HPA_USER', 'OUMPERSO',
     'pphillips', '10.102.2.4', 'MGMRW0100', null);
 
-insert into LAA_ADMINISTRATORS(LOCAL_AUTHORITY_CODE,USERNAME)
-values ('CADM_I','ITAG_LADM');
+insert into LAA_ADMINISTRATORS(LOCAL_AUTHORITY_CODE,USERNAME, ACTIVE_FLAG)
+values ('CADM_I','ITAG_LADM','Y'),
+       ('CADM_I','LAA_USER','Y'),
+       ('MDI','OLD_NOMIS_USER','N');
 
 insert into LAA_GENERAL_USERS(LOCAL_AUTHORITY_CODE,USERNAME, START_DATE)
-values ('CADM_I','ITAG_LADM',sysdate);
-
-insert into LAA_ADMINISTRATORS(LOCAL_AUTHORITY_CODE,USERNAME)
-values ('CADM_I','LAA_USER');
-
-insert into LAA_GENERAL_USERS(LOCAL_AUTHORITY_CODE,USERNAME, START_DATE)
-values ('CADM_I','LAA_USER',sysdate);
+values ('CADM_I','ITAG_LADM',sysdate),
+       ('CADM_I','LAA_USER',sysdate),
+       ('MDI','OLD_NOMIS_USER',sysdate);
 
 
 

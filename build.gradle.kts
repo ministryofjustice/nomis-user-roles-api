@@ -1,7 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.5"
-  kotlin("plugin.spring") version "1.7.10"
-  kotlin("plugin.jpa") version "1.7.10"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.7.2-beta-1"
+  kotlin("plugin.spring") version "1.7.22"
+  kotlin("plugin.jpa") version "1.7.22"
   idea
 }
 
@@ -21,23 +21,23 @@ dependencies {
   implementation("commons-codec:commons-codec:1.15")
 
   implementation("org.flywaydb:flyway-core")
-  implementation("com.vladmihalcea:hibernate-types-52:2.19.2")
+  implementation("com.vladmihalcea:hibernate-types-52:2.20.0")
 
   implementation("javax.transaction:javax.transaction-api:1.3")
   implementation("javax.xml.bind:jaxb-api:2.3.1")
 
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.4")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.1")
 
-  implementation("org.springdoc:springdoc-openapi-ui:1.6.11")
-  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.11")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.11")
+  implementation("org.springdoc:springdoc-openapi-ui:1.6.13")
+  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.13")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.13")
 
-  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.4")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.1")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
 
   implementation("com.zaxxer:HikariCP:5.0.1")
   runtimeOnly("com.h2database:h2:2.1.214")
-  runtimeOnly("com.oracle.database.jdbc:ojdbc10:19.16.0.0")
+  runtimeOnly("com.oracle.database.jdbc:ojdbc10:19.17.0.0")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
@@ -45,7 +45,7 @@ dependencies {
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
-  testImplementation("org.mockito:mockito-inline:4.8.0")
+  testImplementation("org.mockito:mockito-inline:4.9.0")
 }
 
 java {
