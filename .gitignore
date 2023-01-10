@@ -69,3 +69,4 @@ ecr.repo
 
 #Helm
 **/Chart.lock
+helm_deploy/nomis-user-roles-api/charts/
