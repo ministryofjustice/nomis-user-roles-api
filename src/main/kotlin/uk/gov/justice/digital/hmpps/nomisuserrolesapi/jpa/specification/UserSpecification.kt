@@ -79,10 +79,11 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       )
     }
 
-    fun localAuthorityOfAdminGroup(activeCaseloadId: String): Predicate =
+    fun localAuthorityOfAdminGroup(activeCaseloadId: String, showOnlyLSAs: Boolean): Predicate =
       exists(UserGroupAdministrator::class.java) { subQueryRoot ->
         and(
           criteriaBuilder.equal(subQueryRoot.get(UserGroupAdministrator::user), root),
+          criteriaBuilder.equal(subQueryRoot.get(UserGroupAdministrator::active), showOnlyLSAs),
           criteriaBuilder.equal(
             subQueryRoot.get(UserGroupAdministrator::userGroup).get(UserGroup::id),
             activeCaseloadId
@@ -202,7 +203,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
 
     if (filter.showOnlyLSAs == true) {
       filter.activeCaseloadId?.run {
-        predicates.add(localAuthorityOfAdminGroup(filter.activeCaseloadId))
+        predicates.add(localAuthorityOfAdminGroup(filter.activeCaseloadId, filter.showOnlyLSAs))
       } ?: predicates.add(lsaOnly())
     }
 
