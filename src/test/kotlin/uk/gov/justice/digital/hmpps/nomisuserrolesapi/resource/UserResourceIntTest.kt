@@ -1256,7 +1256,6 @@ class UserResourceIntTest : IntegrationTestBase() {
         .firstName("BOBO")
         .lastName("FREEMAN")
         .atPrison("MDI")
-        // .inactive()
         .buildAndSave()
 
       with(dataBuilder) {
