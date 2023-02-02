@@ -1251,6 +1251,13 @@ class UserResourceIntTest : IntegrationTestBase() {
         .inactive()
         .buildAndSave()
 
+      dataBuilder.localAdministrator()
+        .username("BOBI.FREEMAN")
+        .firstName("BOBO")
+        .lastName("FREEMAN")
+        .atPrison("MDI")
+        .buildAndSave()
+
       with(dataBuilder) {
         generalUser().username("marco.rossi")
           .firstName("Marco")
@@ -1284,7 +1291,7 @@ class UserResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("$.totalElements").isEqualTo(4)
+        .jsonPath("$.totalElements").isEqualTo(5)
         .jsonPath("$.content").value<JSONArray> {
           assertThat(it.map { m -> (m as Map<*, *>)["username"] }).contains(
             "RIZ.MARSHALL",
@@ -1306,7 +1313,7 @@ class UserResourceIntTest : IntegrationTestBase() {
 
       webTestClient.get().uri {
         it.path("/users/")
-          .queryParam("size", "5")
+          .queryParam("size", "6")
           .queryParam("showOnlyLSAs", true)
           .build()
       }
@@ -1314,7 +1321,7 @@ class UserResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("$.totalElements").isEqualTo(5)
+        .jsonPath("$.totalElements").isEqualTo(6)
     }
 
     @Test
@@ -1350,13 +1357,64 @@ class UserResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("$.totalElements").isEqualTo(4)
+        .jsonPath("$.totalElements").isEqualTo(5)
         .jsonPath("$.content").value<JSONArray> {
           assertThat(it.map { m -> (m as Map<*, *>)["username"] }).containsExactlyInAnyOrder(
             "RIZ.MARSHALL",
             "TIM.MARSHALL",
             "TOM.MARSHALL",
+            "BOBI.FREEMAN",
             "TIM.SMITH"
+          )
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).doesNotContain("BOB.FREEMAN")
+        }
+    }
+
+    @Test
+    fun `can only show a active LSA for specific Prison`() {
+      webTestClient.get().uri {
+        it.path("/users/")
+          .queryParam("showOnlyLSAs", true)
+          .queryParam("inclusiveRoles", false)
+          .queryParam("nameFilter", "bob")
+          .queryParam("status", "ALL")
+          .queryParam("restrictToActiveGroup", true)
+          .queryParam("caseload", "MDI")
+          .queryParam("activeCaseload", "MDI")
+          .build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$.totalElements").isEqualTo(1)
+        .jsonPath("$.content").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).containsExactlyInAnyOrder(
+            "BOBI.FREEMAN"
+          )
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).doesNotContain("BOB.FREEMAN")
+        }
+    }
+
+    @Test
+    fun `can only show a active LSA for any Prison`() {
+      webTestClient.get().uri {
+        it.path("/users/")
+          .queryParam("showOnlyLSAs", true)
+          .queryParam("inclusiveRoles", false)
+          .queryParam("nameFilter", "bob")
+          .queryParam("status", "ALL")
+          .queryParam("restrictToActiveGroup", true)
+          .build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$.totalElements").isEqualTo(1)
+        .jsonPath("$.content").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).containsExactlyInAnyOrder(
+            "BOBI.FREEMAN"
           )
           assertThat(it.map { m -> (m as Map<*, *>)["username"] }).doesNotContain("BOB.FREEMAN")
         }
@@ -1378,6 +1436,7 @@ class UserResourceIntTest : IntegrationTestBase() {
             "RIZ.MARSHALL",
             "TOM.MARSHALL",
             "TIM.MARSHALL",
+            "BOBI.FREEMAN",
             "TIM.SMITH"
           )
         }
