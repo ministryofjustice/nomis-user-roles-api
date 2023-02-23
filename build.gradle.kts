@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.8.3"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.8.4-beta"
   kotlin("plugin.spring") version "1.8.10"
   kotlin("plugin.jpa") version "1.8.10"
   idea
@@ -37,7 +37,7 @@ dependencies {
 
   implementation("com.zaxxer:HikariCP:5.0.1")
   runtimeOnly("com.h2database:h2:2.1.214")
-  runtimeOnly("com.oracle.database.jdbc:ojdbc10:19.17.0.0")
+  runtimeOnly("com.oracle.database.jdbc:ojdbc10:19.18.0.0")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
