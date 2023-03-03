@@ -20,31 +20,65 @@ interface UserPersonDetailRepository :
   JpaSpecificationExecutor<UserPersonDetail> {
 
   @Modifying
-  @Query(value = "call oms_utils.create_user(:username, :password, :profile)", nativeQuery = true)
+  @Query(
+    value = "call oms_utils.create_user(:username, :password, :profile)",
+    nativeQuery = true,
+    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
+    countQuery = "select 1",
+  )
   fun createUser(username: String, password: String, profile: String = AccountProfile.TAG_GENERAL.name)
 
   @Modifying
-  @Query(value = "call oms_utils.expire_password(:username)", nativeQuery = true)
+  @Query(
+    value = "call oms_utils.expire_password(:username)",
+    nativeQuery = true,
+    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
+    countQuery = "select 1",
+  )
   fun expirePassword(username: String)
 
   @Modifying
-  @Query(value = "call oms_utils.drop_user(:username)", nativeQuery = true)
+  @Query(
+    value = "call oms_utils.drop_user(:username)",
+    nativeQuery = true,
+    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
+    countQuery = "select 1",
+  )
   fun dropUser(username: String)
 
   @Modifying
-  @Query(value = "call oms_utils.change_user_password(:username, :password)", nativeQuery = true)
+  @Query(
+    value = "call oms_utils.change_user_password(:username, :password)",
+    nativeQuery = true,
+    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
+    countQuery = "select 1",
+  )
   fun changePassword(username: String?, password: String?)
 
   @Modifying
-  @Query(value = "call oms_utils.unlock_user(:username)", nativeQuery = true)
+  @Query(
+    value = "call oms_utils.unlock_user(:username)",
+    nativeQuery = true,
+    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
+    countQuery = "select 1",
+  )
   fun unlockUser(username: String?)
 
   @Modifying
-  @Query(value = "call oms_utils.lock_user(:username)", nativeQuery = true)
+  @Query(
+    value = "call oms_utils.lock_user(:username)",
+    nativeQuery = true,
+    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
+    countQuery = "select 1",
+  )
   fun lockUser(username: String?)
+
   @EntityGraph(value = "user-person-detail-download-graph", type = EntityGraph.EntityGraphType.LOAD)
   override fun findAll(speci: Specification<UserPersonDetail>?): List<UserPersonDetail>
-  fun findAllByStaff_FirstNameIgnoreCaseAndStaff_LastNameIgnoreCase(firstName: String, lastName: String): List<UserPersonDetail>
+  fun findAllByStaff_FirstNameIgnoreCaseAndStaff_LastNameIgnoreCase(
+    firstName: String,
+    lastName: String,
+  ): List<UserPersonDetail>
 
   fun findByStaff_EmailsEmail(emailAddress: String): List<UserPersonDetail>
 }
@@ -52,7 +86,7 @@ interface UserPersonDetailRepository :
 fun changePasswordWithValidation(
   username: String?,
   password: String?,
-  changePassword: (username: String?, password: String?) -> Unit
+  changePassword: (username: String?, password: String?) -> Unit,
 ) {
   try {
     changePassword(username, password)
