@@ -49,7 +49,9 @@ internal object PasswordEncoderUtils {
   private fun bytesUtf8(s: String?): ByteArray? {
     return if (s == null) {
       null
-    } else Utf8.encode(s)
+    } else {
+      Utf8.encode(s)
+    }
     // need to check if Utf8.encode() runs in constant time (probably not). This may leak length of string.
   }
 }

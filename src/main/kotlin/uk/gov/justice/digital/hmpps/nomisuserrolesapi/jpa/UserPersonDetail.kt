@@ -33,7 +33,6 @@ import javax.persistence.Table
 @Table(name = "STAFF_USER_ACCOUNTS")
 @SecondaryTable(name = "DBA_USERS", pkJoinColumns = [PrimaryKeyJoinColumn(name = "USERNAME")])
 @BatchSize(size = 100)
-
 @NamedEntityGraph(
   name = "user-person-detail-download-graph",
   attributeNodes = [
