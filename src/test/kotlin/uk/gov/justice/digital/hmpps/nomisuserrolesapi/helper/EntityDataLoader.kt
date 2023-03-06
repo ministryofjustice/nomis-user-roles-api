@@ -48,14 +48,13 @@ class GeneralUserBuilder(
           active = true,
           startDate = LocalDate.now().minusDays(1),
           userGroup = it.userGroup,
-          user = this.userPersonDetail
+          user = this.userPersonDetail,
         )
       }
     }.flatten().toMutableList()
   }
 
   override fun build(): GeneralUserBuilder {
-
     userPersonDetail =
       userPersonDetail.copy(
         activeAndInactiveMemberOfUserGroups = generalUsersOf(prisonCodes),
@@ -65,7 +64,7 @@ class GeneralUserBuilder(
           UserCaseload(
             UserCaseloadPk(
               caseloadId = it,
-              username = userPersonDetail.username
+              username = userPersonDetail.username,
             ),
             startDate = LocalDate.now().minusDays(1),
             caseload = caseloadRepository.findByIdOrNull(it)!!,
@@ -75,11 +74,11 @@ class GeneralUserBuilder(
             userCaseload.copy(
               roles = asRoles(
                 userCaseload,
-                if (it == DPS_CASELOAD) dpsRoles else nomsRoles
-              )
+                if (it == DPS_CASELOAD) dpsRoles else nomsRoles,
+              ),
             )
           }
-        }.toMutableList()
+        }.toMutableList(),
       )
     return this
   }
@@ -136,14 +135,14 @@ class DataBuilder(
     repository = repository,
     groupCaseloadRepository = groupCaseloadRepository,
     caseloadRepository = caseloadRepository,
-    roleRepository = roleRepository
+    roleRepository = roleRepository,
   )
 
   fun localAdministrator() = localAdministratorEntityCreator(
     repository = repository,
     groupCaseloadRepository = groupCaseloadRepository,
     caseloadRepository = caseloadRepository,
-    roleRepository = roleRepository
+    roleRepository = roleRepository,
   )
 
   fun deleteAllUsers() {
@@ -166,7 +165,7 @@ fun generalUserEntityCreator(
     caseloadRepository = caseloadRepository,
     roleRepository = roleRepository,
     userPersonDetail = userPersonDetail,
-    prisonCodes = prisonCodes
+    prisonCodes = prisonCodes,
   )
 }
 
@@ -184,7 +183,7 @@ fun localAdministratorEntityCreator(
     groupCaseloadRepository = groupCaseloadRepository,
     caseloadRepository = caseloadRepository,
     userPersonDetail = userPersonDetail,
-    prisonCodes = prisonCodes
+    prisonCodes = prisonCodes,
   )
 }
 
@@ -193,7 +192,7 @@ fun defaultPerson(): UserPersonDetail {
     username = "tony",
     staff = Staff(firstName = "John", lastName = "Smith", status = "ACTIVE"),
     type = UsageType.GENERAL,
-    accountDetail = AccountDetail(accountStatus = AccountStatus.OPEN.desc, profile = AccountProfile.TAG_GENERAL.name)
+    accountDetail = AccountDetail(accountStatus = AccountStatus.OPEN.desc, profile = AccountProfile.TAG_GENERAL.name),
   )
 }
 

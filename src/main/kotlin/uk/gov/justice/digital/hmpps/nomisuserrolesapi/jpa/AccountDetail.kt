@@ -15,7 +15,7 @@ data class AccountDetail(
   val profile: String = AccountProfile.TAG_GENERAL.name,
 
   @Column(name = "expiry_date", table = "DBA_USERS")
-  val passwordExpiry: LocalDateTime? = null
+  val passwordExpiry: LocalDateTime? = null,
 ) {
 
   val status: AccountStatus
@@ -31,7 +31,8 @@ data class AccountDetail(
 
   fun isCredentialsNonExpired(): Boolean {
     val statusNonExpired =
-      !EnumSet.of(AccountStatus.EXPIRED, AccountStatus.EXPIRED_LOCKED, AccountStatus.EXPIRED_LOCKED_TIMED).contains(status)
+      !EnumSet.of(AccountStatus.EXPIRED, AccountStatus.EXPIRED_LOCKED, AccountStatus.EXPIRED_LOCKED_TIMED)
+        .contains(status)
     return statusNonExpired && (passwordExpiry == null || passwordExpiry.isAfter(LocalDateTime.now()))
   }
 

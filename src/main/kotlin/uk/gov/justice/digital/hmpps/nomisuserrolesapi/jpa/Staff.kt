@@ -45,7 +45,8 @@ data class Staff(
 
   fun adminAccount(): UserPersonDetail? = users.firstOrNull { u -> UsageType.ADMIN == u.type }
 
-  fun primaryEmail(): EmailAddress? = emails.firstOrNull { e -> e.email.contains("justice.gov.uk") } ?: run { emails.firstOrNull() }
+  fun primaryEmail(): EmailAddress? =
+    emails.firstOrNull { e -> e.email.contains("justice.gov.uk") } ?: run { emails.firstOrNull() }
 
   val isActive: Boolean
     get() = STAFF_STATUS_ACTIVE == status

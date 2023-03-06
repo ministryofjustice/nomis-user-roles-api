@@ -33,39 +33,41 @@ import javax.persistence.Table
 @Table(name = "STAFF_USER_ACCOUNTS")
 @SecondaryTable(name = "DBA_USERS", pkJoinColumns = [PrimaryKeyJoinColumn(name = "USERNAME")])
 @BatchSize(size = 100)
-
 @NamedEntityGraph(
   name = "user-person-detail-download-graph",
   attributeNodes = [
     NamedAttributeNode("username"), NamedAttributeNode(value = "administratorOfUserGroups"),
-    NamedAttributeNode(value = "staff", subgraph = "staff-subgraph")
+    NamedAttributeNode(value = "staff", subgraph = "staff-subgraph"),
   ],
   subgraphs = [
     NamedSubgraph(
       name = "staff-subgraph",
       attributeNodes = [
-        NamedAttributeNode(value = "staffId"), NamedAttributeNode(value = "firstName"), NamedAttributeNode(
-          value = "lastName"
-        ), NamedAttributeNode(value = "status"), NamedAttributeNode(
+        NamedAttributeNode(value = "staffId"), NamedAttributeNode(value = "firstName"),
+        NamedAttributeNode(
+          value = "lastName",
+        ),
+        NamedAttributeNode(value = "status"),
+        NamedAttributeNode(
           value = "emails",
-          subgraph = "emails-subgraph"
-        )
-      ]
+          subgraph = "emails-subgraph",
+        ),
+      ],
     ),
     NamedSubgraph(
       name = "emails-subgraph",
       attributeNodes = [
         NamedAttributeNode(value = "userType"),
-        NamedAttributeNode(value = "type"), NamedAttributeNode(value = "email")
-      ]
+        NamedAttributeNode(value = "type"), NamedAttributeNode(value = "email"),
+      ],
     ),
     NamedSubgraph(
       name = "usergroup-admin-subgraph",
       attributeNodes = [
-        NamedAttributeNode(value = "id"), NamedAttributeNode(value = "active")
-      ]
-    )
-  ]
+        NamedAttributeNode(value = "id"), NamedAttributeNode(value = "active"),
+      ],
+    ),
+  ],
 )
 data class UserPersonDetail(
   @Id
@@ -143,7 +145,8 @@ data class UserPersonDetail(
   }
 
   fun setDefaultCaseload(caseloadId: String) {
-    activeCaseLoad = findCaseloadById(caseloadId) ?: throw CaseloadNotFoundException("Default caseload cannot be set as user does not have $caseloadId.")
+    activeCaseLoad = findCaseloadById(caseloadId)
+      ?: throw CaseloadNotFoundException("Default caseload cannot be set as user does not have $caseloadId.")
   }
 
   fun addCaseload(caseload: Caseload) {
@@ -151,7 +154,9 @@ data class UserPersonDetail(
 
     val userCaseload = UserCaseload(
       id = UserCaseloadPk(caseloadId = caseload.id, username = this.username),
-      caseload = caseload, user = this, startDate = now(),
+      caseload = caseload,
+      user = this,
+      startDate = now(),
       roles = mutableListOf(),
     )
     caseloads.add(userCaseload)
@@ -166,10 +171,16 @@ data class UserPersonDetail(
   }
 
   fun removeCaseload(caseloadId: String) {
-    val userCaseload = caseloads.firstOrNull { caseload -> caseloadId == caseload.id.caseloadId } ?: throw CaseloadNotFoundException("Caseload cannot be removed as user does not have $caseloadId.")
+    val userCaseload = caseloads.firstOrNull { caseload -> caseloadId == caseload.id.caseloadId }
+      ?: throw CaseloadNotFoundException("Caseload cannot be removed as user does not have $caseloadId.")
 
     if (isUserGroupCaseload(userCaseload.caseload)) {
-      val userGroupMembersAssociatedWithCaseload = activeAndInactiveMemberOfUserGroups.filter { userGroupMember -> isCaseloadForUserGroup(userCaseload.caseload, userGroupMember) }
+      val userGroupMembersAssociatedWithCaseload = activeAndInactiveMemberOfUserGroups.filter { userGroupMember ->
+        isCaseloadForUserGroup(
+          userCaseload.caseload,
+          userGroupMember,
+        )
+      }
       activeAndInactiveMemberOfUserGroups.removeAll(userGroupMembersAssociatedWithCaseload)
     }
 
@@ -183,19 +194,22 @@ data class UserPersonDetail(
   }
 
   private fun addUserGroup(userGroup: UserGroup) {
-    activeAndInactiveMemberOfUserGroups.firstOrNull { it.id.userGroupCode == userGroup.id && it.id.username == this.username } ?: run {
-      val member = UserGroupMember(
-        id = UserGroupMemberPk(userGroupCode = userGroup.id, username = this.username),
-        user = this, userGroup = userGroup
-      )
-      activeAndInactiveMemberOfUserGroups.add(member)
-    }
+    activeAndInactiveMemberOfUserGroups.firstOrNull { it.id.userGroupCode == userGroup.id && it.id.username == this.username }
+      ?: run {
+        val member = UserGroupMember(
+          id = UserGroupMemberPk(userGroupCode = userGroup.id, username = this.username),
+          user = this,
+          userGroup = userGroup,
+        )
+        activeAndInactiveMemberOfUserGroups.add(member)
+      }
   }
 
   private fun addAdminUserGroup(userGroup: UserGroup) {
     val adminMember = UserGroupAdministrator(
       id = UserGroupAdministratorPk(userGroupCode = userGroup.id, username = this.username),
-      user = this, userGroup = userGroup
+      user = this,
+      userGroup = userGroup,
     )
     activeAndInactiveAdministratorOfUserGroups.add(adminMember)
   }
@@ -234,7 +248,7 @@ fun UserPersonDetail.toUserSummaryWithEmail() = UserSummaryWithEmail(
   activeCaseload = activeCaseLoad?.let { caseload ->
     PrisonCaseload(
       id = caseload.id,
-      name = caseload.name.capitalizeLeavingAbbreviations()
+      name = caseload.name.capitalizeLeavingAbbreviations(),
     )
   },
   dpsRoleCount = this.dpsRoles.size,
@@ -254,7 +268,7 @@ fun UserPersonDetail.toDownloadUserSummaryWithEmail() = UserSummaryWithEmail(
   activeCaseload = this.activeCaseLoad?.let { caseload ->
     PrisonCaseload(
       id = caseload.id,
-      name = caseload.name.capitalizeLeavingAbbreviations()
+      name = caseload.name.capitalizeLeavingAbbreviations(),
     )
   },
   dpsRoleCount = 0,
@@ -271,7 +285,7 @@ fun UserPersonDetail.toUserSummary(): UserSummary = UserSummary(
   activeCaseload = this.activeCaseLoad?.let { caseload ->
     PrisonCaseload(
       id = caseload.id,
-      name = caseload.name.capitalizeLeavingAbbreviations()
+      name = caseload.name.capitalizeLeavingAbbreviations(),
     )
   },
   dpsRoleCount = this.dpsRoles.size,

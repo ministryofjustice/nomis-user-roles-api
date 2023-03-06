@@ -77,7 +77,7 @@ data class UserCaseload(
     val userCaseloadRole = UserCaseloadRole(
       id = UserCaseloadRoleIdentity(roleId = role.id, username = id.username, caseload = id.caseloadId),
       role = role,
-      userCaseload = this
+      userCaseload = this,
     )
     roles.add(userCaseloadRole)
     return userCaseloadRole

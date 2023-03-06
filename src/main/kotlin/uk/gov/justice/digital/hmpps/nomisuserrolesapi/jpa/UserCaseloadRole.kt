@@ -26,8 +26,8 @@ data class UserCaseloadRole(
   @JoinColumns(
     value = [
       JoinColumn(name = "CASELOAD_ID", referencedColumnName = "CASELOAD_ID", insertable = false, updatable = false),
-      JoinColumn(name = "USERNAME", referencedColumnName = "USERNAME", insertable = false, updatable = false)
-    ]
+      JoinColumn(name = "USERNAME", referencedColumnName = "USERNAME", insertable = false, updatable = false),
+    ],
   )
   val userCaseload: UserCaseload,
 
