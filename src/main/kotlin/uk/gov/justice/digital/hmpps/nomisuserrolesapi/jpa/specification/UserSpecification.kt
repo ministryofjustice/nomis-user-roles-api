@@ -31,7 +31,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
   override fun toPredicate(
     root: Root<UserPersonDetail>,
     query: CriteriaQuery<*>,
-    criteriaBuilder: CriteriaBuilder
+    criteriaBuilder: CriteriaBuilder,
   ): Predicate? {
     val predicates = mutableListOf<Predicate>()
 
@@ -47,7 +47,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
 
     fun <FROM, TO, NEXT> Join<FROM, TO>.join(
       prop: KProperty1<*, NEXT>,
-      joinType: JoinType = INNER
+      joinType: JoinType = INNER,
     ): Join<TO, NEXT> = this.join(prop.name, joinType)
 
     fun or(vararg predicates: Predicate) = criteriaBuilder.or(*predicates)
@@ -64,7 +64,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       return criteriaBuilder.exists(
         subQuery
           .select(criteriaBuilder.literal(1))
-          .where(subQueryPredicate(subQueryRoot))
+          .where(subQueryPredicate(subQueryRoot)),
       )
     }
 
@@ -75,7 +75,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
           .join(UserGroup::administrators)
           .get(UserGroupAdministrator::id)
           .get(UserGroupAdministratorPk::username),
-        localAdministratorUsername
+        localAdministratorUsername,
       )
     }
 
@@ -86,7 +86,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
           criteriaBuilder.equal(subQueryRoot.get(UserGroupAdministrator::active), showOnlyLSAs),
           criteriaBuilder.equal(
             subQueryRoot.get(UserGroupAdministrator::userGroup).get(UserGroup::id),
-            activeCaseloadId
+            activeCaseloadId,
           ),
         )
       }
@@ -95,7 +95,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       and(
         criteriaBuilder.equal(subQueryRoot.get(UserGroupAdministrator::user), root),
         criteriaBuilder.isNotNull(subQueryRoot.get(UserGroupAdministrator::userGroup)),
-        criteriaBuilder.isTrue(subQueryRoot.get(UserGroupAdministrator::active))
+        criteriaBuilder.isTrue(subQueryRoot.get(UserGroupAdministrator::active)),
       )
     }
 
@@ -105,21 +105,21 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
           and(
             like(
               get(UserPersonDetail::staff).get(Staff::firstName),
-              name.firstWord().uppercaseLike()
+              name.firstWord().uppercaseLike(),
             ),
             like(
               get(UserPersonDetail::staff).get(Staff::lastName),
-              name.secondWord().uppercaseLike()
+              name.secondWord().uppercaseLike(),
             ),
           ),
           and(
             like(
               get(UserPersonDetail::staff).get(Staff::firstName),
-              name.secondWord().uppercaseLike()
+              name.secondWord().uppercaseLike(),
             ),
             like(
               get(UserPersonDetail::staff).get(Staff::lastName),
-              name.firstWord().uppercaseLike()
+              name.firstWord().uppercaseLike(),
             ),
           ),
         )
@@ -127,19 +127,19 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
         or(
           like(
             get(UserPersonDetail::staff).get(Staff::firstName),
-            name.uppercaseLike()
+            name.uppercaseLike(),
           ),
           like(
             get(UserPersonDetail::staff).get(Staff::lastName),
-            name.uppercaseLike()
+            name.uppercaseLike(),
           ),
           like(
             get(UserPersonDetail::username),
-            name.uppercaseLike()
+            name.uppercaseLike(),
           ),
           like(
             upper(join(UserPersonDetail::staff).join(Staff::emails, LEFT).get(EmailAddress::email)),
-            name.uppercaseLike()
+            name.uppercaseLike(),
           ),
         )
       }
@@ -159,7 +159,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       val userCaseload = join(UserPersonDetail::caseloads)
       return and(
         equal(userCaseload.get(Caseload::id).get(UserCaseloadPk::caseloadId), caseloadId),
-        equal(userCaseload.join(UserCaseload::roles).get(UserCaseloadRole::role).get(Role::code), roleCode)
+        equal(userCaseload.join(UserCaseload::roles).get(UserCaseloadRole::role).get(Role::code), roleCode),
       )
     }
 
@@ -167,15 +167,15 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       and(
         equal(
           join(UserPersonDetail::caseloads).join(UserCaseload::roles).get(UserCaseloadRole::role).get(Role::code),
-          roleCode
-        )
+          roleCode,
+        ),
       )
 
     fun roles(roleCodes: List<String>): Predicate =
       and(
         * roleCodes.map {
           equal(join(UserPersonDetail::dpsRoles).get(UserCaseloadRole::role).get(Role::code), it)
-        }.toTypedArray()
+        }.toTypedArray(),
       )
 
     fun inclusiveRoles(roleCodes: List<String>): Predicate {

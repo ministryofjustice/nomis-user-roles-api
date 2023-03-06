@@ -88,8 +88,11 @@ class UserService(
   @Transactional(readOnly = true)
   fun findAllByEmailAddressAndUsernames(emailAddress: String, usernames: List<String>?): List<UserDetail> {
     val usersByEmail = userPersonDetailRepository.findByStaff_EmailsEmail(emailAddress)
-    val users = if (usernames.isNullOrEmpty()) usersByEmail
-    else usersByEmail.union(userPersonDetailRepository.findAllById(usernames))
+    val users = if (usernames.isNullOrEmpty()) {
+      usersByEmail
+    } else {
+      usersByEmail.union(userPersonDetailRepository.findAllById(usernames))
+    }
     return users.map(this::toUserDetail)
   }
 
@@ -124,7 +127,6 @@ class UserService(
       }
 
   fun createGeneralUser(createUserRequest: CreateGeneralUserRequest): UserSummary {
-
     checkIfAccountAlreadyExists(createUserRequest.username)
 
     val staffAccount =
@@ -144,9 +146,9 @@ class UserService(
       mapOf(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
     return userPersonDetail.toUserSummary()
   }
@@ -171,15 +173,14 @@ class UserService(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
         "linked-to" to linkedUsername,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
     return userPersonDetail.toUserSummary()
   }
 
   fun createAdminUser(createUserRequest: CreateAdminUserRequest): UserSummary {
-
     checkIfAccountAlreadyExists(createUserRequest.username)
 
     val staffAccount =
@@ -199,9 +200,9 @@ class UserService(
       mapOf(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
 
     return userPersonDetail.toUserSummary()
@@ -227,16 +228,15 @@ class UserService(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
         "linked-to" to linkedUsername,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
 
     return userPersonDetail.toUserSummary()
   }
 
   fun createLocalAdminUser(createUserRequest: CreateLocalAdminUserRequest): UserSummary {
-
     checkIfAccountAlreadyExists(createUserRequest.username)
 
     val staffAccount =
@@ -249,7 +249,7 @@ class UserService(
     val userPersonDetail = createLocalAdminUserAccount(
       staffAccount,
       createUserRequest.username,
-      localAdminUserGroup = createUserRequest.localAdminGroup
+      localAdminUserGroup = createUserRequest.localAdminGroup,
     )
 
     createSchemaUser(createUserRequest.username, AccountProfile.TAG_ADMIN)
@@ -259,9 +259,9 @@ class UserService(
       mapOf(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
     return userPersonDetail.toUserSummary()
   }
@@ -279,7 +279,7 @@ class UserService(
     val userPersonDetail = createLocalAdminUserAccount(
       staffAccount,
       linkedUserRequest.username,
-      localAdminUserGroup = linkedUserRequest.localAdminGroup
+      localAdminUserGroup = linkedUserRequest.localAdminGroup,
     )
     createSchemaUser(linkedUserRequest.username, AccountProfile.TAG_ADMIN)
 
@@ -289,9 +289,9 @@ class UserService(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
         "linked-to" to linkedUsername,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
 
     return userPersonDetail.toUserSummary()
@@ -310,9 +310,9 @@ class UserService(
         "username" to username,
         "old-email" to oldEmail,
         "new-email" to email,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
 
     return user.staff.toStaffDetail()
@@ -334,9 +334,9 @@ class UserService(
           "username" to username,
           "old-name" to oldFullName,
           "new-name" to this.fullName(),
-          "admin" to authenticationFacade.currentUsername
+          "admin" to authenticationFacade.currentUsername,
         ),
-        null
+        null,
       )
     }
 
@@ -355,9 +355,9 @@ class UserService(
       mapOf(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
   }
 
@@ -376,14 +376,15 @@ class UserService(
       "NURA-lock-user",
       mapOf(
         "username" to username,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
   }
 
   fun unlockUser(username: String) {
-    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    val user =
+      userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
     user.staff.status = Staff.STAFF_STATUS_ACTIVE
     userPersonDetailRepository.unlockUser(username)
 
@@ -391,9 +392,9 @@ class UserService(
       "NURA-unlock-user",
       mapOf(
         "username" to username,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
   }
 
@@ -405,9 +406,9 @@ class UserService(
       "NURA-change-password",
       mapOf(
         "username" to username,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
   }
 
@@ -421,9 +422,9 @@ class UserService(
       mapOf(
         "username" to username,
         "caseload" to defaultCaseloadId,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
     return user.toUserCaseloadDetail()
   }
@@ -439,9 +440,9 @@ class UserService(
       mapOf(
         "username" to user.username,
         "caseload" to caseloadId,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
 
     return user.toUserCaseloadDetail()
@@ -476,9 +477,9 @@ class UserService(
       mapOf(
         "username" to username,
         "caseload" to caseloadId,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
 
     return user.toUserCaseloadDetail()
@@ -507,9 +508,9 @@ class UserService(
         "username" to username,
         "role-code" to roleCode,
         "caseload" to caseloadId,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
 
     return user.toUserRoleDetail()
@@ -530,9 +531,9 @@ class UserService(
                   "username" to user.username,
                   "role-code" to roleCode,
                   "caseload" to DPS_CASELOAD,
-                  "admin" to authenticationFacade.currentUsername
+                  "admin" to authenticationFacade.currentUsername,
                 ),
-                null
+                null,
               )
             }
         }
@@ -547,7 +548,7 @@ class UserService(
 
   private fun setupCaseloadForUser(
     username: String,
-    caseloadId: String
+    caseloadId: String,
   ): UserPersonDetail {
     val user =
       userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
@@ -556,7 +557,7 @@ class UserService(
     if (caseloadId == DPS_CASELOAD) {
       user.findCaseloadById(DPS_CASELOAD) ?: user.addCaseload(
         caseloadRepository.findById(DPS_CASELOAD)
-          .orElseThrow(CaseloadNotFoundException("Caseload $DPS_CASELOAD not found"))
+          .orElseThrow(CaseloadNotFoundException("Caseload $DPS_CASELOAD not found")),
       )
     }
     return user
@@ -565,7 +566,7 @@ class UserService(
   private fun addRole(
     roleCode: String,
     user: UserPersonDetail,
-    caseloadId: String
+    caseloadId: String,
   ) {
     val role = roleRepository.findByCode(roleCode).orElseThrow { UserRoleNotFoundException("Role $roleCode not found") }
     user.addRole(role, caseloadId)
@@ -576,9 +577,9 @@ class UserService(
         "username" to user.username,
         "role-code" to roleCode,
         "caseload" to caseloadId,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
   }
 
@@ -595,7 +596,7 @@ class UserService(
     val staffAccount = Staff(
       firstName = firstName.uppercase(),
       lastName = lastName.uppercase(),
-      status = "ACTIVE"
+      status = "ACTIVE",
     )
     staffAccount.setEmail(email)
     return staffAccount
@@ -604,14 +605,13 @@ class UserService(
   private fun createUserAccount(
     staffAccount: Staff,
     username: String,
-    defaultCaseloadId: String
+    defaultCaseloadId: String,
   ): UserPersonDetail {
-
     val userPersonDetail = UserPersonDetail(
       username = username.uppercase(),
       staff = staffAccount,
       type = getUsageType(false),
-      accountDetail = null
+      accountDetail = null,
     )
     caseloadRepository.findById(DPS_CASELOAD)
       .ifPresent {
@@ -630,9 +630,8 @@ class UserService(
 
   private fun createAdminUserAccount(
     staffAccount: Staff,
-    username: String
+    username: String,
   ): UserPersonDetail {
-
     val userPersonDetail = setupUserPersonDetailForAdmins(username, staffAccount)
 
     userPersonDetailRepository.saveAndFlush(userPersonDetail)
@@ -642,9 +641,8 @@ class UserService(
   private fun createLocalAdminUserAccount(
     staffAccount: Staff,
     username: String,
-    localAdminUserGroup: String
+    localAdminUserGroup: String,
   ): UserPersonDetail {
-
     val userPersonDetail = setupUserPersonDetailForAdmins(username, staffAccount)
 
     val userGroup = caseloadRepository.findById(localAdminUserGroup)
@@ -657,13 +655,13 @@ class UserService(
 
   private fun setupUserPersonDetailForAdmins(
     username: String,
-    staffAccount: Staff
+    staffAccount: Staff,
   ): UserPersonDetail {
     val userPersonDetail = UserPersonDetail(
       username = username.uppercase(),
       staff = staffAccount,
       type = getUsageType(true),
-      accountDetail = null
+      accountDetail = null,
     )
     caseloadRepository.findById(DPS_CASELOAD)
       .ifPresent {
@@ -679,7 +677,7 @@ class UserService(
 
   private fun createSchemaUser(
     username: String,
-    profile: AccountProfile
+    profile: AccountProfile,
   ) {
     userPersonDetailRepository.createUser(username, generatePassword(), profile.name)
     userPersonDetailRepository.expirePassword(username)
@@ -703,9 +701,9 @@ class UserService(
                   "username" to user.username,
                   "role-code" to roleCode,
                   "caseload" to DPS_CASELOAD,
-                  "admin" to authenticationFacade.currentUsername
+                  "admin" to authenticationFacade.currentUsername,
                 ),
-                null
+                null,
               )
             }
         }
@@ -726,7 +724,7 @@ private fun mapSortOrderProperties(sort: Sort, sortMapper: (sortProperty: String
         .by(sortMapper(order.property))
         .with(order.direction)
     }
-    .collect(Collectors.toList())
+    .collect(Collectors.toList()),
 )
 
 class UserNotFoundException(message: String?) :

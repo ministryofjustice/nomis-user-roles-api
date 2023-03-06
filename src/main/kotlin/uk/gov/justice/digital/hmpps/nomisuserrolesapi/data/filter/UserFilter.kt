@@ -11,5 +11,5 @@ data class UserFilter(
   val roleCodes: List<String> = listOf(),
   val nomisRoleCode: String? = null,
   var inclusiveRoles: Boolean? = null,
-  val showOnlyLSAs: Boolean? = false
+  val showOnlyLSAs: Boolean? = false,
 )

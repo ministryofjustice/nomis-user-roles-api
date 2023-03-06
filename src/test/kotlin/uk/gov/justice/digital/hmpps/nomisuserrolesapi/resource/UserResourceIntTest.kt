@@ -807,8 +807,8 @@ class UserResourceIntTest : IntegrationTestBase() {
           .headers(
             setAuthorisation(
               roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN"),
-              user = "jane.lsa.wwi"
-            )
+              user = "jane.lsa.wwi",
+            ),
           )
           .exchange()
           .expectStatus().isOk
@@ -854,7 +854,7 @@ class UserResourceIntTest : IntegrationTestBase() {
                               },
                                   "dpsRoleCount": 0
                             }]
-                            """
+                            """,
           )
       }
 
@@ -1192,9 +1192,9 @@ class UserResourceIntTest : IntegrationTestBase() {
               firstName = "Test",
               lastName = "User",
               defaultCaseloadId = "BXI",
-              email = "test@test.com"
-            )
-          )
+              email = "test@test.com",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isCreated
@@ -1297,7 +1297,7 @@ class UserResourceIntTest : IntegrationTestBase() {
             "RIZ.MARSHALL",
             "TOM.MARSHALL",
             "TIM.MARSHALL",
-            "TIM.SMITH"
+            "TIM.SMITH",
           )
         }
     }
@@ -1340,7 +1340,7 @@ class UserResourceIntTest : IntegrationTestBase() {
         .jsonPath("$.content").value<JSONArray> {
           assertThat(it.map { m -> (m as Map<*, *>)["username"] }).containsExactlyInAnyOrder(
             "TIM.MARSHALL",
-            "TIM.SMITH"
+            "TIM.SMITH",
           )
         }
     }
@@ -1364,7 +1364,7 @@ class UserResourceIntTest : IntegrationTestBase() {
             "TIM.MARSHALL",
             "TOM.MARSHALL",
             "BOBI.FREEMAN",
-            "TIM.SMITH"
+            "TIM.SMITH",
           )
           assertThat(it.map { m -> (m as Map<*, *>)["username"] }).doesNotContain("BOB.FREEMAN")
         }
@@ -1390,7 +1390,7 @@ class UserResourceIntTest : IntegrationTestBase() {
         .jsonPath("$.totalElements").isEqualTo(1)
         .jsonPath("$.content").value<JSONArray> {
           assertThat(it.map { m -> (m as Map<*, *>)["username"] }).containsExactlyInAnyOrder(
-            "BOBI.FREEMAN"
+            "BOBI.FREEMAN",
           )
           assertThat(it.map { m -> (m as Map<*, *>)["username"] }).doesNotContain("BOB.FREEMAN")
         }
@@ -1414,7 +1414,7 @@ class UserResourceIntTest : IntegrationTestBase() {
         .jsonPath("$.totalElements").isEqualTo(1)
         .jsonPath("$.content").value<JSONArray> {
           assertThat(it.map { m -> (m as Map<*, *>)["username"] }).containsExactlyInAnyOrder(
-            "BOBI.FREEMAN"
+            "BOBI.FREEMAN",
           )
           assertThat(it.map { m -> (m as Map<*, *>)["username"] }).doesNotContain("BOB.FREEMAN")
         }
@@ -1437,7 +1437,7 @@ class UserResourceIntTest : IntegrationTestBase() {
             "TOM.MARSHALL",
             "TIM.MARSHALL",
             "BOBI.FREEMAN",
-            "TIM.SMITH"
+            "TIM.SMITH",
           )
         }
     }
@@ -1457,7 +1457,7 @@ class UserResourceIntTest : IntegrationTestBase() {
         .jsonPath("$").value<JSONArray> {
           assertThat(it.map { m -> (m as Map<*, *>)["username"] }).containsExactlyInAnyOrder(
             "TIM.MARSHALL",
-            "TIM.SMITH"
+            "TIM.SMITH",
           )
         }
     }

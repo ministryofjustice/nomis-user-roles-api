@@ -24,9 +24,9 @@ fun UserPersonDetail.toUserCaseloadDetail(removeDpsCaseload: Boolean = false): U
     .map { uc ->
       PrisonCaseload(
         id = uc.id.caseloadId,
-        name = uc.caseload.name.capitalizeLeavingAbbreviations()
+        name = uc.caseload.name.capitalizeLeavingAbbreviations(),
       )
-    }
+    },
 )
 
 val userSummaryToEntityPropertyMap = mapOf(
@@ -42,7 +42,7 @@ fun Role.toRoleDetail(): RoleDetail = RoleDetail(
   sequence = this.sequence,
   adminRoleOnly = this.roleFunction == UsageType.ADMIN,
   type = this.type,
-  parentRole = this.parent?.toRoleDetail()
+  parentRole = this.parent?.toRoleDetail(),
 )
 
 fun Staff.toStaffDetail(): StaffDetail = StaffDetail(this)
@@ -65,17 +65,17 @@ fun UserPersonDetail.toUserRoleDetail(includeNomisRoles: Boolean = false): UserR
           caseload = uc.caseload.toPrisonCaseload(),
           roles = uc.roles.map {
             it.role.toRoleDetail()
-          }
+          },
         )
       }
   } else {
     null
-  }
+  },
 )
 
 fun Caseload.toPrisonCaseload(): PrisonCaseload = PrisonCaseload(
   id = this.id,
-  name = this.name.capitalizeLeavingAbbreviations()
+  name = this.name.capitalizeLeavingAbbreviations(),
 )
 
 internal fun mapUserSummarySortProperties(sort: String): String =
@@ -186,7 +186,7 @@ object AbbreviationsProcessor {
     "VP",
     "VTC",
     "WFC",
-    "YOI"
+    "YOI",
   ).joinToString("|")
 
   private val pattern =

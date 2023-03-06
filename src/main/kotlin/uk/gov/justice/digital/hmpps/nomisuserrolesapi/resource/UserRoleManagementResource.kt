@@ -29,7 +29,7 @@ import javax.validation.constraints.Size
 @Validated
 @RequestMapping("/users", produces = [MediaType.APPLICATION_JSON_VALUE])
 class UserRoleManagementResource(
-  private val userService: UserService
+  private val userService: UserService,
 ) {
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
@@ -42,7 +42,7 @@ class UserRoleManagementResource(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "User role list"
+        description = "User role list",
       ),
       ApiResponse(
         responseCode = "400",
@@ -50,9 +50,9 @@ class UserRoleManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "401",
@@ -60,9 +60,9 @@ class UserRoleManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "403",
@@ -70,17 +70,29 @@ class UserRoleManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
-      )
-    ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
   )
   fun getUserRoles(
     @Schema(description = "Username", example = "TEST_USER1", required = true)
-    @PathVariable username: String,
-    @Schema(name = "include-nomis-roles", description = "Include NOMIS roles", example = "false", required = false, defaultValue = "false")
-    @RequestParam(name = "include-nomis-roles", required = false, defaultValue = "false") includeNomisRoles: Boolean = false,
+    @PathVariable
+    username: String,
+    @Schema(
+      name = "include-nomis-roles",
+      description = "Include NOMIS roles",
+      example = "false",
+      required = false,
+      defaultValue = "false",
+    )
+    @RequestParam(
+      name = "include-nomis-roles",
+      required = false,
+      defaultValue = "false",
+    )
+    includeNomisRoles: Boolean = false,
   ): UserRoleDetail = userService.getUserRoles(username, includeNomisRoles)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
@@ -93,7 +105,7 @@ class UserRoleManagementResource(
     responses = [
       ApiResponse(
         responseCode = "201",
-        description = "User information with role details"
+        description = "User information with role details",
       ),
       ApiResponse(
         responseCode = "400",
@@ -101,9 +113,9 @@ class UserRoleManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "401",
@@ -111,9 +123,9 @@ class UserRoleManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "403",
@@ -121,23 +133,33 @@ class UserRoleManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
-      )
-    ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
   )
   fun addRole(
     @Schema(
       description = "Username of the account to add role",
       example = "TEST_USER2",
-      required = true
+      required = true,
     )
-    @PathVariable @Size(max = 30, min = 1, message = "Username must be between 1 and 30") username: String,
+    @PathVariable
+    @Size(max = 30, min = 1, message = "Username must be between 1 and 30")
+    username: String,
     @Schema(description = "Role Code", example = "GLOBAL_SEARCH", required = true)
-    @PathVariable @Size(max = 30, min = 1, message = "Role code must be between 1 and 30") roleCode: String,
+    @PathVariable
+    @Size(max = 30, min = 1, message = "Role code must be between 1 and 30")
+    roleCode: String,
     @Schema(description = "Caseload Id", example = "NWEB", required = false, defaultValue = "NWEB")
-    @RequestParam(required = false, defaultValue = "NWEB") @Size(max = 6, min = 3, message = "Caseload must be between 3-6 characters") caseloadId: String = DPS_CASELOAD,
+    @RequestParam(required = false, defaultValue = "NWEB")
+    @Size(
+      max = 6,
+      min = 3,
+      message = "Caseload must be between 3-6 characters",
+    )
+    caseloadId: String = DPS_CASELOAD,
   ): UserRoleDetail = userService.addRoleToUser(username, roleCode, caseloadId)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
@@ -150,7 +172,7 @@ class UserRoleManagementResource(
     responses = [
       ApiResponse(
         responseCode = "201",
-        description = "User information with role details"
+        description = "User information with role details",
       ),
       ApiResponse(
         responseCode = "400",
@@ -158,9 +180,9 @@ class UserRoleManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "401",
@@ -168,9 +190,9 @@ class UserRoleManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "403",
@@ -178,23 +200,33 @@ class UserRoleManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
-      )
-    ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
   )
   fun addRoles(
     @Schema(
       description = "Username of the account to add roles",
       example = "TEST_USER2",
-      required = true
+      required = true,
     )
-    @PathVariable @Size(max = 30, min = 1, message = "Username must be between 1 and 30 characters") username: String,
+    @PathVariable
+    @Size(max = 30, min = 1, message = "Username must be between 1 and 30 characters")
+    username: String,
     @Schema(description = "Caseload Id", example = "NWEB", required = false, defaultValue = "NWEB")
-    @RequestParam(required = false, defaultValue = "NWEB") @Size(max = 6, min = 3, message = "Caseload must be between 3-6 characters") caseloadId: String = DPS_CASELOAD,
+    @RequestParam(required = false, defaultValue = "NWEB")
+    @Size(
+      max = 6,
+      min = 3,
+      message = "Caseload must be between 3-6 characters",
+    )
+    caseloadId: String = DPS_CASELOAD,
     @Schema(description = "Role Codes", required = true)
-    @RequestBody @Valid roleCodes: List<String>,
+    @RequestBody
+    @Valid
+    roleCodes: List<String>,
   ): UserRoleDetail = userService.addRolesToUser(username, roleCodes, caseloadId)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
@@ -206,7 +238,7 @@ class UserRoleManagementResource(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "User information with role details"
+        description = "User information with role details",
       ),
       ApiResponse(
         responseCode = "400",
@@ -214,9 +246,9 @@ class UserRoleManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "401",
@@ -224,9 +256,9 @@ class UserRoleManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "403",
@@ -234,23 +266,33 @@ class UserRoleManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
-      )
-    ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
   )
   fun removeRole(
     @Schema(
       description = "Username of the account to remove role",
       example = "TEST_USER2",
-      required = true
+      required = true,
     )
-    @PathVariable @Size(max = 30, min = 1, message = "Username must be between 1 and 30") username: String,
+    @PathVariable
+    @Size(max = 30, min = 1, message = "Username must be between 1 and 30")
+    username: String,
     @Schema(description = "Role Code", example = "GLOBAL_SEARCH", required = true)
-    @PathVariable @Size(max = 30, min = 1, message = "Role code must be between 1 and 30") roleCode: String,
+    @PathVariable
+    @Size(max = 30, min = 1, message = "Role code must be between 1 and 30")
+    roleCode: String,
     @Schema(description = "Caseload Id", example = "NWEB", required = false, defaultValue = "NWEB")
-    @RequestParam(required = false, defaultValue = "NWEB") @Size(max = 6, min = 3, message = "Caseload must be between 3-6 characters") caseloadId: String = DPS_CASELOAD,
+    @RequestParam(required = false, defaultValue = "NWEB")
+    @Size(
+      max = 6,
+      min = 3,
+      message = "Caseload must be between 3-6 characters",
+    )
+    caseloadId: String = DPS_CASELOAD,
   ): UserRoleDetail = userService.removeRoleFromUser(username, roleCode, caseloadId)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
@@ -262,7 +304,7 @@ class UserRoleManagementResource(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "User information with role details"
+        description = "User information with role details",
       ),
       ApiResponse(
         responseCode = "400",
@@ -270,9 +312,9 @@ class UserRoleManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "401",
@@ -280,9 +322,9 @@ class UserRoleManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "403",
@@ -290,17 +332,20 @@ class UserRoleManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
-      )
-    ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
   )
   fun bulkRemoveRoles(
     @Schema(description = "Role Code", example = "GLOBAL_SEARCH", required = true)
-    @PathVariable @Size(max = 30, min = 1, message = "Role code must be between 1 and 30") roleCode: String,
+    @PathVariable
+    @Size(max = 30, min = 1, message = "Role code must be between 1 and 30")
+    roleCode: String,
     @Schema(description = "Users", example = "JSMITH_GEN,JMOHMAND_GEN", required = true)
-    @RequestBody users: String,
+    @RequestBody
+    users: String,
   ): List<UserRoleDetail> = userService.removeRoleFromUsers(users.asList(), roleCode)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
@@ -312,7 +357,7 @@ class UserRoleManagementResource(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "User information with role details"
+        description = "User information with role details",
       ),
       ApiResponse(
         responseCode = "400",
@@ -320,9 +365,9 @@ class UserRoleManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "401",
@@ -330,9 +375,9 @@ class UserRoleManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "403",
@@ -340,17 +385,20 @@ class UserRoleManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
-      )
-    ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
   )
   fun bulkAddRoles(
     @Schema(description = "Role Code", example = "GLOBAL_SEARCH", required = true)
-    @PathVariable @Size(max = 30, min = 1, message = "Role code must be between 1 and 30") roleCode: String,
+    @PathVariable
+    @Size(max = 30, min = 1, message = "Role code must be between 1 and 30")
+    roleCode: String,
     @Schema(description = "Users", example = "JSMITH_GEN,JMOHMAND_GEN", required = true)
-    @RequestBody users: String,
+    @RequestBody
+    users: String,
   ): List<UserRoleDetail> = userService.addRoleToUsers(users.asList(), roleCode)
 }
 

@@ -41,7 +41,6 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `access forbidden when no role`() {
-
       webTestClient.get().uri("/users/CASELOAD_USER1/caseloads")
         .headers(setAuthorisation(roles = listOf()))
         .exchange()
@@ -50,7 +49,6 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `get user forbidden with wrong role`() {
-
       webTestClient.get().uri("/users/CASELOAD_USER1/caseloads")
         .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
         .exchange()
@@ -59,7 +57,6 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `get user with caseloads not found`() {
-
       webTestClient.get().uri("/users/dummy/caseloads")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -68,7 +65,6 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `get user with caseloads`() {
-
       webTestClient.get().uri("/users/CASELOAD_USER1/caseloads")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -109,7 +105,6 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `access forbidden when no role`() {
-
       webTestClient.post().uri("/users/CASELOAD_USER1/caseloads/LEI")
         .headers(setAuthorisation(roles = listOf()))
         .exchange()
@@ -118,7 +113,6 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `add caseload to user forbidden with wrong role`() {
-
       webTestClient.post().uri("/users/CASELOAD_USER1/caseloads/LEI")
         .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
         .exchange()
@@ -127,7 +121,6 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `add caseload not found`() {
-
       webTestClient.post().uri("/users/dummy/caseloads/LEI")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -136,7 +129,6 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `add caseload to user`() {
-
       webTestClient.get().uri("/users/CASELOAD_USER1/caseloads")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -254,7 +246,6 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `add caseloads to user forbidden with wrong role`() {
-
       webTestClient.post().uri("/users/CASELOAD_USER1/caseloads")
         .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
         .body(BodyInserters.fromValue(listOf("MDI", "LEI")))
@@ -264,7 +255,6 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `add caseloads user not found`() {
-
       webTestClient.post().uri("/users/dummy/caseloads")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .body(BodyInserters.fromValue(listOf("MDI", "LEI")))
@@ -274,7 +264,6 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `add caseloads to user`() {
-
       webTestClient.get().uri("/users/CASELOAD_USER1/caseloads")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -347,7 +336,6 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `access forbidden when no role`() {
-
       webTestClient.put().uri("/users/CASELOAD_USER1/default-caseload/WWI")
         .headers(setAuthorisation(roles = listOf()))
         .exchange()
@@ -356,7 +344,6 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `set caseload default forbidden with wrong role`() {
-
       webTestClient.put().uri("/users/CASELOAD_USER1/default-caseload/WWI")
         .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
         .exchange()
@@ -365,7 +352,6 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `set caseload default with user not found`() {
-
       webTestClient.put().uri("/users/dummy/default-caseload/WWI")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -374,7 +360,6 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `set user caseload`() {
-
       webTestClient.put().uri("/users/CASELOAD_USER1/default-caseload/WWI")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -394,13 +379,13 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `set user caseload not in caseload list`() {
-
       webTestClient.put().uri("/users/CASELOAD_USER1/default-caseload/MDI")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
         .expectStatus().is4xxClientError
         .expectBody()
-        .jsonPath("userMessage").isEqualTo("Caseload not found: Default caseload cannot be set as user does not have MDI.")
+        .jsonPath("userMessage")
+        .isEqualTo("Caseload not found: Default caseload cannot be set as user does not have MDI.")
     }
   }
 
@@ -433,7 +418,6 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `access forbidden when no role`() {
-
       webTestClient.delete().uri("/users/CASELOAD_USER1/caseloads/WWI")
         .headers(setAuthorisation(roles = listOf()))
         .exchange()
@@ -442,7 +426,6 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `delete caseload forbidden with wrong role`() {
-
       webTestClient.delete().uri("/users/CASELOAD_USER1/caseloads/WWI")
         .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
         .exchange()
@@ -451,7 +434,6 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `delete user caseload with username not found`() {
-
       webTestClient.delete().uri("/user/dummy/caseloads/WWI")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()

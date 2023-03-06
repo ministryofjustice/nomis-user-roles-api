@@ -25,7 +25,10 @@ data class UserSummaryWithEmail(
   val activeCaseload: PrisonCaseload?,
   @Schema(description = "The count of DPS roles allocated to this staff member", example = "12")
   val dpsRoleCount: Int,
-  @Schema(description = "Primary email address of user - normally justice.gov.uk one if available otherwise first one in list", example = "joe.bloggs@justice.gov.uk")
+  @Schema(
+    description = "Primary email address of user - normally justice.gov.uk one if available otherwise first one in list",
+    example = "joe.bloggs@justice.gov.uk",
+  )
   val email: String?,
   @Schema(description = "Staff status", example = "ACTIVE")
   val staffStatus: String?,

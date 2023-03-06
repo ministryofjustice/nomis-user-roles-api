@@ -55,10 +55,12 @@ data class Caseload(
 
   companion object {
     const val GENERAL_CASELOAD = "GENERAL"
+
     @Suppress("unused")
     const val ADMIN_CASELOAD = "ADMIN"
 
     const val INSTITUTION_CASELOAD = "INST"
+
     @Suppress("unused")
     const val APPLICATION_CASELOAD = "APP"
   }

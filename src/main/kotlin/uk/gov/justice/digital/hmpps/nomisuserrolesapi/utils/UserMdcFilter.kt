@@ -1,4 +1,5 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.utils
+
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.annotation.Order

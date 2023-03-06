@@ -52,9 +52,9 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
               firstName = "Locking",
               lastName = "User",
               email = "test@test.com",
-              defaultCaseloadId = "PVI"
-            )
-          )
+              defaultCaseloadId = "PVI",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isCreated
@@ -244,7 +244,6 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     internal fun `must have role ROLE_MANAGE_NOMIS_USER_ACCOUNT`() {
-
       webTestClient.put().uri("/users/JMULLARD_GEN/change-password")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .body(BodyInserters.fromValue("hdhshshhhabad73hde"))
@@ -271,10 +270,10 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             SQLException(
               "Password has been used before",
               "SQLSTATE",
-              20087
-            )
-          )
-        )
+              20087,
+            ),
+          ),
+        ),
       ).whenever(userPersonDetailRepository).changePassword(any(), any())
 
       webTestClient.put().uri("/users/JMULLARD_GEN/change-password")
@@ -296,10 +295,10 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             SQLException(
               "Password can not contain password",
               "SQLSTATE",
-              20001
-            )
-          )
-        )
+              20001,
+            ),
+          ),
+        ),
       ).whenever(userPersonDetailRepository).changePassword(any(), any())
 
       webTestClient.put().uri("/users/JMULLARD_GEN/change-password")
@@ -316,7 +315,7 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
     @Test
     internal fun `any unexpected NOMIS error results in a 500 error`() {
       doThrow(JpaSystemException(RuntimeException(SQLException("Bind error", "SQLSTATE", -803)))).whenever(
-        userPersonDetailRepository
+        userPersonDetailRepository,
       ).changePassword(any(), any())
 
       webTestClient.put().uri("/users/JMULLARD_GEN/change-password")
@@ -356,8 +355,8 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             NameDetail(
               firstName = "NewFirstName",
               lastName = "NewLastName",
-            )
-          )
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isNotFound
@@ -372,8 +371,8 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             NameDetail(
               firstName = "NewFirstName",
               lastName = "NewLastName",
-            )
-          )
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isForbidden
@@ -388,8 +387,8 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             NameDetail(
               firstName = "87234gjhsdbfsdfh23r23f23g23",
               lastName = "lastName",
-            )
-          )
+            ),
+          ),
         )
         .exchange()
         .expectStatus().is4xxClientError
@@ -407,8 +406,8 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             NameDetail(
               firstName = "firstname",
               lastName = "sdifhosidfhjoisdjfoiwejfoiwjefwefwefrdrd",
-            )
-          )
+            ),
+          ),
         )
         .exchange()
         .expectStatus().is4xxClientError
@@ -426,8 +425,8 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             NameDetail(
               firstName = "Newfirstname",
               lastName = "O'NeilLastName",
-            )
-          )
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isOk
@@ -445,8 +444,8 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             NameDetail(
               firstName = "Sarah-Louise",
               lastName = "O'NeilLastName",
-            )
-          )
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isOk
@@ -464,8 +463,8 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             NameDetail(
               firstName = "April",
               lastName = "O’shea",
-            )
-          )
+            ),
+          ),
         )
         .exchange()
         .expectStatus().is4xxClientError
@@ -476,7 +475,6 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `can change name of a user that does exist`() {
-
       webTestClient.get().uri("/users/TEST_DATA_USER1")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -492,8 +490,8 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             NameDetail(
               firstName = "NewFirstName",
               lastName = "NewLastName",
-            )
-          )
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isOk
@@ -557,9 +555,9 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         Optional.of(
           UserPassword(
             "MARCOROSSI",
-            "S:C59371608F601E454682E0B5293F2752A1DC31C4BDEF9D50802212AD981E"
-          )
-        )
+            "S:C59371608F601E454682E0B5293F2752A1DC31C4BDEF9D50802212AD981E",
+          ),
+        ),
       )
       webTestClient.post().uri("/users/MARCOROSSI/authenticate")
         .bodyValue(mapOf("password" to "password123456"))

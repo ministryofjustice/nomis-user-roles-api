@@ -14,9 +14,19 @@ data class StaffDetail(
   @Schema(description = "First name of the user", example = "John", required = true) val firstName: String,
   @Schema(description = "Last name of the user", example = "Smith", required = true) val lastName: String,
   @Schema(description = "Status of staff account", example = "Smith", required = true) val status: String,
-  @Schema(description = "Email addresses of staff", example = "test@test.com", required = false) val primaryEmail: String?,
-  @Schema(description = "General user account for this staff member", required = false) val generalAccount: UserCaseloadDetail?,
-  @Schema(description = "Admin user account for this staff member", required = false) val adminAccount: UserCaseloadDetail?
+  @Schema(
+    description = "Email addresses of staff",
+    example = "test@test.com",
+    required = false,
+  ) val primaryEmail: String?,
+  @Schema(
+    description = "General user account for this staff member",
+    required = false,
+  ) val generalAccount: UserCaseloadDetail?,
+  @Schema(
+    description = "Admin user account for this staff member",
+    required = false,
+  ) val adminAccount: UserCaseloadDetail?,
 ) {
   constructor(staff: Staff) :
     this(
@@ -26,7 +36,7 @@ data class StaffDetail(
       status = staff.status,
       primaryEmail = staff.primaryEmail()?.email,
       generalAccount = staff.generalAccount()?.toUserCaseloadDetail(),
-      adminAccount = staff.adminAccount()?.toUserCaseloadDetail()
+      adminAccount = staff.adminAccount()?.toUserCaseloadDetail(),
     )
 }
 
@@ -35,7 +45,18 @@ data class StaffDetail(
 data class UserCaseloadDetail(
   @Schema(description = "Username", example = "TESTUSER1", required = true) val username: String,
   @Schema(description = "Indicates that the user is active", example = "true", required = true) val active: Boolean,
-  @Schema(description = "Type of user account", example = "GENERAL", required = true) val accountType: UsageType = UsageType.GENERAL,
-  @Schema(description = "Active Caseload of the user", example = "BXI", required = false) val activeCaseload: PrisonCaseload?,
-  @Schema(description = "Caseloads available for this user", required = false) val caseloads: List<PrisonCaseload> = listOf()
+  @Schema(
+    description = "Type of user account",
+    example = "GENERAL",
+    required = true,
+  ) val accountType: UsageType = UsageType.GENERAL,
+  @Schema(
+    description = "Active Caseload of the user",
+    example = "BXI",
+    required = false,
+  ) val activeCaseload: PrisonCaseload?,
+  @Schema(
+    description = "Caseloads available for this user",
+    required = false,
+  ) val caseloads: List<PrisonCaseload> = listOf(),
 )

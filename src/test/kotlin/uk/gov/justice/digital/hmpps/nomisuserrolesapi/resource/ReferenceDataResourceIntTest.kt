@@ -20,7 +20,6 @@ class ReferenceDataResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `access allowed even when no roles specified`() {
-
       webTestClient.get().uri("/reference-data/caseloads")
         .headers(setAuthorisation(roles = listOf()))
         .exchange()
@@ -29,7 +28,6 @@ class ReferenceDataResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `access allowed for any role specified`() {
-
       webTestClient.get().uri("/reference-data/caseloads")
         .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
         .exchange()
@@ -38,7 +36,6 @@ class ReferenceDataResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `will return all active general caseloads ordered by name`() {
-
       webTestClient.get().uri("/reference-data/caseloads")
         .headers(setAuthorisation())
         .exchange()

@@ -23,9 +23,9 @@ class ReferenceDataResource(private val referenceDataService: ReferenceDataServi
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
-    ]
+    ],
   )
   fun getCaseload(): List<PrisonCaseload> = referenceDataService.getActiveGeneralCaseloads()
 }

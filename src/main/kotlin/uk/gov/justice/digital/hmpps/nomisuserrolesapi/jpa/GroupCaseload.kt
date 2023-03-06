@@ -19,7 +19,7 @@ data class GroupCaseloadPk(
   @Column(name = "CASELOAD_ID", nullable = false)
   var caseload: String,
   @Column(name = "LOCAL_AUTHORITY_CODE", nullable = false)
-  var userGroupCode: String
+  var userGroupCode: String,
 ) : Serializable
 
 @Entity

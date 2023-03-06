@@ -18,14 +18,15 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
       listOf(
         Server().url("https://nomis-user.aks-live-1.studio-hosting.service.justice.gov.uk").description("Prod"),
         Server().url("https://nomis-user-pp.aks-live-1.studio-hosting.service.justice.gov.uk").description("PreProd"),
-        Server().url("https://nomis-user-dev.aks-dev-1.studio-hosting.service.justice.gov.uk").description("Development"),
+        Server().url("https://nomis-user-dev.aks-dev-1.studio-hosting.service.justice.gov.uk")
+          .description("Development"),
         Server().url("http://localhost:8080").description("Local"),
-      )
+      ),
     )
     .info(
       Info().title("NOMIS User and Role Management API")
         .version(version)
         .description("Register providing NOMIS User and role information")
-        .contact(Contact().name("HMPPS Digital Studio").email("feedback@digital.justice.gov.uk"))
+        .contact(Contact().name("HMPPS Digital Studio").email("feedback@digital.justice.gov.uk")),
     )
 }

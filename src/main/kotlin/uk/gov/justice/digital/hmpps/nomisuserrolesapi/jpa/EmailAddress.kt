@@ -32,7 +32,7 @@ data class EmailAddress(
 
   @ManyToOne(cascade = [CascadeType.ALL], optional = false)
   @JoinColumn(name = "OWNER_ID", nullable = false)
-  val staff: Staff
+  val staff: Staff,
 
 ) {
   override fun equals(other: Any?): Boolean {

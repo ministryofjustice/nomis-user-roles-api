@@ -45,7 +45,6 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `access forbidden when no role`() {
-
       webTestClient.get().uri("/users/ROLE_USER1/roles")
         .headers(setAuthorisation(roles = listOf()))
         .exchange()
@@ -54,7 +53,6 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `get user forbidden with wrong role`() {
-
       webTestClient.get().uri("/users/ROLE_USER1/roles")
         .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
         .exchange()
@@ -63,7 +61,6 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `get user with roles not found`() {
-
       webTestClient.get().uri("/users/dummy/roles")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -72,7 +69,6 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `get user with DPS roles`() {
-
       webTestClient.get().uri("/users/ROLE_USER1/roles")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -85,7 +81,6 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `get user with NOMIS roles`() {
-
       webTestClient.get().uri("/users/ROLE_USER1/roles?include-nomis-roles=true")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -128,7 +123,6 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `access forbidden when no role`() {
-
       webTestClient.post().uri("/users/ROLE_USER1/roles/GLOBAL_SEARCH")
         .headers(setAuthorisation(roles = listOf()))
         .exchange()
@@ -137,7 +131,6 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `add role to user forbidden with wrong role`() {
-
       webTestClient.post().uri("/users/ROLE_USER1/roles/GLOBAL_SEARCH")
         .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
         .exchange()
@@ -146,7 +139,6 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `add roles user not found`() {
-
       webTestClient.post().uri("/users/dummy/roles/GLOBAL_SEARCH")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -155,7 +147,6 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `add role to user`() {
-
       webTestClient.get().uri("/users/ROLE_USER1/roles")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -214,7 +205,8 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().is4xxClientError
         .expectBody()
-        .jsonPath("userMessage").isEqualTo("Role assignment invalid: Roles of type INST cannot be assigned to caseloads of type APP")
+        .jsonPath("userMessage")
+        .isEqualTo("Role assignment invalid: Roles of type INST cannot be assigned to caseloads of type APP")
     }
 
     @Test
@@ -248,7 +240,8 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().is4xxClientError
         .expectBody()
-        .jsonPath("userMessage").isEqualTo("Role assignment invalid: Roles of type APP cannot be assigned to caseloads of type INST")
+        .jsonPath("userMessage")
+        .isEqualTo("Role assignment invalid: Roles of type APP cannot be assigned to caseloads of type INST")
     }
 
     @Test
@@ -291,7 +284,6 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `access forbidden when no role`() {
-
       webTestClient.post().uri("/users/ROLE_USER1/roles")
         .body(BodyInserters.fromValue(listOf("GLOBAL_SEARCH", "POM")))
         .headers(setAuthorisation(roles = listOf()))
@@ -301,7 +293,6 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `add role to user forbidden with wrong role`() {
-
       webTestClient.post().uri("/users/ROLE_USER1/roles")
         .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
         .body(BodyInserters.fromValue(listOf("GLOBAL_SEARCH", "POM")))
@@ -311,7 +302,6 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `add roles user not found`() {
-
       webTestClient.post().uri("/users/dummy/roles")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .body(BodyInserters.fromValue(listOf("GLOBAL_SEARCH", "POM")))
@@ -321,7 +311,6 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `add roles to user`() {
-
       webTestClient.post().uri("/users/ROLE_USER1/roles")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .body(BodyInserters.fromValue(listOf("GLOBAL_SEARCH", "POM")))
@@ -353,7 +342,8 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().is4xxClientError
         .expectBody()
-        .jsonPath("userMessage").isEqualTo("Role already exists: Role VIEW_PRISONER_DATA is already assigned to this user")
+        .jsonPath("userMessage")
+        .isEqualTo("Role already exists: Role VIEW_PRISONER_DATA is already assigned to this user")
     }
 
     @Test
@@ -364,12 +354,12 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().is4xxClientError
         .expectBody()
-        .jsonPath("userMessage").isEqualTo("Role assignment invalid: Roles of type INST cannot be assigned to caseloads of type APP")
+        .jsonPath("userMessage")
+        .isEqualTo("Role assignment invalid: Roles of type INST cannot be assigned to caseloads of type APP")
     }
 
     @Test
     fun `add NOMIS roles to user`() {
-
       webTestClient.post().uri("/users/ROLE_USER1/roles?caseloadId=BXI")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .body(BodyInserters.fromValue(listOf("300")))
@@ -393,7 +383,8 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().is4xxClientError
         .expectBody()
-        .jsonPath("userMessage").isEqualTo("Role assignment invalid: Roles of type APP cannot be assigned to caseloads of type INST")
+        .jsonPath("userMessage")
+        .isEqualTo("Role assignment invalid: Roles of type APP cannot be assigned to caseloads of type INST")
     }
 
     @Test
@@ -437,7 +428,6 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `access forbidden when no role`() {
-
       webTestClient.delete().uri("/users/ROLE_USER1/roles/APPROVE_CATEGORISATION")
         .headers(setAuthorisation(roles = listOf()))
         .exchange()
@@ -446,7 +436,6 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `delete role forbidden with wrong role`() {
-
       webTestClient.delete().uri("/users/ROLE_USER1/roles/APPROVE_CATEGORISATION")
         .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
         .exchange()
@@ -455,7 +444,6 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `delete user role with username not found`() {
-
       webTestClient.delete().uri("/user/dummy/roles/APPROVE_CATEGORISATION")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -486,6 +474,7 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .jsonPath("userMessage").isEqualTo("Role not found: Role POM is not assigned to this user")
     }
   }
+
   @DisplayName("POST /users/remove-roles/{roleCode}")
   @Nested
   inner class BulkDeleteRoleByUsernames {
@@ -590,6 +579,7 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .jsonPath(matchByUserNameAndRole, "ROLE_USER3", "CREATE_CATEGORISATION").exists()
         .jsonPath(matchByUserNameAndRole, "ROLE_USER3", "APPROVE_CATEGORISATION").exists()
     }
+
     @Test
     fun `delete non-user role will return all users except the one not found`() {
       webTestClient.post().uri("/users/remove-roles/GLOBAL_SEARCH")
@@ -602,6 +592,7 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .jsonPath(matchByUserName, "ROLE_USER2").exists()
         .jsonPath(matchByUserName, "ROLE_USER4").doesNotExist()
     }
+
     @Test
     fun `can add quotes around the names that will be ignored`() {
       webTestClient.post().uri("/users/remove-roles/APPROVE_CATEGORISATION")
@@ -612,8 +603,8 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
           "ROLE_USER1",
           'ROLE_USER2',
           ROLE_USER3
-          """
-          )
+          """,
+          ),
         )
         .exchange()
         .expectStatus().isOk
@@ -623,6 +614,7 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .jsonPath(matchByUserName, "ROLE_USER3").exists()
     }
   }
+
   @DisplayName("POST /users/add-roles/{roleCode}")
   @Nested
   inner class BulkAddRoleByUsernames {
@@ -729,6 +721,7 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
           assertThat(it).containsExactlyInAnyOrder("CREATE_CATEGORISATION")
         }
     }
+
     @Test
     fun `add non-user role will return all users except the one not found`() {
       webTestClient.post().uri("/users/add-roles/GLOBAL_SEARCH")
@@ -741,6 +734,7 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .jsonPath(matchByUserName, "ROLE_USER2").exists()
         .jsonPath(matchByUserName, "ROLE_USER4").doesNotExist()
     }
+
     @Test
     fun `can add quotes around the names that will be ignored`() {
       webTestClient.post().uri("/users/add-roles/APPROVE_CATEGORISATION")
@@ -751,8 +745,8 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
           "ROLE_USER1",
           'ROLE_USER2',
           ROLE_USER3
-          """
-          )
+          """,
+          ),
         )
         .exchange()
         .expectStatus().isOk
