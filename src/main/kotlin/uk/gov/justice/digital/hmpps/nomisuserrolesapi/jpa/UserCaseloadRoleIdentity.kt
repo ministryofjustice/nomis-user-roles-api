@@ -1,8 +1,8 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
+import jakarta.persistence.Column
+import jakarta.persistence.Embeddable
 import java.io.Serializable
-import javax.persistence.Column
-import javax.persistence.Embeddable
 
 @Embeddable
 data class UserCaseloadRoleIdentity(

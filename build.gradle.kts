@@ -1,7 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.8.6-beta-2"
-  kotlin("plugin.spring") version "1.8.10"
-  kotlin("plugin.jpa") version "1.8.10"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.1.4-beta-3"
+  kotlin("plugin.spring") version "1.8.20"
+  kotlin("plugin.jpa") version "1.8.20"
   idea
 }
 
@@ -21,18 +21,16 @@ dependencies {
   implementation("commons-codec:commons-codec:1.15")
 
   implementation("org.flywaydb:flyway-core")
-  implementation("com.vladmihalcea:hibernate-types-52:2.21.1")
+  implementation("io.hypersistence:hypersistence-utils-hibernate-60:3.3.2")
 
   implementation("javax.transaction:javax.transaction-api:1.3")
   implementation("javax.xml.bind:jaxb-api:2.3.1")
 
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.0")
 
-  implementation("org.springdoc:springdoc-openapi-ui:1.7.0")
-  implementation("org.springdoc:springdoc-openapi-kotlin:1.7.0")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.7.0")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
 
-  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.0")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
 
   implementation("com.zaxxer:HikariCP:5.0.1")
@@ -42,10 +40,13 @@ dependencies {
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
-  testImplementation("io.jsonwebtoken:jjwt:0.9.1")
+  testImplementation("io.jsonwebtoken:jjwt-impl:0.11.5")
+  testImplementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-  testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
+  testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:2.35.0")
   testImplementation("org.mockito:mockito-inline:5.2.0")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.25.0")
+  testImplementation("javax.xml.bind:jaxb-api:2.3.1")
 }
 
 java {

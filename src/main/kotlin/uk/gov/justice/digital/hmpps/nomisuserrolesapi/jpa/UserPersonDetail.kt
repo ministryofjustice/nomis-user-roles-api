@@ -1,7 +1,23 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Embedded
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.NamedAttributeNode
+import jakarta.persistence.NamedEntityGraph
+import jakarta.persistence.NamedSubgraph
+import jakarta.persistence.OneToMany
+import jakarta.persistence.PrimaryKeyJoinColumn
+import jakarta.persistence.SecondaryTable
+import jakarta.persistence.Table
 import org.hibernate.Hibernate
-import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.Where
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.PrisonCaseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
@@ -10,29 +26,11 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.Abbreviati
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.CaseloadNotFoundException
 import java.time.LocalDate.now
 import java.util.function.Supplier
-import javax.persistence.CascadeType
-import javax.persistence.Column
-import javax.persistence.Embedded
-import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.FetchType
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
-import javax.persistence.NamedAttributeNode
-import javax.persistence.NamedEntityGraph
-import javax.persistence.NamedSubgraph
-import javax.persistence.OneToMany
-import javax.persistence.PrimaryKeyJoinColumn
-import javax.persistence.SecondaryTable
-import javax.persistence.Table
 
 @Suppress("DataClassEqualsAndHashCodeInspection")
 @Entity
 @Table(name = "STAFF_USER_ACCOUNTS")
 @SecondaryTable(name = "DBA_USERS", pkJoinColumns = [PrimaryKeyJoinColumn(name = "USERNAME")])
-@BatchSize(size = 100)
 @NamedEntityGraph(
   name = "user-person-detail-download-graph",
   attributeNodes = [
@@ -81,28 +79,22 @@ data class UserPersonDetail(
   @OneToMany(fetch = FetchType.LAZY)
   @JoinColumn(name = "USERNAME", updatable = false, insertable = false, nullable = false)
   @Where(clause = "CASELOAD_ID = '$DPS_CASELOAD'")
-  @BatchSize(size = 100)
   val dpsRoles: List<UserCaseloadRole> = listOf(),
 
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], mappedBy = "user", orphanRemoval = true)
-  @BatchSize(size = 100)
   val caseloads: MutableList<UserCaseload> = mutableListOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-  @BatchSize(size = 100)
   val activeAndInactiveMemberOfUserGroups: MutableList<UserGroupMember> = mutableListOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   @Where(clause = "ACTIVE_FLAG = 'Y'")
-  @BatchSize(size = 100)
   val memberOfUserGroups: List<UserGroupMember> = listOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-  @BatchSize(size = 100)
   val activeAndInactiveAdministratorOfUserGroups: MutableList<UserGroupAdministrator> = mutableListOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-  @BatchSize(size = 100)
   @Where(clause = "ACTIVE_FLAG = 'Y'")
   val administratorOfUserGroups: List<UserGroupAdministrator> = listOf(),
 
@@ -112,7 +104,6 @@ data class UserPersonDetail(
 
   @JoinColumn(name = "WORKING_CASELOAD_ID", nullable = true)
   @ManyToOne(fetch = FetchType.LAZY)
-  @BatchSize(size = 100)
   var activeCaseLoad: Caseload? = null,
 
   @Column(name = "ID_SOURCE")

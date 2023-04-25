@@ -23,8 +23,6 @@ interface UserPersonDetailRepository :
   @Query(
     value = "call oms_utils.create_user(:username, :password, :profile)",
     nativeQuery = true,
-    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
-    countQuery = "select 1",
   )
   fun createUser(username: String, password: String, profile: String = AccountProfile.TAG_GENERAL.name)
 
@@ -32,8 +30,6 @@ interface UserPersonDetailRepository :
   @Query(
     value = "call oms_utils.expire_password(:username)",
     nativeQuery = true,
-    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
-    countQuery = "select 1",
   )
   fun expirePassword(username: String)
 
@@ -41,8 +37,6 @@ interface UserPersonDetailRepository :
   @Query(
     value = "call oms_utils.drop_user(:username)",
     nativeQuery = true,
-    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
-    countQuery = "select 1",
   )
   fun dropUser(username: String)
 
@@ -50,8 +44,6 @@ interface UserPersonDetailRepository :
   @Query(
     value = "call oms_utils.change_user_password(:username, :password)",
     nativeQuery = true,
-    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
-    countQuery = "select 1",
   )
   fun changePassword(username: String?, password: String?)
 
@@ -59,8 +51,6 @@ interface UserPersonDetailRepository :
   @Query(
     value = "call oms_utils.unlock_user(:username)",
     nativeQuery = true,
-    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
-    countQuery = "select 1",
   )
   fun unlockUser(username: String?)
 
@@ -68,8 +58,6 @@ interface UserPersonDetailRepository :
   @Query(
     value = "call oms_utils.lock_user(:username)",
     nativeQuery = true,
-    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
-    countQuery = "select 1",
   )
   fun lockUser(username: String?)
 

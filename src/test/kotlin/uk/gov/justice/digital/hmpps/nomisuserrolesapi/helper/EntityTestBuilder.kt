@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper
+package uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper // ktlint-disable filename
 
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Role

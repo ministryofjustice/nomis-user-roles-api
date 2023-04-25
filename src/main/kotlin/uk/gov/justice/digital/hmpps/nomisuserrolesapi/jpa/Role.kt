@@ -1,22 +1,23 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Convert
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
+import jakarta.persistence.SequenceGenerator
+import jakarta.persistence.Table
 import org.hibernate.Hibernate
-import org.hibernate.annotations.Type
 import org.hibernate.annotations.Where
+import org.hibernate.type.YesNoConverter
 import java.io.Serializable
-import javax.persistence.CascadeType
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
-import javax.persistence.SequenceGenerator
-import javax.persistence.Table
 
 @Entity
 @Table(name = "OMS_ROLES")
@@ -49,7 +50,7 @@ data class Role(
   var roleFunction: UsageType = UsageType.GENERAL,
 
   @Column(name = "SYSTEM_DATA_FLAG", nullable = false)
-  @Type(type = "yes_no")
+  @Convert(converter = YesNoConverter::class)
   val systemData: Boolean = true,
 
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])

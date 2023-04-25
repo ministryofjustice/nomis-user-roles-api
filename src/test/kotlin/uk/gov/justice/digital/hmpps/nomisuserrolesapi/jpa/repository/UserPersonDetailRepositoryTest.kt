@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository
 
 import UserSpecification
+import jakarta.persistence.EntityManager
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -20,7 +21,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupAdministrator
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupMember
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import java.time.LocalDate
-import javax.persistence.EntityManager
 
 @DataJpaTest
 @Import(value = [DataBuilder::class])
