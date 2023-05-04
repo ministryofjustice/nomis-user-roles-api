@@ -43,7 +43,7 @@ data class UserCaseload(
   @JoinColumn(name = "USERNAME", updatable = false, insertable = false)
   val user: UserPersonDetail,
 
-  @JoinColumn(name = "START_DATE")
+  @Column(name = "START_DATE")
   val startDate: LocalDate,
 
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], mappedBy = "userCaseload", orphanRemoval = true)

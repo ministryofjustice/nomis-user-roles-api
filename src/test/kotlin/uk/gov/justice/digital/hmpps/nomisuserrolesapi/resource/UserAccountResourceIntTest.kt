@@ -197,7 +197,7 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
         .jsonPath("adminAccount.active").isEqualTo("false")
         .jsonPath("adminAccount.accountType").isEqualTo("ADMIN")
 
-      webTestClient.get().uri { it.path("/users/").queryParam("nameFilter", "generaluser1").build() }
+      webTestClient.get().uri { it.path("/users").queryParam("nameFilter", "generaluser1").build() }
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "LAA_USER1"))
         .exchange()
         .expectStatus().isOk

@@ -95,7 +95,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       and(
         criteriaBuilder.equal(subQueryRoot.get(UserGroupAdministrator::user), root),
         criteriaBuilder.isNotNull(subQueryRoot.get(UserGroupAdministrator::userGroup)),
-        criteriaBuilder.isTrue(subQueryRoot.get(UserGroupAdministrator::active)),
+        criteriaBuilder.equal(subQueryRoot.get(UserGroupAdministrator::active), 'Y'),
       )
     }
 

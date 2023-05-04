@@ -30,7 +30,7 @@ data class EmailAddress(
   @Column(name = "INTERNET_ADDRESS")
   val email: String,
 
-  @ManyToOne(cascade = [CascadeType.ALL], optional = false)
+  @ManyToOne(cascade = [CascadeType.PERSIST], optional = false)
   @JoinColumn(name = "OWNER_ID", nullable = false)
   val staff: Staff,
 

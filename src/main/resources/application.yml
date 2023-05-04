@@ -47,6 +47,8 @@ spring:
     generate-ddl: false
     hibernate:
       ddl-auto: none
+      naming:
+        physical-strategy: uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UpperCaseNamingStrategy
 
   datasource:
     hikari:
