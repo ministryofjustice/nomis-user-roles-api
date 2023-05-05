@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
-import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -30,7 +29,7 @@ data class EmailAddress(
   @Column(name = "INTERNET_ADDRESS")
   val email: String,
 
-  @ManyToOne(cascade = [CascadeType.PERSIST], optional = false)
+  @ManyToOne(optional = false)
   @JoinColumn(name = "OWNER_ID", nullable = false)
   val staff: Staff,
 
