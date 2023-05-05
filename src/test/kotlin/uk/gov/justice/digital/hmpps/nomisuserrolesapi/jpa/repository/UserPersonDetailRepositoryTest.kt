@@ -830,7 +830,6 @@ class UserPersonDetailRepositoryTest {
           "IBRAGIM.MIHAIL",
           "MARIAN.CHESED",
           "LEOPOLDO.CHESED",
-          "LEOPOLDO.CHESED",
           "SAWYL.ALYCIA",
           "SAW.MICKEN",
           "BOB.SAW",
