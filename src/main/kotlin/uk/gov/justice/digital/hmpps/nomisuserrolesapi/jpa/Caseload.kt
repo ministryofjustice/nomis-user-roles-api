@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import org.hibernate.Hibernate
+import org.hibernate.annotations.BatchSize
 import org.hibernate.type.YesNoConverter
 
 const val DPS_CASELOAD = "NWEB"
@@ -16,6 +17,7 @@ const val CENTRAL_ADMIN_CASELOAD = "CADM_I"
 
 @Entity
 @Table(name = "CASELOADS")
+@BatchSize(size = 100)
 data class Caseload(
   @Id
   @Column(name = "CASELOAD_ID", nullable = false)

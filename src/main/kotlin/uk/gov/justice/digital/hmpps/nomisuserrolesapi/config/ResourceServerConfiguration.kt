@@ -31,6 +31,9 @@ class ResourceServerConfiguration {
           "/v3/api-docs/**",
           "/swagger-ui/**",
           "/swagger-ui.html",
+          "/swagger-resources",
+          "/swagger-resources/configuration/ui",
+          "/swagger-resources/configuration/security",
         ).forEach { authorize(it, permitAll) }
         authorize(anyRequest, authenticated)
       }
