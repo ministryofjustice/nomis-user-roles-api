@@ -2,6 +2,16 @@
 
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Embeddable
+import jakarta.persistence.EmbeddedId
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import org.hibernate.Hibernate
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserRoleAlreadyExistsException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserRoleNotFoundException
@@ -9,16 +19,6 @@ import java.io.Serializable
 import java.time.LocalDate
 import java.util.Objects
 import java.util.function.Supplier
-import javax.persistence.CascadeType
-import javax.persistence.Column
-import javax.persistence.Embeddable
-import javax.persistence.EmbeddedId
-import javax.persistence.Entity
-import javax.persistence.FetchType
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
-import javax.persistence.Table
 
 @Embeddable
 data class UserCaseloadPk(
@@ -43,7 +43,7 @@ data class UserCaseload(
   @JoinColumn(name = "USERNAME", updatable = false, insertable = false)
   val user: UserPersonDetail,
 
-  @JoinColumn(name = "START_DATE")
+  @Column(name = "START_DATE")
   val startDate: LocalDate,
 
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], mappedBy = "userCaseload", orphanRemoval = true)

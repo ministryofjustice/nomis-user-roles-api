@@ -1,3 +1,13 @@
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.CriteriaQuery
+import jakarta.persistence.criteria.Expression
+import jakarta.persistence.criteria.Join
+import jakarta.persistence.criteria.JoinType
+import jakarta.persistence.criteria.JoinType.INNER
+import jakarta.persistence.criteria.JoinType.LEFT
+import jakarta.persistence.criteria.Path
+import jakarta.persistence.criteria.Predicate
+import jakarta.persistence.criteria.Root
 import org.springframework.data.jpa.domain.Specification
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
@@ -15,16 +25,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupAdministrator
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupAdministratorPk
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupMember
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
-import javax.persistence.criteria.CriteriaBuilder
-import javax.persistence.criteria.CriteriaQuery
-import javax.persistence.criteria.Expression
-import javax.persistence.criteria.Join
-import javax.persistence.criteria.JoinType
-import javax.persistence.criteria.JoinType.INNER
-import javax.persistence.criteria.JoinType.LEFT
-import javax.persistence.criteria.Path
-import javax.persistence.criteria.Predicate
-import javax.persistence.criteria.Root
 import kotlin.reflect.KProperty1
 
 class UserSpecification(private val filter: UserFilter) : Specification<UserPersonDetail> {
@@ -95,7 +95,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       and(
         criteriaBuilder.equal(subQueryRoot.get(UserGroupAdministrator::user), root),
         criteriaBuilder.isNotNull(subQueryRoot.get(UserGroupAdministrator::userGroup)),
-        criteriaBuilder.isTrue(subQueryRoot.get(UserGroupAdministrator::active)),
+        criteriaBuilder.equal(subQueryRoot.get(UserGroupAdministrator::active), 'Y'),
       )
     }
 

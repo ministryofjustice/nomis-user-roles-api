@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.config
 
+import jakarta.validation.ValidationException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.TypeMismatchException
 import org.springframework.http.HttpStatus
@@ -25,7 +26,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserAlreadyExistsE
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserNotFoundException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserRoleAlreadyExistsException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserRoleNotFoundException
-import javax.validation.ValidationException
 
 @RestControllerAdvice
 class NomisUserRolesApiExceptionHandler {

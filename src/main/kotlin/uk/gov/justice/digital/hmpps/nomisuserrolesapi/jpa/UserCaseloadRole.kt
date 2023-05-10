@@ -1,16 +1,16 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
+import jakarta.persistence.EmbeddedId
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinColumns
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToOne
+import jakarta.persistence.Table
 import org.hibernate.Hibernate
 import java.io.Serializable
 import java.util.Objects
-import javax.persistence.EmbeddedId
-import javax.persistence.Entity
-import javax.persistence.FetchType
-import javax.persistence.JoinColumn
-import javax.persistence.JoinColumns
-import javax.persistence.ManyToOne
-import javax.persistence.OneToOne
-import javax.persistence.Table
 
 @Entity
 @Table(name = "USER_CASELOAD_ROLES")

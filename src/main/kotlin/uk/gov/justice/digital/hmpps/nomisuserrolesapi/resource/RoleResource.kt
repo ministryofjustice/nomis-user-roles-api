@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import jakarta.validation.Valid
+import jakarta.validation.constraints.Size
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
@@ -26,8 +28,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateRoleRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.RoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UpdateRoleRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.RoleService
-import javax.validation.Valid
-import javax.validation.constraints.Size
 
 @RestController
 @Validated
