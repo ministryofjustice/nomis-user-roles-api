@@ -82,12 +82,12 @@ class UserService(
 
   @Transactional(readOnly = true)
   fun findAllByEmailAddress(emailAddress: String): List<UserDetail> =
-    userPersonDetailRepository.findByStaff_EmailsEmailCaseSensitive(emailAddress)
+    userPersonDetailRepository.findByStaff_EmailsEmailCaseSensitiveIgnoreCase(emailAddress)
       .map(this::toUserDetail)
 
   @Transactional(readOnly = true)
   fun findAllByEmailAddressAndUsernames(emailAddress: String, usernames: List<String>?): List<UserDetail> {
-    val usersByEmail = userPersonDetailRepository.findByStaff_EmailsEmailCaseSensitive(emailAddress)
+    val usersByEmail = userPersonDetailRepository.findByStaff_EmailsEmailCaseSensitiveIgnoreCase(emailAddress)
     val users = if (usernames.isNullOrEmpty()) {
       usersByEmail
     } else {

@@ -209,6 +209,12 @@ class UserResourceIntTest : IntegrationTestBase() {
           .email("fred@justice.gov.uk")
           .atPrison("WWI")
           .buildAndSave()
+        generalUser().username("abe.tozzi")
+          .firstName("Abe")
+          .lastName("Tozzi")
+          .email("Abe@justice.gov.uk")
+          .atPrison("LEI")
+          .buildAndSave()
       }
     }
 
@@ -271,6 +277,20 @@ class UserResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("$").isArray
         .jsonPath(matchByUserName, "marco.rossi").exists()
+    }
+
+    @Test
+    fun `get user by email ignore case`() {
+      webTestClient.get().uri {
+        it.path("/users/user")
+          .queryParam("email", "abe@justice.gov.uk").build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").isArray
+        .jsonPath(matchByUserName, "abe.tozzi").exists()
     }
 
     @Test

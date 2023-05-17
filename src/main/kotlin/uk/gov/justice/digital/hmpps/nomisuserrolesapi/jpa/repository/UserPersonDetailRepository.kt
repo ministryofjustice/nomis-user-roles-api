@@ -68,7 +68,7 @@ interface UserPersonDetailRepository :
     lastName: String,
   ): List<UserPersonDetail>
 
-  fun findByStaff_EmailsEmailCaseSensitive(emailAddress: String): List<UserPersonDetail>
+  fun findByStaff_EmailsEmailCaseSensitiveIgnoreCase(emailAddress: String): List<UserPersonDetail>
 }
 
 fun changePasswordWithValidation(
