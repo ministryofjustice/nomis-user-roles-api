@@ -138,7 +138,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
             name.uppercaseLike(),
           ),
           like(
-            upper(join(UserPersonDetail::staff).join(Staff::emails, LEFT).get(EmailAddress::email)),
+            upper(join(UserPersonDetail::staff).join(Staff::emails, LEFT).get(EmailAddress::emailCaseSensitive)),
             name.uppercaseLike(),
           ),
         )

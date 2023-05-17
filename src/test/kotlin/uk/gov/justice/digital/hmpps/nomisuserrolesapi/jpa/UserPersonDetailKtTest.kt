@@ -126,8 +126,8 @@ internal class UserPersonDetailKtTest {
     @Test
     internal fun `will copy email address`() {
       val staff = Staff(staffId = 99, firstName = "Raj", lastName = "Maki", status = "ACTIVE")
-      staff.emails.add(EmailAddress(email = "joe@bob.com", staff = staff))
-      staff.emails.add(EmailAddress(email = "bloggs@justice.gov.uk", staff = staff))
+      staff.emails.add(EmailAddress(emailCaseSensitive = "joe@bob.com", staff = staff))
+      staff.emails.add(EmailAddress(emailCaseSensitive = "bloggs@justice.gov.uk", staff = staff))
       val entity = UserPersonDetail(
         username = "raj.maki",
         staff = staff,
