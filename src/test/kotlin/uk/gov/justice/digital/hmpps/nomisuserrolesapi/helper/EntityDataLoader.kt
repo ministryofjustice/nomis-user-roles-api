@@ -253,7 +253,7 @@ abstract class UserBuilder<T>(
   }
 
   fun addEmail(email: String): UserBuilder<T> {
-    this.userPersonDetail.staff.emails.add(EmailAddress(email = email, staff = userPersonDetail.staff))
+    this.userPersonDetail.staff.emails.add(EmailAddress(emailCaseSensitive = email, staff = userPersonDetail.staff))
     return this
   }
 

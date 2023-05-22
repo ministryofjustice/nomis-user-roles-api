@@ -27,13 +27,16 @@ data class EmailAddress(
   val type: String = "EMAIL",
 
   @Column(name = "INTERNET_ADDRESS")
-  val email: String,
+  val emailCaseSensitive: String,
 
   @ManyToOne(optional = false)
   @JoinColumn(name = "OWNER_ID", nullable = false)
   val staff: Staff,
 
 ) {
+  val email: String
+    get() = emailCaseSensitive.lowercase()
+
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false

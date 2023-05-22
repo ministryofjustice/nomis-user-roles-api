@@ -45,7 +45,7 @@ data class UserDetail(
       activeCaseloadId = userPersonDetail.activeCaseLoad?.id,
       accountStatus = userPersonDetail.accountDetail?.status,
       accountType = userPersonDetail.type,
-      primaryEmail = userPersonDetail.staff.primaryEmail()?.email,
+      primaryEmail = userPersonDetail.staff.primaryEmail()?.emailCaseSensitive,
       dpsRoleCodes = userPersonDetail.dpsRoles.map { it.role.code },
       accountNonLocked = userPersonDetail.accountDetail?.isAccountNonLocked(),
       credentialsNonExpired = userPersonDetail.accountDetail?.isCredentialsNonExpired(),

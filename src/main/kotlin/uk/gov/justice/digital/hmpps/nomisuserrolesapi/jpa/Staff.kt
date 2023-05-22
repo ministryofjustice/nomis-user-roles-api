@@ -46,7 +46,7 @@ data class Staff(
   fun adminAccount(): UserPersonDetail? = users.firstOrNull { u -> UsageType.ADMIN == u.type }
 
   fun primaryEmail(): EmailAddress? =
-    emails.firstOrNull { e -> e.email.contains("justice.gov.uk") } ?: run { emails.firstOrNull() }
+    emails.firstOrNull { e -> e.emailCaseSensitive.contains("justice.gov.uk") } ?: run { emails.firstOrNull() }
 
   val isActive: Boolean
     get() = STAFF_STATUS_ACTIVE == status
@@ -58,7 +58,7 @@ data class Staff(
 
   fun setEmail(email: String) {
     emails.clear()
-    emails.add(EmailAddress(email = email, staff = this))
+    emails.add(EmailAddress(emailCaseSensitive = email, staff = this))
   }
 
   override fun equals(other: Any?): Boolean {

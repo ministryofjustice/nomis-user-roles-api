@@ -56,7 +56,7 @@ import java.util.function.Supplier
       name = "emails-subgraph",
       attributeNodes = [
         NamedAttributeNode(value = "userType"),
-        NamedAttributeNode(value = "type"), NamedAttributeNode(value = "email"),
+        NamedAttributeNode(value = "type"), NamedAttributeNode(value = "emailCaseSensitive"),
       ],
     ),
     NamedSubgraph(
@@ -243,7 +243,7 @@ fun UserPersonDetail.toUserSummaryWithEmail() = UserSummaryWithEmail(
     )
   },
   dpsRoleCount = this.dpsRoles.size,
-  email = staff.primaryEmail()?.email,
+  email = staff.primaryEmail()?.emailCaseSensitive,
   staffStatus = staff.status,
 )
 
@@ -263,7 +263,7 @@ fun UserPersonDetail.toDownloadUserSummaryWithEmail() = UserSummaryWithEmail(
     )
   },
   dpsRoleCount = 0,
-  email = staff.primaryEmail()?.email,
+  email = staff.primaryEmail()?.emailCaseSensitive,
   staffStatus = staff.status,
 )
 

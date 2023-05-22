@@ -34,7 +34,7 @@ data class StaffDetail(
       firstName = staff.firstName.capitalizeFully(),
       lastName = staff.lastName.capitalizeFully(),
       status = staff.status,
-      primaryEmail = staff.primaryEmail()?.email,
+      primaryEmail = staff.primaryEmail()?.emailCaseSensitive,
       generalAccount = staff.generalAccount()?.toUserCaseloadDetail(),
       adminAccount = staff.adminAccount()?.toUserCaseloadDetail(),
     )

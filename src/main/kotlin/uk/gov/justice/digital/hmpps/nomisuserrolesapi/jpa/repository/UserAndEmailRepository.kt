@@ -19,8 +19,6 @@ interface UserAndEmailRepository : JpaRepository<UserAndEmail, String> {
       "      ia.internet_address_class = 'EMAIL' AND ia.owner_class = 'STF' " +
       "GROUP BY username ORDER BY username",
     nativeQuery = true,
-    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
-    countQuery = "select 1",
   )
   fun findUsersAndEmails(): List<UserAndEmail>
 }
