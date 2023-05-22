@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Size
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -41,6 +42,9 @@ class UserResource(
   private val userService: UserService,
   private val authenticationFacade: AuthenticationFacade,
 ) {
+  companion object {
+    private val log = LoggerFactory.getLogger(this::class.java)
+  }
 
   @PreAuthorize("hasRole('ROLE_CREATE_USER')")
   @DeleteMapping("/{username}")
@@ -111,8 +115,12 @@ class UserResource(
     @Schema(description = "Username", example = "testuser1", required = true)
     @PathVariable
     username: String,
-  ): UserDetail =
-    userService.findByUsername(username)
+  ): UserDetail {
+    log.debug("Fetching user details for : {}", username)
+    val userDetail = userService.findByUsername(username)
+    log.debug("Returning user details for : {}", username)
+    return userDetail
+  }
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @GetMapping("/staff/{staffId}")
