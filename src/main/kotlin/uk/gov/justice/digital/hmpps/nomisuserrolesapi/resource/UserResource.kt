@@ -116,9 +116,9 @@ class UserResource(
     @PathVariable
     username: String,
   ): UserDetail {
-    log.debug("Fetching user details for : {}", username)
+    log.info("Fetching user details for : {}", username)
     val userDetail = userService.findByUsername(username)
-    log.debug("Returning user details for : {}", username)
+    log.info("Returning user details for : {}", username)
     return userDetail
   }
 
