@@ -23,6 +23,7 @@ dependencies {
   implementation("org.flywaydb:flyway-core")
   implementation("io.hypersistence:hypersistence-utils-hibernate-60:3.3.2")
   implementation("org.hibernate.orm:hibernate-community-dialects:6.2.3.Final")
+  implementation("org.hibernate.orm:hibernate-core:6.2.3.Final")
 
   implementation("javax.transaction:javax.transaction-api:1.3")
   implementation("javax.xml.bind:jaxb-api:2.3.1")
