@@ -27,8 +27,6 @@ dependencies {
   implementation("javax.transaction:javax.transaction-api:1.3")
   implementation("javax.xml.bind:jaxb-api:2.3.1")
 
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.1")
-
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
 
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
