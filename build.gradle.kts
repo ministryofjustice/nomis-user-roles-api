@@ -22,7 +22,7 @@ dependencies {
 
   implementation("org.flywaydb:flyway-core")
   implementation("io.hypersistence:hypersistence-utils-hibernate-60:3.3.2")
-  implementation("org.hibernate.orm:hibernate-community-dialects:6.2.3.Final")
+  implementation("org.hibernate.orm:hibernate-community-dialects")
 
   implementation("javax.transaction:javax.transaction-api:1.3")
   implementation("javax.xml.bind:jaxb-api:2.3.1")
@@ -31,7 +31,6 @@ dependencies {
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
 
-  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.1")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
 
   implementation("com.zaxxer:HikariCP:5.0.1")
