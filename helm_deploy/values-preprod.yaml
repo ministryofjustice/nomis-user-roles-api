@@ -2,7 +2,7 @@
 # Per environment values which override defaults in nomis-user-roles-api/values.yaml
 
 generic-service:
-  replicaCount: 4
+  replicaCount: 2
 
   ingress:
     host: nomis-user-pp.aks-live-1.studio-hosting.service.justice.gov.uk
