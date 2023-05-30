@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.2.0-beta"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.2.0-beta-2"
   kotlin("plugin.spring") version "1.8.21"
   kotlin("plugin.jpa") version "1.8.21"
   idea
@@ -21,7 +21,7 @@ dependencies {
   implementation("commons-codec:commons-codec:1.15")
 
   implementation("org.flywaydb:flyway-core")
-  implementation("io.hypersistence:hypersistence-utils-hibernate-60:3.3.2")
+  implementation("io.hypersistence:hypersistence-utils-hibernate-60:3.4.1")
   implementation("org.hibernate.orm:hibernate-community-dialects")
 
   implementation("javax.transaction:javax.transaction-api:1.3")
@@ -33,7 +33,7 @@ dependencies {
 
   implementation("com.zaxxer:HikariCP:5.0.1")
   runtimeOnly("com.h2database:h2:2.1.214")
-  runtimeOnly("com.oracle.database.jdbc:ojdbc10:19.18.0.0")
+  runtimeOnly("com.oracle.database.jdbc:ojdbc10:19.19.0.0")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
