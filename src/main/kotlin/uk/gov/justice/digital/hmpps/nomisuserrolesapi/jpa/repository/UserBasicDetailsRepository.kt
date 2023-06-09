@@ -9,7 +9,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
 import java.util.Optional
 
 @Repository
-interface BasicUserDetailsRepository : JpaRepository<BasicUserPersonalDetail, String> {
+interface UserBasicDetailsRepository : JpaRepository<UserBasicPersonalDetail, String> {
 
   @Query(
     value =
@@ -21,11 +21,11 @@ interface BasicUserDetailsRepository : JpaRepository<BasicUserPersonalDetail, St
       "     sua.USERNAME= ?1",
     nativeQuery = true,
   )
-  fun findBasicUserDetails(username: String): Optional<BasicUserPersonalDetail>
+  fun find(username: String): Optional<UserBasicPersonalDetail>
 }
 
 @Entity
-data class BasicUserPersonalDetail(
+data class UserBasicPersonalDetail(
   @Id
   val username: String,
   val accountStatus: String,

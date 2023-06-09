@@ -3,11 +3,11 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.data
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.capitalizeFully
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.BasicUserPersonalDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserBasicPersonalDetail
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "Basic User Information")
-data class BasicUserDetail(
+data class UserBasicDetails(
   @Schema(description = "Username", example = "testuser1", required = true) val username: String,
   @Schema(description = "Staff ID", example = "324323", required = true) val staffId: Long,
   @Schema(description = "First name of the user", example = "John", required = true) val firstName: String,
@@ -17,7 +17,7 @@ data class BasicUserDetail(
 
 ) {
   constructor(
-    userPersonDetail: BasicUserPersonalDetail,
+    userPersonDetail: UserBasicPersonalDetail,
   ) :
     this(
       username = userPersonDetail.username,

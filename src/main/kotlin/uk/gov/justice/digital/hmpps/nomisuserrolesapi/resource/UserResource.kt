@@ -125,7 +125,7 @@ class UserResource(
   @PreAuthorize("hasAnyRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN', 'ROLE_MAINTAIN_ACCESS_ROLES', 'ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
   @GetMapping("/basic/{username}")
   @Operation(
-    summary = "Get basic user details",
+    summary = "Get user basic details",
     description = "Information on a specific user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES or ROLE_MANAGE_NOMIS_USER_ACCOUNT",
     security = [
       SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES"),
@@ -160,11 +160,11 @@ class UserResource(
       ),
     ],
   )
-  fun getBasicUserDetailsInfo(
+  fun getUserBasicDetailsInfo(
     @Schema(description = "Username", example = "testuser1", required = true)
     @PathVariable
     username: String,
-  ) = userService.findBasicUserDetails(username)
+  ) = userService.findUserBasicDetails(username)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @GetMapping("/staff/{staffId}")

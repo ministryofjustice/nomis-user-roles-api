@@ -1485,7 +1485,7 @@ class UserResourceIntTest : IntegrationTestBase() {
 
   @DisplayName("GET /users/basic/{username}")
   @Nested
-  inner class GetBasicUserDetailByUsername {
+  inner class GetUserBasicDetailsByUsername {
     @BeforeEach
     internal fun createUsers() {
       with(dataBuilder) {
