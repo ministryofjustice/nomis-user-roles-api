@@ -1482,4 +1482,84 @@ class UserResourceIntTest : IntegrationTestBase() {
         }
     }
   }
+
+  @DisplayName("GET /users/basic/{username}")
+  @Nested
+  inner class GetBasicUserDetailByUsername {
+    @BeforeEach
+    internal fun createUsers() {
+      with(dataBuilder) {
+        generalUser().username("marco.rossi").firstName("Marco").lastName("Rossi").buildAndSave()
+      }
+    }
+
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    fun `access forbidden when no authority`() {
+      webTestClient.get().uri("/users/basic/marco.rossi")
+        .exchange()
+        .expectStatus().isUnauthorized
+    }
+
+    @Test
+    fun `access forbidden when no role`() {
+      webTestClient.get().uri("/users/basic/marco.rossi")
+        .headers(setAuthorisation(roles = listOf()))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `get user forbidden with wrong role`() {
+      webTestClient.get().uri("/users/basic/marco.rossi")
+        .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `get user not found`() {
+      webTestClient.get().uri("/users/basic/dummy")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isNotFound
+    }
+
+    @Test
+    fun `get user with role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN`() {
+      webTestClient.get().uri("/users/basic/marco.rossi")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("username").isEqualTo("marco.rossi")
+        .jsonPath("firstName").isEqualTo("Marco")
+        .jsonPath("lastName").isEqualTo("Rossi")
+        .jsonPath("enabled").isEqualTo("true")
+        .jsonPath("activeCaseloadId").isEqualTo("WWI")
+        .jsonPath("staffId").exists()
+    }
+
+    @Test
+    fun `get user with role ROLE_MAINTAIN_ACCESS_ROLES`() {
+      webTestClient.get().uri("/users/basic/marco.rossi")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("staffId").exists()
+    }
+
+    @Test
+    fun `get user with role ROLE_MANAGE_NOMIS_USER_ACCOUNT`() {
+      webTestClient.get().uri("/users/basic/marco.rossi")
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("staffId").exists()
+    }
+  }
 }

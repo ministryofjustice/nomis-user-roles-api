@@ -20,6 +20,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPassword
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.BasicUserDetailsRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.CaseloadRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
@@ -39,6 +40,7 @@ internal class UserServiceTest {
   private val authenticationFacade: AuthenticationFacade = mock()
   private val passwordEncoder: PasswordEncoder = mock()
   private val userPasswordRepository: UserPasswordRepository = mock()
+  private val basicUserDetailsRepository: BasicUserDetailsRepository = mock()
   private val userService: UserService = UserService(
     userPersonDetailRepository,
     userAndEmailRepository,
@@ -49,6 +51,7 @@ internal class UserServiceTest {
     authenticationFacade,
     passwordEncoder,
     userPasswordRepository,
+    basicUserDetailsRepository,
   )
 
   @Nested
