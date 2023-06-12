@@ -22,6 +22,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedGeneralUs
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedLocalAdminUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLocalAdminUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserBasicDetails
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserRoleDetail
@@ -39,6 +40,8 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleReposit
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserAndEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserAndEmailRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserBasicDetailsRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserBasicPersonalDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPasswordRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.changePasswordWithValidation
@@ -64,6 +67,7 @@ class UserService(
   private val authenticationFacade: AuthenticationFacade,
   private val passwordEncoder: PasswordEncoder,
   private val userPasswordRepository: UserPasswordRepository,
+  private val userBasicDetailsRepository: UserBasicDetailsRepository,
 ) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -102,6 +106,15 @@ class UserService(
     val usersAndEmails = userAndEmailRepository.findUsersAndEmails()
     log.info("Done retrieving users and emails from database...")
     return usersAndEmails
+  }
+
+  @Transactional(readOnly = true)
+  fun findUserBasicDetails(username: String): UserBasicDetails {
+    log.info("Fetching  user basic details for : {}", username)
+    val userDetails = userBasicDetailsRepository.find(username)
+      .map(this::toUserBasicDetail).orElseThrow { UserNotFoundException("User not found: $username not found") }
+    log.info("Returning user basic details for : {}", username)
+    return userDetails
   }
 
   @Transactional(readOnly = true)
@@ -585,6 +598,9 @@ class UserService(
 
   private fun toUserDetail(user: UserPersonDetail): UserDetail {
     return UserDetail(user)
+  }
+  private fun toUserBasicDetail(user: UserBasicPersonalDetail): UserBasicDetails {
+    return UserBasicDetails(user)
   }
 
   private fun checkIfAccountAlreadyExists(username: String) {
