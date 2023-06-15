@@ -14,7 +14,7 @@ data class UserBasicDetails(
   @Schema(description = "Last name of the user", example = "Smith", required = true) val lastName: String,
   @Schema(description = "Active Caseload of the user", example = "BXI", required = false) val activeCaseloadId: String?,
   @Schema(description = "User is enabled flag", required = true) val enabled: Boolean,
-
+  @Schema(description = "Status of the user", example = "OPEN", required = false) val accountStatus: String,
 ) {
   constructor(
     userPersonDetail: UserBasicPersonalDetail,
@@ -26,6 +26,7 @@ data class UserBasicDetails(
       lastName = userPersonDetail.lastName.capitalizeFully(),
       activeCaseloadId = userPersonDetail.activeCaseloadId,
       enabled = userPersonDetail.isEnabled(),
+      accountStatus = userPersonDetail.accountStatus,
 
     )
 }
