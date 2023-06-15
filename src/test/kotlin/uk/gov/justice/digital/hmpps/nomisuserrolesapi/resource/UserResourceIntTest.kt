@@ -1539,6 +1539,7 @@ class UserResourceIntTest : IntegrationTestBase() {
         .jsonPath("lastName").isEqualTo("Rossi")
         .jsonPath("enabled").isEqualTo("true")
         .jsonPath("activeCaseloadId").isEqualTo("WWI")
+        .jsonPath("accountStatus").isEqualTo("OPEN")
         .jsonPath("staffId").exists()
     }
 
