@@ -28,15 +28,15 @@ interface UserBasicDetailsRepository : JpaRepository<UserBasicPersonalDetail, St
 data class UserBasicPersonalDetail(
   @Id
   val username: String,
-  val accountStatus: String,
+  val accountStatus: String?,
   val activeCaseloadId: String?,
   val firstName: String,
   val lastName: String,
   val staffId: Long,
 
 ) {
-  val status: AccountStatus
-    get() = AccountStatus.get(accountStatus)
+  val status: AccountStatus?
+    get() = accountStatus?.let { AccountStatus.get(it) }
 
   private fun isLocked(): Boolean =
     AccountStatus.values().filter { it.isLocked }.contains(status)
