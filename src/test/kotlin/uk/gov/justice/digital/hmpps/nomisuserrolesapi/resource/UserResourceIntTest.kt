@@ -1489,7 +1489,7 @@ class UserResourceIntTest : IntegrationTestBase() {
     @BeforeEach
     internal fun createUsers() {
       with(dataBuilder) {
-        generalUser().username("marco.rossi").firstName("Marco").lastName("Rossi").buildAndSave()
+        generalUser().username("marco.rossi").firstName("Marco").lastName("Rossi").status(AccountStatus.EXPIRED_GRACE).buildAndSave()
       }
     }
 
@@ -1535,11 +1535,11 @@ class UserResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("marco.rossi")
+        .jsonPath("accountStatus").isEqualTo("EXPIRED_GRACE")
         .jsonPath("firstName").isEqualTo("Marco")
         .jsonPath("lastName").isEqualTo("Rossi")
         .jsonPath("enabled").isEqualTo("true")
         .jsonPath("activeCaseloadId").isEqualTo("WWI")
-        .jsonPath("accountStatus").isEqualTo("OPEN")
         .jsonPath("staffId").exists()
     }
 

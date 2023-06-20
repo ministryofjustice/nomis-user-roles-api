@@ -12,6 +12,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.crypto.password.PasswordEncoder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserBasicDetails
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountProfile
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
@@ -25,6 +26,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleReposit
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserAndEmailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserBasicDetailsRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserBasicPersonalDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPasswordRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import java.time.LocalDateTime
@@ -367,5 +369,37 @@ internal class UserServiceTest {
 
     private fun filterSetFromAccountStatuses(accountStatusesToFilter: Set<AccountStatus>) =
       AccountStatus.values().filterNot { accountStatusesToFilter.contains(it) }
+  }
+
+  @Nested
+  internal inner class GetUserBasicDetails {
+    @Test
+    fun getUserBasicDetails() {
+      val userBasicPersonalDetail =
+        UserBasicPersonalDetail(
+          username = "joe",
+          accountStatus = "EXPIRED(GRACE)",
+          activeCaseloadId = "MKI",
+          firstName = "JOE",
+          lastName = "SMITH",
+          staffId = 1,
+
+        )
+
+      val expectedUserBasicDetail =
+        UserBasicDetails(
+          username = "joe",
+          accountStatus = "EXPIRED_GRACE",
+          activeCaseloadId = "MKI",
+          firstName = "Joe",
+          lastName = "Smith",
+          staffId = 1,
+          enabled = true,
+
+        )
+      whenever(userBasicDetailsRepository.find(anyString())).thenReturn(Optional.of(userBasicPersonalDetail))
+      val userBasicDetails = userService.findUserBasicDetails("joe")
+      assertThat(userBasicDetails).isEqualTo(expectedUserBasicDetail)
+    }
   }
 }
