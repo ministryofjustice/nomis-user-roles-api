@@ -372,7 +372,7 @@ internal class UserServiceTest {
   }
 
   @Nested
-  internal inner class GetUserGeneralDetails {
+  internal inner class GetUserBasicDetails {
     @Test
     fun getUserBasicDetails() {
       val userBasicPersonalDetail =
