@@ -26,6 +26,7 @@ dependencies {
 
   implementation("javax.transaction:javax.transaction-api:1.3")
   implementation("javax.xml.bind:jaxb-api:2.3.1")
+  implementation("com.google.guava:guava:32.0.1-jre")
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
 
