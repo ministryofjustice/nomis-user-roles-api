@@ -1,5 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository
 
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
@@ -67,6 +69,9 @@ interface UserPersonDetailRepository :
     firstName: String,
     lastName: String,
   ): List<UserPersonDetail>
+
+  @EntityGraph(value = "user-person-detail-graph", type = EntityGraph.EntityGraphType.FETCH)
+  override fun findAll(spec: Specification<UserPersonDetail>?, pageable: Pageable?): Page<UserPersonDetail>
 
   fun findByStaff_EmailsEmailCaseSensitiveIgnoreCase(emailAddress: String): List<UserPersonDetail>
 }

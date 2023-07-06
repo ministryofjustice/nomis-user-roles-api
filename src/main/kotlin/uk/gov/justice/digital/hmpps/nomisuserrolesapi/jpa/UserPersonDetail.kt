@@ -67,6 +67,26 @@ import java.util.function.Supplier
     ),
   ],
 )
+@NamedEntityGraph(
+  name = "user-person-detail-graph",
+  attributeNodes = [
+    NamedAttributeNode("username"),
+    NamedAttributeNode("activeCaseLoad"),
+    NamedAttributeNode(value = "staff", subgraph = "staff-subgraph"),
+  ],
+  subgraphs = [
+    NamedSubgraph(
+      name = "staff-subgraph",
+      attributeNodes = [
+        NamedAttributeNode(value = "staffId"), NamedAttributeNode(value = "firstName"),
+        NamedAttributeNode(
+          value = "lastName",
+        ),
+        NamedAttributeNode(value = "status"),
+      ],
+    ),
+  ],
+)
 data class UserPersonDetail(
   @Id
   @Column(name = "USERNAME", nullable = false)
