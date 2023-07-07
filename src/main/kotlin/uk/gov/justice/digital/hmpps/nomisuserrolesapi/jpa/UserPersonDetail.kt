@@ -18,6 +18,7 @@ import jakarta.persistence.PrimaryKeyJoinColumn
 import jakarta.persistence.SecondaryTable
 import jakarta.persistence.Table
 import org.hibernate.Hibernate
+import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.Where
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.PrisonCaseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
@@ -99,12 +100,14 @@ data class UserPersonDetail(
   @OneToMany(fetch = FetchType.LAZY)
   @JoinColumn(name = "USERNAME", updatable = false, insertable = false, nullable = false)
   @Where(clause = "CASELOAD_ID = '$DPS_CASELOAD'")
+  @BatchSize(size = 1000)
   val dpsRoles: List<UserCaseloadRole> = listOf(),
 
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], mappedBy = "user", orphanRemoval = true)
   val caseloads: MutableList<UserCaseload> = mutableListOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+  @BatchSize(size = 1000)
   val activeAndInactiveMemberOfUserGroups: MutableList<UserGroupMember> = mutableListOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
@@ -116,6 +119,7 @@ data class UserPersonDetail(
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   @Where(clause = "ACTIVE_FLAG = 'Y'")
+  @BatchSize(size = 1000)
   val administratorOfUserGroups: List<UserGroupAdministrator> = listOf(),
 
   @Column(name = "STAFF_USER_TYPE", nullable = false)

@@ -14,6 +14,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.PasswordValidationException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.ReusedPasswordException
 import java.sql.SQLException
+import java.util.Optional
 
 @Suppress("SqlResolve")
 @Repository
@@ -65,6 +66,8 @@ interface UserPersonDetailRepository :
 
   @EntityGraph(value = "user-person-detail-download-graph", type = EntityGraph.EntityGraphType.LOAD)
   override fun findAll(speci: Specification<UserPersonDetail>?): List<UserPersonDetail>
+
+  @EntityGraph(value = "user-person-detail-graph", type = EntityGraph.EntityGraphType.FETCH)
   fun findAllByStaff_FirstNameIgnoreCaseAndStaff_LastNameIgnoreCase(
     firstName: String,
     lastName: String,
@@ -72,6 +75,9 @@ interface UserPersonDetailRepository :
 
   @EntityGraph(value = "user-person-detail-graph", type = EntityGraph.EntityGraphType.FETCH)
   override fun findAll(spec: Specification<UserPersonDetail>?, pageable: Pageable?): Page<UserPersonDetail>
+
+  @EntityGraph(value = "user-person-detail-graph", type = EntityGraph.EntityGraphType.FETCH)
+  override fun findById(username: String): Optional<UserPersonDetail>
 
   fun findByStaff_EmailsEmailCaseSensitiveIgnoreCase(emailAddress: String): List<UserPersonDetail>
 }
