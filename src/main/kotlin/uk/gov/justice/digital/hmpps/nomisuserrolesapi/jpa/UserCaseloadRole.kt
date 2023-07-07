@@ -9,6 +9,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import org.hibernate.Hibernate
+import org.hibernate.annotations.BatchSize
 import java.io.Serializable
 import java.util.Objects
 
@@ -20,6 +21,7 @@ data class UserCaseloadRole(
 
   @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "ROLE_ID", updatable = false, insertable = false)
+  @BatchSize(size = 1000)
   val role: Role,
 
   @ManyToOne(fetch = FetchType.EAGER)
