@@ -35,7 +35,7 @@ import java.util.function.Supplier
 @NamedEntityGraph(
   name = "user-person-detail-download-graph",
   attributeNodes = [
-    NamedAttributeNode("username"), NamedAttributeNode(value = "administratorOfUserGroups"),
+    NamedAttributeNode("username"),
     NamedAttributeNode(value = "staff", subgraph = "staff-subgraph"),
   ],
   subgraphs = [
@@ -58,12 +58,6 @@ import java.util.function.Supplier
       attributeNodes = [
         NamedAttributeNode(value = "userType"),
         NamedAttributeNode(value = "type"), NamedAttributeNode(value = "emailCaseSensitive"),
-      ],
-    ),
-    NamedSubgraph(
-      name = "usergroup-admin-subgraph",
-      attributeNodes = [
-        NamedAttributeNode(value = "id"), NamedAttributeNode(value = "active"),
       ],
     ),
   ],
