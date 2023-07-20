@@ -1,7 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.2.2"
-  kotlin("plugin.spring") version "1.8.22"
-  kotlin("plugin.jpa") version "1.8.22"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.2.4"
+  kotlin("plugin.spring") version "1.9.0"
+  kotlin("plugin.jpa") version "1.9.0"
   idea
 }
 
@@ -26,14 +26,14 @@ dependencies {
 
   implementation("javax.transaction:javax.transaction-api:1.3")
   implementation("javax.xml.bind:jaxb-api:2.3.1")
-  implementation("com.google.guava:guava:32.0.1-jre")
+  implementation("com.google.guava:guava:32.1.1-jre")
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
 
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
 
   implementation("com.zaxxer:HikariCP:5.0.1")
-  runtimeOnly("com.h2database:h2:2.1.214")
+  runtimeOnly("com.h2database:h2:2.2.220")
   runtimeOnly("com.oracle.database.jdbc:ojdbc10:19.19.0.0")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
@@ -44,7 +44,7 @@ dependencies {
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:2.35.0")
   testImplementation("org.mockito:mockito-inline:5.2.0")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.27.0")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.28.0")
   testImplementation("javax.xml.bind:jaxb-api:2.3.1")
 }
 
