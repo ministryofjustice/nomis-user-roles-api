@@ -62,22 +62,10 @@ workflows:
             - validate
             - build_docker
             - helm_lint
-      - request-stage-approval:
-          type: approval
-          requires:
-            - deploy_dev
-      - hmpps/deploy_env:
-          name: deploy_stage
-          env: "stage"
-          context:
-            - hmpps-common-vars
-            - nomis-user-roles-api-stage
-          requires:
-            - request-stage-approval
       - request-preprod-approval:
           type: approval
           requires:
-            - deploy_stage
+            - deploy_dev
       - hmpps/deploy_env:
           name: deploy_preprod
           env: "preprod"
