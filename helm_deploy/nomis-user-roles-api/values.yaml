@@ -1,6 +1,7 @@
 ---
 generic-service:
   nameOverride: nomis-user-roles-api
+  productId: DPS017
 
   replicaCount: 4
 
