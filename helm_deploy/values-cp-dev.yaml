@@ -10,6 +10,7 @@ generic-service:
 
   ingress:
     host: nomis-user-roles-api-dev.prison.service.justice.gov.uk
+    dso_enabled: false
 
   allowlist:
     office: "217.33.148.210/32"
