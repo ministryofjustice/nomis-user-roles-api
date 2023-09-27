@@ -15,8 +15,6 @@ generic-service:
     port: 8080
 
   ingress:
-    annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-production
     enabled: true
     dso_enabled: true
     host: app-hostname.local    # override per environment
@@ -42,8 +40,6 @@ generic-service:
       DB_USERNAME: "DB_USERNAME"
       DB_PASSWORD: "DB_PASSWORD"
 
-  # Disabled for DSO AKS cluster
-  allowlist: null
 
   resources:
     requests:

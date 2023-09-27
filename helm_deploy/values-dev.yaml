@@ -9,9 +9,13 @@ generic-service:
     minAvailable: 1
 
   ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-production
     host: nomis-user-dev.aks-dev-1.studio-hosting.service.justice.gov.uk
 
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     API_BASE_URL_OAUTH: https://sign-in-dev.hmpps.service.justice.gov.uk/auth
 
+  # Disabled for DSO AKS cluster
+  allowlist: null
