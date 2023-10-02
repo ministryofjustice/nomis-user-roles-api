@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.4.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.5.0"
   kotlin("plugin.spring") version "1.9.10"
   kotlin("plugin.jpa") version "1.9.10"
   idea
@@ -21,7 +21,7 @@ dependencies {
   implementation("commons-codec:commons-codec:1.16.0")
 
   implementation("org.flywaydb:flyway-core")
-  implementation("io.hypersistence:hypersistence-utils-hibernate-60:3.5.2")
+  implementation("io.hypersistence:hypersistence-utils-hibernate-60:3.5.3")
   implementation("org.hibernate.orm:hibernate-community-dialects")
 
   implementation("javax.transaction:javax.transaction-api:1.3")
@@ -33,7 +33,7 @@ dependencies {
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
 
   implementation("com.zaxxer:HikariCP:5.0.1")
-  runtimeOnly("com.h2database:h2:2.2.222")
+  runtimeOnly("com.h2database:h2:2.2.224")
   runtimeOnly("com.oracle.database.jdbc:ojdbc10:19.20.0.0")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
@@ -42,9 +42,9 @@ dependencies {
   testImplementation("io.jsonwebtoken:jjwt-impl:0.11.5")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-  testImplementation("org.wiremock:wiremock:3.0.4")
+  testImplementation("org.wiremock:wiremock:3.2.0")
   testImplementation("org.mockito:mockito-inline:5.2.0")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.30.0")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.30.1")
   testImplementation("javax.xml.bind:jaxb-api:2.3.1")
 }
 
