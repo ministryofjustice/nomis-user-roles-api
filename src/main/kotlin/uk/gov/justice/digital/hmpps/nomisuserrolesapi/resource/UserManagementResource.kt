@@ -39,7 +39,7 @@ class UserManagementResource(
   @PutMapping("/{username}/logon-date")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
-    summary = "Record the date and time of last logon for the user",
+    summary = "Record a user as having successfully signed in, with current date and time written to the LAST_LOGON_DATE",
     description = "Record the date and time of last logon for the user. Requires role ROLE_MANAGE_NOMIS_USER_ACCOUNT",
     security = [SecurityRequirement(name = "MANAGE_NOMIS_USER_ACCOUNT")],
     responses = [
