@@ -26,6 +26,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.AbbreviationsProcessor
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.CaseloadNotFoundException
 import java.time.LocalDate.now
+import java.time.LocalDateTime
 import java.util.function.Supplier
 
 @Suppress("DataClassEqualsAndHashCodeInspection")
@@ -129,6 +130,9 @@ data class UserPersonDetail(
 
   @Embedded
   val accountDetail: AccountDetail? = AccountDetail(),
+
+  @Column(name = "LAST_LOGON_DATE")
+  var lastLogonDate: LocalDateTime? = null,
 ) {
 
   fun isActive() = accountDetail?.isActive() ?: false

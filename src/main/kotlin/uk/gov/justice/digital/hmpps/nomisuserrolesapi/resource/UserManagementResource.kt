@@ -36,6 +36,49 @@ class UserManagementResource(
 ) {
 
   @PreAuthorize("hasRole('ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
+  @PutMapping("/{username}/logon-date")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+    summary = "Record the date and time of last logon for the user",
+    description = "Record the date and time of last logon for the user. Requires role ROLE_MANAGE_NOMIS_USER_ACCOUNT",
+    security = [SecurityRequirement(name = "MANAGE_NOMIS_USER_ACCOUNT")],
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Last logon date recorded",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to record last logon date",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to record the last logon date for the user",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "User not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun recordLogonDate(
+    @Schema(description = "Username", example = "testuser1", required = true)
+    @PathVariable
+    @Size(max = 30, min = 1, message = "username must be between 1 and 30")
+    username: String,
+  ) {
+    userService.recordLogonDate(username)
+  }
+
+  @PreAuthorize("hasRole('ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
   @PutMapping("/{username}/lock-user")
   @ResponseStatus(HttpStatus.OK)
   @Operation(

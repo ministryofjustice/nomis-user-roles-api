@@ -4,11 +4,14 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.springframework.security.crypto.password.PasswordEncoder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
@@ -54,7 +57,27 @@ internal class UserServiceTest {
     passwordEncoder,
     userPasswordRepository,
     userBasicDetailsRepository,
+    recordLogonDate = true,
   )
+
+  @Nested
+  internal inner class recordLogonDate {
+    @Test
+    fun `logon date recorded if user exists`() {
+      whenever(userPersonDetailRepository.findById(anyString())).thenReturn(Optional.of(mock()))
+      userService.recordLogonDate("user1")
+      verify(userPersonDetailRepository).recordLogonDate("user1")
+      verify(telemetryClient).trackEvent("NURA-record-logon-date", mapOf("username" to "user1"), null)
+    }
+
+    @Test
+    fun `logon date not recorded if user does not exist`() {
+      whenever(userPersonDetailRepository.findById(anyString())).thenReturn(Optional.empty())
+      assertThatThrownBy { userService.recordLogonDate("user1") }.isInstanceOf(UserNotFoundException::class.java)
+      verify(userPersonDetailRepository, never()).recordLogonDate(anyString())
+      verifyNoInteractions(telemetryClient)
+    }
+  }
 
   @Nested
   internal inner class authenticateUser {
