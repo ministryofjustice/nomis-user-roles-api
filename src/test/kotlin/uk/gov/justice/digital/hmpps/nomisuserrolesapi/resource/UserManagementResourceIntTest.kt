@@ -41,8 +41,8 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
   private lateinit var userPasswordRepository: UserPasswordRepository
 
   @Nested
-  @DisplayName("PUT /users/{username}/logon-date")
-  inner class RecordLogonTime {
+  @DisplayName("POST /users/{username}/record-sign-in")
+  inner class RecordSignIn {
 
     @BeforeEach
     internal fun createUsers() {
@@ -57,16 +57,16 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
     internal fun deleteUsers() = dataBuilder.deleteAllUsers()
 
     @Test
-    fun `can't record logon date of a user that doesn't exist`() {
-      webTestClient.put().uri("/users/TEST_DATA_USER2/logon-date")
+    fun `can't record sign-in of a user that doesn't exist`() {
+      webTestClient.post().uri("/users/TEST_DATA_USER2/record-sign-in")
         .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
         .exchange()
         .expectStatus().isNotFound
     }
 
     @Test
-    fun `can't record logon date of user without correct role`() {
-      webTestClient.put().uri("/users/TEST_DATA_USER1/logon-date")
+    fun `can't record sign-in of user without correct role`() {
+      webTestClient.post().uri("/users/TEST_DATA_USER1/record-sign-in")
         .headers(setAuthorisation(roles = listOf("ROLE_DUMMY")))
         .exchange()
         .expectStatus().isForbidden
@@ -74,7 +74,7 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `can record logon date of a user that does exist`() {
-      webTestClient.put().uri("/users/TEST_DATA_USER1/logon-date")
+      webTestClient.post().uri("/users/TEST_DATA_USER1/record-sign-in")
         .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
         .exchange()
         .expectStatus().isOk

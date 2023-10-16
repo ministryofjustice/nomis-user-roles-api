@@ -36,20 +36,20 @@ class UserManagementResource(
 ) {
 
   @PreAuthorize("hasRole('ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
-  @PutMapping("/{username}/logon-date")
+  @PostMapping("/{username}/record-sign-in")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
-    summary = "Record a user as having successfully signed in, with current date and time written to the LAST_LOGON_DATE",
-    description = "Record the date and time of last logon for the user. Requires role ROLE_MANAGE_NOMIS_USER_ACCOUNT",
+    summary = "Record a user as having successfully signed in.",
+    description = "Record a user as having successfully signed in, with current date and time written to the LAST_LOGON_DATE. Requires role ROLE_MANAGE_NOMIS_USER_ACCOUNT",
     security = [SecurityRequirement(name = "MANAGE_NOMIS_USER_ACCOUNT")],
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Last logon date recorded",
+        description = "User sign in recorded",
       ),
       ApiResponse(
         responseCode = "400",
-        description = "Incorrect request to record last logon date",
+        description = "Incorrect request to record user sign-in",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
@@ -59,7 +59,7 @@ class UserManagementResource(
       ),
       ApiResponse(
         responseCode = "403",
-        description = "Incorrect permissions to record the last logon date for the user",
+        description = "Incorrect permissions to record the user sign-in",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
@@ -69,7 +69,7 @@ class UserManagementResource(
       ),
     ],
   )
-  fun recordLogonDate(
+  fun recordSignIn(
     @Schema(description = "Username", example = "testuser1", required = true)
     @PathVariable
     @Size(max = 30, min = 1, message = "username must be between 1 and 30")
