@@ -1,5 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
+import org.hamcrest.BaseMatcher
+import org.hamcrest.Description
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -24,6 +26,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPassword
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPasswordRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import java.sql.SQLException
+import java.time.LocalDateTime
 import java.util.Optional
 
 class UserManagementResourceIntTest : IntegrationTestBase() {
@@ -36,6 +39,54 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
 
   @SpyBean
   private lateinit var userPasswordRepository: UserPasswordRepository
+
+  @Nested
+  @DisplayName("POST /users/{username}/record-sign-in")
+  inner class RecordSignIn {
+
+    @BeforeEach
+    internal fun createUsers() {
+      with(dataBuilder) {
+        generalUser()
+          .username("TEST_DATA_USER1")
+          .buildAndSave()
+      }
+    }
+
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    fun `can't record sign-in of a user that doesn't exist`() {
+      webTestClient.post().uri("/users/TEST_DATA_USER2/record-sign-in")
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .exchange()
+        .expectStatus().isNotFound
+    }
+
+    @Test
+    fun `can't record sign-in of user without correct role`() {
+      webTestClient.post().uri("/users/TEST_DATA_USER1/record-sign-in")
+        .headers(setAuthorisation(roles = listOf("ROLE_DUMMY")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `can record logon date of a user that does exist`() {
+      webTestClient.post().uri("/users/TEST_DATA_USER1/record-sign-in")
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .exchange()
+        .expectStatus().isOk
+
+      webTestClient.get().uri("/users/TEST_DATA_USER1")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("lastLogonDate").value(IsCloseTo(LocalDateTime.now()))
+    }
+  }
 
   @Nested
   @DisplayName("PUT /users/{username}/lock-user")
@@ -565,6 +616,21 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
       verify(userPasswordRepository).findById("MARCOROSSI")
+    }
+  }
+
+  class IsCloseTo(
+    private val expected: LocalDateTime,
+  ) : BaseMatcher<LocalDateTime>() {
+    override fun describeTo(description: Description?) {
+      description?.appendValue(expected)
+    }
+
+    override fun matches(actual: Any?): Boolean {
+      val actualTime = LocalDateTime.parse(actual.toString())
+      val justBefore = expected.minusMinutes(1)
+      val justAfter = expected.plusMinutes(1)
+      return justBefore.isBefore(actualTime) && justAfter.isAfter(actualTime)
     }
   }
 }

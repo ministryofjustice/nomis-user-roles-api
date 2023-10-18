@@ -36,6 +36,49 @@ class UserManagementResource(
 ) {
 
   @PreAuthorize("hasRole('ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
+  @PostMapping("/{username}/record-sign-in")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+    summary = "Record a user as having successfully signed in.",
+    description = "Record a user as having successfully signed in, with current date and time written to the LAST_LOGON_DATE. Requires role ROLE_MANAGE_NOMIS_USER_ACCOUNT",
+    security = [SecurityRequirement(name = "MANAGE_NOMIS_USER_ACCOUNT")],
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "User sign in recorded",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to record user sign-in",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to record the user sign-in",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "User not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun recordSignIn(
+    @Schema(description = "Username", example = "testuser1", required = true)
+    @PathVariable
+    @Size(max = 30, min = 1, message = "username must be between 1 and 30")
+    username: String,
+  ) {
+    userService.recordLogonDate(username)
+  }
+
+  @PreAuthorize("hasRole('ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
   @PutMapping("/{username}/lock-user")
   @ResponseStatus(HttpStatus.OK)
   @Operation(

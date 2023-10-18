@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.service
 import UserSpecification
 import com.microsoft.applicationinsights.TelemetryClient
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -68,6 +69,7 @@ class UserService(
   private val passwordEncoder: PasswordEncoder,
   private val userPasswordRepository: UserPasswordRepository,
   private val userBasicDetailsRepository: UserBasicDetailsRepository,
+  @Value("\${feature.record-logon-date:false}") private val recordLogonDate: Boolean = false,
 ) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -379,6 +381,21 @@ class UserService(
     return staffRepository.findById(staffId)
       .map { s -> StaffDetail(s) }
       .orElseThrow(UserNotFoundException("Staff ID $staffId not found"))
+  }
+
+  fun recordLogonDate(username: String) {
+    if (recordLogonDate) {
+      userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+      userPersonDetailRepository.recordLogonDate(username)
+
+      telemetryClient.trackEvent(
+        "NURA-record-logon-date",
+        mapOf(
+          "username" to username,
+        ),
+        null,
+      )
+    }
   }
 
   fun lockUser(username: String) {

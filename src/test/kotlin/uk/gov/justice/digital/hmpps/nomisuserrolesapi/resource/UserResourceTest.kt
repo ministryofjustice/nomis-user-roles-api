@@ -33,6 +33,7 @@ class UserResourceTest {
     admin = false,
     active = true,
     staffStatus = "ACTIVE",
+    lastLogonDate = null,
   )
 
   @Test

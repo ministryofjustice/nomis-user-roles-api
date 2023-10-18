@@ -24,6 +24,13 @@ interface UserPersonDetailRepository :
 
   @Modifying
   @Query(
+    value = "call oms_utils.record_logon_date(:username)",
+    nativeQuery = true,
+  )
+  fun recordLogonDate(username: String)
+
+  @Modifying
+  @Query(
     value = "call oms_utils.create_user(:username, :password, :profile)",
     nativeQuery = true,
   )
