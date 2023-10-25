@@ -1,7 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
-import org.hamcrest.BaseMatcher
-import org.hamcrest.Description
+import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
+import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -26,13 +26,17 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPassword
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPasswordRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import java.sql.SQLException
-import java.time.LocalDateTime
+import java.time.LocalDateTime.now
+import java.time.temporal.ChronoUnit.MINUTES
 import java.util.Optional
 
 class UserManagementResourceIntTest : IntegrationTestBase() {
 
   @Autowired
   private lateinit var dataBuilder: DataBuilder
+
+  @Autowired
+  private lateinit var staffUserAccountsTestRepository: StaffUserAccountsTestRepository
 
   @SpyBean
   private lateinit var userPersonDetailRepository: UserPersonDetailRepository
@@ -79,12 +83,8 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
 
-      webTestClient.get().uri("/users/TEST_DATA_USER1")
-        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
-        .exchange()
-        .expectStatus().isOk
-        .expectBody()
-        .jsonPath("lastLogonDate").value(IsCloseTo(LocalDateTime.now()))
+      assertThat(staffUserAccountsTestRepository.getLastLogonDateFor("TEST_DATA_USER1"))
+        .isCloseTo(now(), within(1, MINUTES))
     }
   }
 
@@ -616,21 +616,6 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
       verify(userPasswordRepository).findById("MARCOROSSI")
-    }
-  }
-
-  class IsCloseTo(
-    private val expected: LocalDateTime,
-  ) : BaseMatcher<LocalDateTime>() {
-    override fun describeTo(description: Description?) {
-      description?.appendValue(expected)
-    }
-
-    override fun matches(actual: Any?): Boolean {
-      val actualTime = LocalDateTime.parse(actual.toString())
-      val justBefore = expected.minusMinutes(1)
-      val justAfter = expected.plusMinutes(1)
-      return justBefore.isBefore(actualTime) && justAfter.isAfter(actualTime)
     }
   }
 }
