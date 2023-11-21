@@ -1,17 +1,18 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.Id
+import jakarta.persistence.OneToMany
+import jakarta.persistence.SequenceGenerator
+import jakarta.persistence.Table
 import org.apache.commons.text.WordUtils
 import org.hibernate.Hibernate
+import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.Where
-import javax.persistence.CascadeType
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.Id
-import javax.persistence.OneToMany
-import javax.persistence.SequenceGenerator
-import javax.persistence.Table
 
 @Entity
 @Table(name = "STAFF_MEMBERS")
@@ -36,6 +37,7 @@ data class Staff(
 
   @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   @Where(clause = "OWNER_CLASS = 'STF' AND INTERNET_ADDRESS_CLASS = 'EMAIL'")
+  @BatchSize(size = 1000)
   val emails: MutableSet<EmailAddress> = mutableSetOf(),
 ) {
 
@@ -45,7 +47,8 @@ data class Staff(
 
   fun adminAccount(): UserPersonDetail? = users.firstOrNull { u -> UsageType.ADMIN == u.type }
 
-  fun primaryEmail(): EmailAddress? = emails.firstOrNull { e -> e.email.contains("justice.gov.uk") } ?: run { emails.firstOrNull() }
+  fun primaryEmail(): EmailAddress? =
+    emails.firstOrNull { e -> e.emailCaseSensitive.contains("justice.gov.uk") } ?: run { emails.firstOrNull() }
 
   val isActive: Boolean
     get() = STAFF_STATUS_ACTIVE == status
@@ -57,7 +60,7 @@ data class Staff(
 
   fun setEmail(email: String) {
     emails.clear()
-    emails.add(EmailAddress(email = email, staff = this))
+    emails.add(EmailAddress(emailCaseSensitive = email, staff = this))
   }
 
   override fun equals(other: Any?): Boolean {

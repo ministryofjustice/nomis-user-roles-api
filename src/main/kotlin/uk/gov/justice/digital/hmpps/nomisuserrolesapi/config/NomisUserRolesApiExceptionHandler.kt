@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.config
 
+import jakarta.validation.ValidationException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.TypeMismatchException
 import org.springframework.http.HttpStatus
@@ -25,7 +26,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserAlreadyExistsE
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserNotFoundException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserRoleAlreadyExistsException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserRoleNotFoundException
-import javax.validation.ValidationException
 
 @RestControllerAdvice
 class NomisUserRolesApiExceptionHandler {
@@ -67,8 +67,8 @@ class NomisUserRolesApiExceptionHandler {
           status = BAD_REQUEST,
           userMessage = "Validation failure: ${e.message}",
           developerMessage = e.message,
-          errorCode = BASIC_VALIDATION_FAILURE
-        )
+          errorCode = BASIC_VALIDATION_FAILURE,
+        ),
       )
   }
 
@@ -81,8 +81,8 @@ class NomisUserRolesApiExceptionHandler {
         ErrorResponse(
           status = BAD_REQUEST,
           userMessage = "Parameter conversion failure: ${e.message}",
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -95,8 +95,8 @@ class NomisUserRolesApiExceptionHandler {
         ErrorResponse(
           status = HttpStatus.NOT_FOUND,
           userMessage = "User not found: ${e.message}",
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -109,8 +109,8 @@ class NomisUserRolesApiExceptionHandler {
         ErrorResponse(
           status = HttpStatus.CONFLICT,
           userMessage = "User already exists: ${e.message}",
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -123,8 +123,8 @@ class NomisUserRolesApiExceptionHandler {
         ErrorResponse(
           status = HttpStatus.NOT_FOUND,
           userMessage = "Role not found: ${e.message}",
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -137,8 +137,8 @@ class NomisUserRolesApiExceptionHandler {
         ErrorResponse(
           status = BAD_REQUEST,
           userMessage = "Role assignment invalid: ${e.message}",
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -151,10 +151,11 @@ class NomisUserRolesApiExceptionHandler {
         ErrorResponse(
           status = HttpStatus.CONFLICT,
           userMessage = "Role already exists: ${e.message}",
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
+
   @ExceptionHandler(CaseloadNotFoundException::class)
   fun handleCaseloadNotFoundException(e: CaseloadNotFoundException): ResponseEntity<ErrorResponse?>? {
     log.debug("Caseload not found exception caught: {}", e.message)
@@ -164,10 +165,11 @@ class NomisUserRolesApiExceptionHandler {
         ErrorResponse(
           status = HttpStatus.NOT_FOUND,
           userMessage = "Caseload not found: ${e.message}",
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
+
   @ExceptionHandler(CaseloadAlreadyExistsException::class)
   fun handleCaseloadAlreadyExistsException(e: CaseloadAlreadyExistsException): ResponseEntity<ErrorResponse?>? {
     log.debug("Caseload already exists exception caught: {}", e.message)
@@ -177,10 +179,11 @@ class NomisUserRolesApiExceptionHandler {
         ErrorResponse(
           status = HttpStatus.CONFLICT,
           userMessage = "Caseload already exists: ${e.message}",
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
+
   @ExceptionHandler(PasswordTooShortException::class)
   fun handlePasswordTooShortException(e: PasswordTooShortException): ResponseEntity<ErrorResponse> {
     log.debug("Password too short exception caught: {}", e.message)
@@ -190,8 +193,8 @@ class NomisUserRolesApiExceptionHandler {
         ErrorResponse(
           status = (BAD_REQUEST.value()),
           userMessage = "Password too short: ${e.message}",
-          developerMessage = (e.message)
-        )
+          developerMessage = (e.message),
+        ),
       )
   }
 
@@ -204,23 +207,27 @@ class NomisUserRolesApiExceptionHandler {
         ErrorResponse(
           status = (BAD_REQUEST.value()),
           userMessage = "Parameter Missing: ${e.message}",
-          developerMessage = (e.message)
-        )
+          developerMessage = (e.message),
+        ),
       )
   }
 
   @ExceptionHandler(MethodArgumentNotValidException::class)
   fun handleValidationException(e: MethodArgumentNotValidException): ResponseEntity<ErrorResponse> {
     log.debug("Validation error (400) returned: {}", e.message)
-    val message = if (e.hasFieldErrors()) { e.fieldError?.defaultMessage } else { e.message }
+    val message = if (e.hasFieldErrors()) {
+      e.fieldError?.defaultMessage
+    } else {
+      e.message
+    }
     return ResponseEntity
       .status(BAD_REQUEST)
       .body(
         ErrorResponse(
           status = (BAD_REQUEST.value()),
           userMessage = "Validation failure: $message",
-          developerMessage = (e.message)
-        )
+          developerMessage = (e.message),
+        ),
       )
   }
 
@@ -235,7 +242,7 @@ class NomisUserRolesApiExceptionHandler {
           userMessage = e.message,
           developerMessage = e.message,
           errorCode = PASSWORD_HAS_BEEN_USED_BEFORE,
-        )
+        ),
       )
   }
 
@@ -250,7 +257,7 @@ class NomisUserRolesApiExceptionHandler {
           userMessage = e.message,
           developerMessage = e.message,
           errorCode = PASSWORD_NOT_ACCEPTABLE,
-        )
+        ),
       )
   }
 
@@ -264,7 +271,7 @@ class NomisUserRolesApiExceptionHandler {
           status = UNAUTHORIZED.value(),
           userMessage = e.message,
           developerMessage = e.message,
-        )
+        ),
       )
   }
 
@@ -277,8 +284,8 @@ class NomisUserRolesApiExceptionHandler {
         ErrorResponse(
           status = INTERNAL_SERVER_ERROR,
           userMessage = "Unexpected error: ${e.message}",
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -291,13 +298,13 @@ data class ErrorResponse(
   val status: Int,
   val errorCode: Int? = null,
   val userMessage: String? = null,
-  val developerMessage: String? = null
+  val developerMessage: String? = null,
 ) {
   constructor(
     status: HttpStatus,
     errorCode: Int? = null,
     userMessage: String? = null,
-    developerMessage: String? = null
+    developerMessage: String? = null,
   ) :
     this(status.value(), errorCode, userMessage, developerMessage)
 }

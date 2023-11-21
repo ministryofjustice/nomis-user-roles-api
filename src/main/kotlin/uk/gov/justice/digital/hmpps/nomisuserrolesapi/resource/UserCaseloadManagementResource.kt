@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import jakarta.validation.Valid
+import jakarta.validation.constraints.Size
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
@@ -21,14 +23,12 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
-import javax.validation.Valid
-import javax.validation.constraints.Size
 
 @RestController
 @Validated
 @RequestMapping("/users", produces = [MediaType.APPLICATION_JSON_VALUE])
 class UserCaseloadManagementResource(
-  private val userService: UserService
+  private val userService: UserService,
 ) {
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
@@ -41,7 +41,7 @@ class UserCaseloadManagementResource(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "User caseload list"
+        description = "User caseload list",
       ),
       ApiResponse(
         responseCode = "400",
@@ -49,9 +49,9 @@ class UserCaseloadManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "401",
@@ -59,9 +59,9 @@ class UserCaseloadManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "403",
@@ -69,15 +69,16 @@ class UserCaseloadManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
-      )
-    ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
   )
   fun getUserCaseloads(
     @Schema(description = "Username", example = "TEST_USER1", required = true)
-    @PathVariable username: String
+    @PathVariable
+    username: String,
   ): UserCaseloadDetail {
     return userService.getCaseloads(username)
   }
@@ -92,7 +93,7 @@ class UserCaseloadManagementResource(
     responses = [
       ApiResponse(
         responseCode = "201",
-        description = "User information with caseload details"
+        description = "User information with caseload details",
       ),
       ApiResponse(
         responseCode = "400",
@@ -100,9 +101,9 @@ class UserCaseloadManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "401",
@@ -110,9 +111,9 @@ class UserCaseloadManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "403",
@@ -120,21 +121,25 @@ class UserCaseloadManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
-      )
-    ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
   )
   fun addCaseload(
     @Schema(
       description = "Username of the account to add caseload",
       example = "TEST_USER2",
-      required = true
+      required = true,
     )
-    @PathVariable @Size(max = 30, min = 1, message = "Username must be between 1 and 30") username: String,
+    @PathVariable
+    @Size(max = 30, min = 1, message = "Username must be between 1 and 30")
+    username: String,
     @Schema(description = "Caseload Id", example = "LEI", required = true)
-    @PathVariable @Size(max = 6, min = 3, message = "Caseload must be between 3 and 6") caseloadId: String,
+    @PathVariable
+    @Size(max = 6, min = 3, message = "Caseload must be between 3 and 6")
+    caseloadId: String,
   ): UserCaseloadDetail {
     return userService.addCaseloadToUser(username, caseloadId)
   }
@@ -149,7 +154,7 @@ class UserCaseloadManagementResource(
     responses = [
       ApiResponse(
         responseCode = "201",
-        description = "User information with caseload details"
+        description = "User information with caseload details",
       ),
       ApiResponse(
         responseCode = "400",
@@ -157,9 +162,9 @@ class UserCaseloadManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "401",
@@ -167,9 +172,9 @@ class UserCaseloadManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "403",
@@ -177,20 +182,23 @@ class UserCaseloadManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
-      )
-    ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
   )
   fun addCaseloads(
     @Schema(
       description = "Username of the account to add caseloads",
       example = "TEST_USER2",
-      required = true
+      required = true,
     )
-    @PathVariable @Size(max = 30, min = 1, message = "Username must be between 1 and 30") username: String,
-    @RequestBody @Valid caseloadIds: List<String>,
+    @PathVariable
+    @Size(max = 30, min = 1, message = "Username must be between 1 and 30")
+    username: String,
+    @RequestBody @Valid
+    caseloadIds: List<String>,
   ): UserCaseloadDetail {
     return userService.addCaseloadsToUser(username, caseloadIds)
   }
@@ -204,7 +212,7 @@ class UserCaseloadManagementResource(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "User information with active caseload details"
+        description = "User information with active caseload details",
       ),
       ApiResponse(
         responseCode = "400",
@@ -212,9 +220,9 @@ class UserCaseloadManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "401",
@@ -222,9 +230,9 @@ class UserCaseloadManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "403",
@@ -232,21 +240,25 @@ class UserCaseloadManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
-      )
-    ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
   )
   fun setDefaultCaseload(
     @Schema(
       description = "Username to default caseload",
       example = "TEST_USER2",
-      required = true
+      required = true,
     )
-    @PathVariable @Size(max = 30, min = 1, message = "Username must be between 1 and 30") username: String,
+    @PathVariable
+    @Size(max = 30, min = 1, message = "Username must be between 1 and 30")
+    username: String,
     @Schema(description = "Default caseload Id", example = "LEI", required = true)
-    @PathVariable @Size(max = 6, min = 3, message = "Caseload must be between 3 and 6") defaultCaseloadId: String,
+    @PathVariable
+    @Size(max = 6, min = 3, message = "Caseload must be between 3 and 6")
+    defaultCaseloadId: String,
   ): UserCaseloadDetail {
     return userService.setDefaultCaseload(username, defaultCaseloadId)
   }
@@ -260,7 +272,7 @@ class UserCaseloadManagementResource(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "User information with caseload details"
+        description = "User information with caseload details",
       ),
       ApiResponse(
         responseCode = "400",
@@ -268,9 +280,9 @@ class UserCaseloadManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "401",
@@ -278,9 +290,9 @@ class UserCaseloadManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "403",
@@ -288,21 +300,25 @@ class UserCaseloadManagementResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
-      )
-    ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
   )
   fun removeCaseload(
     @Schema(
       description = "Username to remove caseload from",
       example = "TEST_USER2",
-      required = true
+      required = true,
     )
-    @PathVariable @Size(max = 30, min = 1, message = "Username must be between 1 and 30") username: String,
+    @PathVariable
+    @Size(max = 30, min = 1, message = "Username must be between 1 and 30")
+    username: String,
     @Schema(description = "Caseload ID to remove from this user", example = "LEI", required = true)
-    @PathVariable @Size(max = 6, min = 3, message = "Caseload must be between 3 and 6") caseloadId: String,
+    @PathVariable
+    @Size(max = 6, min = 3, message = "Caseload must be between 3 and 6")
+    caseloadId: String,
   ): UserCaseloadDetail {
     return userService.removeCaseload(username, caseloadId)
   }

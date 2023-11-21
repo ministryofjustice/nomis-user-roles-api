@@ -1,5 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
+import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
+import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -24,6 +26,8 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPassword
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPasswordRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import java.sql.SQLException
+import java.time.LocalDateTime.now
+import java.time.temporal.ChronoUnit.MINUTES
 import java.util.Optional
 
 class UserManagementResourceIntTest : IntegrationTestBase() {
@@ -31,11 +35,58 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
   @Autowired
   private lateinit var dataBuilder: DataBuilder
 
+  @Autowired
+  private lateinit var staffUserAccountsTestRepository: StaffUserAccountsTestRepository
+
   @SpyBean
   private lateinit var userPersonDetailRepository: UserPersonDetailRepository
 
   @SpyBean
   private lateinit var userPasswordRepository: UserPasswordRepository
+
+  @Nested
+  @DisplayName("POST /users/{username}/record-sign-in")
+  inner class RecordSignIn {
+
+    @BeforeEach
+    internal fun createUsers() {
+      with(dataBuilder) {
+        generalUser()
+          .username("TEST_DATA_USER1")
+          .buildAndSave()
+      }
+    }
+
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    fun `can't record sign-in of a user that doesn't exist`() {
+      webTestClient.post().uri("/users/TEST_DATA_USER2/record-sign-in")
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .exchange()
+        .expectStatus().isNotFound
+    }
+
+    @Test
+    fun `can't record sign-in of user without correct role`() {
+      webTestClient.post().uri("/users/TEST_DATA_USER1/record-sign-in")
+        .headers(setAuthorisation(roles = listOf("ROLE_DUMMY")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `can record logon date of a user that does exist`() {
+      webTestClient.post().uri("/users/TEST_DATA_USER1/record-sign-in")
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .exchange()
+        .expectStatus().isOk
+
+      assertThat(staffUserAccountsTestRepository.getLastLogonDateFor("TEST_DATA_USER1"))
+        .isCloseTo(now(), within(1, MINUTES))
+    }
+  }
 
   @Nested
   @DisplayName("PUT /users/{username}/lock-user")
@@ -52,9 +103,9 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
               firstName = "Locking",
               lastName = "User",
               email = "test@test.com",
-              defaultCaseloadId = "PVI"
-            )
-          )
+              defaultCaseloadId = "PVI",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isCreated
@@ -244,7 +295,6 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     internal fun `must have role ROLE_MANAGE_NOMIS_USER_ACCOUNT`() {
-
       webTestClient.put().uri("/users/JMULLARD_GEN/change-password")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .body(BodyInserters.fromValue("hdhshshhhabad73hde"))
@@ -271,10 +321,10 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             SQLException(
               "Password has been used before",
               "SQLSTATE",
-              20087
-            )
-          )
-        )
+              20087,
+            ),
+          ),
+        ),
       ).whenever(userPersonDetailRepository).changePassword(any(), any())
 
       webTestClient.put().uri("/users/JMULLARD_GEN/change-password")
@@ -296,10 +346,10 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             SQLException(
               "Password can not contain password",
               "SQLSTATE",
-              20001
-            )
-          )
-        )
+              20001,
+            ),
+          ),
+        ),
       ).whenever(userPersonDetailRepository).changePassword(any(), any())
 
       webTestClient.put().uri("/users/JMULLARD_GEN/change-password")
@@ -316,7 +366,7 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
     @Test
     internal fun `any unexpected NOMIS error results in a 500 error`() {
       doThrow(JpaSystemException(RuntimeException(SQLException("Bind error", "SQLSTATE", -803)))).whenever(
-        userPersonDetailRepository
+        userPersonDetailRepository,
       ).changePassword(any(), any())
 
       webTestClient.put().uri("/users/JMULLARD_GEN/change-password")
@@ -356,8 +406,8 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             NameDetail(
               firstName = "NewFirstName",
               lastName = "NewLastName",
-            )
-          )
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isNotFound
@@ -372,8 +422,8 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             NameDetail(
               firstName = "NewFirstName",
               lastName = "NewLastName",
-            )
-          )
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isForbidden
@@ -388,8 +438,8 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             NameDetail(
               firstName = "87234gjhsdbfsdfh23r23f23g23",
               lastName = "lastName",
-            )
-          )
+            ),
+          ),
         )
         .exchange()
         .expectStatus().is4xxClientError
@@ -407,8 +457,8 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             NameDetail(
               firstName = "firstname",
               lastName = "sdifhosidfhjoisdjfoiwejfoiwjefwefwefrdrd",
-            )
-          )
+            ),
+          ),
         )
         .exchange()
         .expectStatus().is4xxClientError
@@ -426,8 +476,8 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             NameDetail(
               firstName = "Newfirstname",
               lastName = "O'NeilLastName",
-            )
-          )
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isOk
@@ -445,8 +495,8 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             NameDetail(
               firstName = "Sarah-Louise",
               lastName = "O'NeilLastName",
-            )
-          )
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isOk
@@ -464,8 +514,8 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             NameDetail(
               firstName = "April",
               lastName = "O’shea",
-            )
-          )
+            ),
+          ),
         )
         .exchange()
         .expectStatus().is4xxClientError
@@ -476,7 +526,6 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `can change name of a user that does exist`() {
-
       webTestClient.get().uri("/users/TEST_DATA_USER1")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -492,8 +541,8 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
             NameDetail(
               firstName = "NewFirstName",
               lastName = "NewLastName",
-            )
-          )
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isOk
@@ -557,9 +606,9 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         Optional.of(
           UserPassword(
             "MARCOROSSI",
-            "S:C59371608F601E454682E0B5293F2752A1DC31C4BDEF9D50802212AD981E"
-          )
-        )
+            "S:C59371608F601E454682E0B5293F2752A1DC31C4BDEF9D50802212AD981E",
+          ),
+        ),
       )
       webTestClient.post().uri("/users/MARCOROSSI/authenticate")
         .bodyValue(mapOf("password" to "password123456"))

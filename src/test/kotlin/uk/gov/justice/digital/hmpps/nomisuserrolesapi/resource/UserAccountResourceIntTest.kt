@@ -22,7 +22,6 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `an admin database user can be created`() {
-
       webTestClient.post().uri("/users/admin-account")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .body(
@@ -31,9 +30,9 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
               username = "testuser2",
               firstName = "Test",
               lastName = "U'ser",
-              email = "test@test.com"
-            )
-          )
+              email = "test@test.com",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isCreated
@@ -47,7 +46,7 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           "primaryEmail": "test@test.com",
           "accountType": "ADMIN"
           }
-          """
+          """,
         )
 
       webTestClient.get().uri("/users/TESTUSER2")
@@ -63,7 +62,6 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `a database user cannot be created without correct role`() {
-
       webTestClient.post().uri("/users/general-account")
         .headers(setAuthorisation(roles = listOf("ROLE_DUMMY")))
         .body(
@@ -73,9 +71,9 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
               firstName = "Test-User'",
               lastName = "User",
               defaultCaseloadId = "BXI",
-              email = "test@test.com"
-            )
-          )
+              email = "test@test.com",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isForbidden
@@ -83,7 +81,6 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `a local admin database user can be created`() {
-
       webTestClient.post().uri("/users/local-admin-account")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .body(
@@ -93,9 +90,9 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
               firstName = "Laa-ln'",
               lastName = "U'ser-ls",
               email = "laa@test.com",
-              localAdminGroup = "PVI"
-            )
-          )
+              localAdminGroup = "PVI",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isCreated
@@ -109,13 +106,12 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           "primaryEmail": "laa@test.com",
           "accountType": "ADMIN"
           }
-          """
+          """,
         )
     }
 
     @Test
     fun `a general user can be created`() {
-
       webTestClient.post().uri("/users/general-account")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .body(
@@ -125,9 +121,9 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
               firstName = "Test",
               lastName = "U'ser",
               defaultCaseloadId = "BXI",
-              email = "testgen@test.com"
-            )
-          )
+              email = "testgen@test.com",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isCreated
@@ -141,7 +137,7 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           "primaryEmail": "testgen@test.com",
           "accountType": "GENERAL"
           }
-          """
+          """,
         )
     }
   }
@@ -151,7 +147,6 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
   inner class LinkUsers {
     @Test
     fun `a local admin user can be linked to  general database user can local admin can search for general user`() {
-
       webTestClient.post().uri("/users/local-admin-account")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .body(
@@ -161,9 +156,9 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
               firstName = "Laa",
               lastName = "User",
               email = "laa@test.com",
-              localAdminGroup = "WWI"
-            )
-          )
+              localAdminGroup = "WWI",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isCreated
@@ -177,7 +172,7 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           "primaryEmail": "laa@test.com",
           "accountType": "ADMIN"
           }
-          """
+          """,
         )
 
       webTestClient.post().uri("/users/link-general-account/LAA_USER1")
@@ -186,9 +181,9 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           BodyInserters.fromValue(
             CreateLinkedGeneralUserRequest(
               username = "generaluser1",
-              defaultCaseloadId = "WWI"
-            )
-          )
+              defaultCaseloadId = "WWI",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isCreated
@@ -202,7 +197,7 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
         .jsonPath("adminAccount.active").isEqualTo("false")
         .jsonPath("adminAccount.accountType").isEqualTo("ADMIN")
 
-      webTestClient.get().uri { it.path("/users/").queryParam("nameFilter", "generaluser1").build() }
+      webTestClient.get().uri { it.path("/users").queryParam("nameFilter", "generaluser1").build() }
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "LAA_USER1"))
         .exchange()
         .expectStatus().isOk
@@ -213,7 +208,6 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `a user can be link to an existing account`() {
-
       webTestClient.post().uri("/users/admin-account")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .body(
@@ -222,9 +216,9 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
               username = "testuser4",
               firstName = "Test-'fn",
               lastName = "User'-ln",
-              email = "test@test.com"
-            )
-          )
+              email = "test@test.com",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isCreated
@@ -235,9 +229,9 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           BodyInserters.fromValue(
             CreateLinkedGeneralUserRequest(
               username = "testuser5",
-              defaultCaseloadId = "BXI"
-            )
-          )
+              defaultCaseloadId = "BXI",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isCreated
@@ -283,7 +277,6 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `a user cannot be link to an existing account of same ADMIN type`() {
-
       webTestClient.post().uri("/users/admin-account")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .body(
@@ -292,9 +285,9 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
               username = "testuser6",
               firstName = "Test",
               lastName = "User",
-              email = "test@test.com"
-            )
-          )
+              email = "test@test.com",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isCreated
@@ -304,9 +297,9 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
         .body(
           BodyInserters.fromValue(
             CreateLinkedAdminUserRequest(
-              username = "testuser5"
-            )
-          )
+              username = "testuser5",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().is4xxClientError
@@ -316,7 +309,6 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `a user cannot be link to an existing account of same GENERAL type`() {
-
       webTestClient.post().uri("/users/general-account")
         .headers(setAuthorisation(roles = listOf("ROLE_CREATE_USER")))
         .body(
@@ -326,9 +318,9 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
               firstName = "Test",
               lastName = "User",
               defaultCaseloadId = "BXI",
-              email = "test@test.com"
-            )
-          )
+              email = "test@test.com",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isCreated
@@ -339,9 +331,9 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
           BodyInserters.fromValue(
             CreateLinkedGeneralUserRequest(
               username = "testuser8",
-              defaultCaseloadId = "BXI"
-            )
-          )
+              defaultCaseloadId = "BXI",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().is4xxClientError

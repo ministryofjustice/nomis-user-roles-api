@@ -209,6 +209,12 @@ class UserResourceIntTest : IntegrationTestBase() {
           .email("fred@justice.gov.uk")
           .atPrison("WWI")
           .buildAndSave()
+        generalUser().username("abe.tozzi")
+          .firstName("Abe")
+          .lastName("Tozzi")
+          .email("Abe@justice.gov.uk")
+          .atPrison("LEI")
+          .buildAndSave()
       }
     }
 
@@ -271,6 +277,20 @@ class UserResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("$").isArray
         .jsonPath(matchByUserName, "marco.rossi").exists()
+    }
+
+    @Test
+    fun `get user by email ignore case`() {
+      webTestClient.get().uri {
+        it.path("/users/user")
+          .queryParam("email", "abe@justice.gov.uk").build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").isArray
+        .jsonPath(matchByUserName, "abe.tozzi").exists()
     }
 
     @Test
@@ -589,7 +609,7 @@ class UserResourceIntTest : IntegrationTestBase() {
 
       @Test
       fun `they can call the endpoint with the ROLE_MAINTAIN_ACCESS_ROLES_ADMIN role`() {
-        webTestClient.get().uri("/users/")
+        webTestClient.get().uri("/users")
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
           .exchange()
           .expectStatus().isOk
@@ -603,7 +623,7 @@ class UserResourceIntTest : IntegrationTestBase() {
 
       @Test
       internal fun `will return the count of DPS roles`() {
-        webTestClient.get().uri("/users/")
+        webTestClient.get().uri("/users")
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
           .exchange()
           .expectStatus().isOk
@@ -617,7 +637,7 @@ class UserResourceIntTest : IntegrationTestBase() {
 
       @Test
       internal fun `will return the email addresss`() {
-        webTestClient.get().uri("/users/")
+        webTestClient.get().uri("/users")
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
           .exchange()
           .expectStatus().isOk
@@ -632,7 +652,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       fun `blank filters are ignored`() {
         webTestClient.get().uri {
-          it.path("/users/")
+          it.path("/users")
             .queryParam("nameFilter", "")
             .queryParam("caseload", "")
             .queryParam("activeCaseload", "")
@@ -652,7 +672,7 @@ class UserResourceIntTest : IntegrationTestBase() {
 
       @Test
       fun `they can filter by user name`() {
-        webTestClient.get().uri { it.path("/users/").queryParam("nameFilter", "mar").build() }
+        webTestClient.get().uri { it.path("/users").queryParam("nameFilter", "mar").build() }
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
           .exchange()
           .expectStatus().isOk
@@ -664,7 +684,7 @@ class UserResourceIntTest : IntegrationTestBase() {
 
       @Test
       fun `they can filter by account status`() {
-        webTestClient.get().uri { it.path("/users/").queryParam("status", "ACTIVE").build() }
+        webTestClient.get().uri { it.path("/users").queryParam("status", "ACTIVE").build() }
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
           .exchange()
           .expectStatus().isOk
@@ -676,7 +696,7 @@ class UserResourceIntTest : IntegrationTestBase() {
 
       @Test
       fun `invalid account status filter is a bad request`() {
-        webTestClient.get().uri { it.path("/users/").queryParam("status", "INACT").build() }
+        webTestClient.get().uri { it.path("/users").queryParam("status", "INACT").build() }
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
           .exchange()
           .expectStatus().isBadRequest
@@ -684,7 +704,7 @@ class UserResourceIntTest : IntegrationTestBase() {
 
       @Test
       fun `they can filter by active caseload`() {
-        webTestClient.get().uri { it.path("/users/").queryParam("activeCaseload", "WWI").build() }
+        webTestClient.get().uri { it.path("/users").queryParam("activeCaseload", "WWI").build() }
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
           .exchange()
           .expectStatus().isOk
@@ -696,7 +716,7 @@ class UserResourceIntTest : IntegrationTestBase() {
 
       @Test
       fun `they can filter by caseload`() {
-        webTestClient.get().uri { it.path("/users/").queryParam("caseload", "WWI").build() }
+        webTestClient.get().uri { it.path("/users").queryParam("caseload", "WWI").build() }
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
           .exchange()
           .expectStatus().isOk
@@ -710,7 +730,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       fun `they can filter by role`() {
         webTestClient.get().uri {
-          it.path("/users/")
+          it.path("/users")
             .queryParam("accessRoles", "CREATE_CATEGORISATION")
             .queryParam("accessRoles", "GLOBAL_SEARCH")
             .build()
@@ -727,7 +747,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       fun `they can filter by with inclusive role`() {
         webTestClient.get().uri {
-          it.path("/users/")
+          it.path("/users")
             .queryParam("accessRoles", "CREATE_CATEGORISATION")
             .queryParam("accessRoles", "GLOBAL_SEARCH")
             .queryParam("inclusiveRoles", true)
@@ -772,7 +792,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       fun `they can filter by user name with multiple emails`() {
         webTestClient.get()
-          .uri { it.path("/users/").queryParam("status", "ALL").queryParam("nameFilter", "dav").build() }
+          .uri { it.path("/users").queryParam("status", "ALL").queryParam("nameFilter", "dav").build() }
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
           .exchange()
           .expectStatus().isOk
@@ -783,7 +803,7 @@ class UserResourceIntTest : IntegrationTestBase() {
 
       @Test
       fun `they can call the endpoint with the ROLE_MAINTAIN_ACCESS_ROLES role`() {
-        webTestClient.get().uri("/users/")
+        webTestClient.get().uri("/users")
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
           .exchange()
           .expectStatus().isOk
@@ -803,12 +823,12 @@ class UserResourceIntTest : IntegrationTestBase() {
 
       @Test
       internal fun `they would see all users, including themselves,  if they have the nation admin role`() {
-        webTestClient.get().uri("/users/")
+        webTestClient.get().uri("/users")
           .headers(
             setAuthorisation(
               roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN"),
-              user = "jane.lsa.wwi"
-            )
+              user = "jane.lsa.wwi",
+            ),
           )
           .exchange()
           .expectStatus().isOk
@@ -824,7 +844,7 @@ class UserResourceIntTest : IntegrationTestBase() {
 
       @Test
       fun `they can filter by user name`() {
-        webTestClient.get().uri { it.path("/users/").queryParam("nameFilter", "mar").build() }
+        webTestClient.get().uri { it.path("/users").queryParam("nameFilter", "mar").build() }
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
           .exchange()
           .expectStatus().isOk
@@ -835,7 +855,7 @@ class UserResourceIntTest : IntegrationTestBase() {
 
       @Test
       fun `they can download with filter by user name`() {
-        webTestClient.get().uri { it.path("/users/download/").queryParam("nameFilter", "mar").build() }
+        webTestClient.get().uri { it.path("/users/download").queryParam("nameFilter", "mar").build() }
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
           .exchange()
           .expectStatus().isOk
@@ -854,13 +874,13 @@ class UserResourceIntTest : IntegrationTestBase() {
                               },
                                   "dpsRoleCount": 0
                             }]
-                            """
+                            """,
           )
       }
 
       @Test
       fun `they can filter by account status`() {
-        webTestClient.get().uri { it.path("/users/").queryParam("status", "ACTIVE").build() }
+        webTestClient.get().uri { it.path("/users").queryParam("status", "ACTIVE").build() }
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
           .exchange()
           .expectStatus().isOk
@@ -871,7 +891,7 @@ class UserResourceIntTest : IntegrationTestBase() {
 
       @Test
       fun `they can filter by active caseload`() {
-        webTestClient.get().uri { it.path("/users/").queryParam("activeCaseload", "BXI").build() }
+        webTestClient.get().uri { it.path("/users").queryParam("activeCaseload", "BXI").build() }
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
           .exchange()
           .expectStatus().isOk
@@ -883,7 +903,7 @@ class UserResourceIntTest : IntegrationTestBase() {
 
       @Test
       fun `they can filter by caseload`() {
-        webTestClient.get().uri { it.path("/users/").queryParam("caseload", "BXI").build() }
+        webTestClient.get().uri { it.path("/users").queryParam("caseload", "BXI").build() }
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
           .exchange()
           .expectStatus().isOk
@@ -968,7 +988,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       internal fun `can order by first name, last name ascending`() {
         webTestClient.get().uri {
-          it.path("/users/")
+          it.path("/users")
             .queryParam("status", "ACTIVE")
             .queryParam("sort", "firstName,lastName")
             .build()
@@ -991,7 +1011,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       internal fun `can order by last name, first name descending`() {
         webTestClient.get().uri {
-          it.path("/users/")
+          it.path("/users")
             .queryParam("status", "ACTIVE")
             .queryParam("sort", "lastName,firstName,desc")
             .build()
@@ -1014,7 +1034,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       internal fun `default order is last name, first name ascending`() {
         webTestClient.get().uri {
-          it.path("/users/")
+          it.path("/users")
             .queryParam("status", "ACTIVE")
             .build()
         }
@@ -1036,7 +1056,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       internal fun `can order by username`() {
         webTestClient.get().uri {
-          it.path("/users/")
+          it.path("/users")
             .queryParam("status", "ACTIVE")
             .queryParam("sort", "username,asc")
             .build()
@@ -1059,7 +1079,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       internal fun `can order by activeCaseload`() {
         webTestClient.get().uri {
-          it.path("/users/")
+          it.path("/users")
             .queryParam("status", "ACTIVE")
             .queryParam("sort", "activeCaseload,username,asc")
             .build()
@@ -1076,7 +1096,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       internal fun `can order by account status`() {
         webTestClient.get().uri {
-          it.path("/users/")
+          it.path("/users")
             .queryParam("sort", "status,username,asc")
             .build()
         }
@@ -1088,7 +1108,7 @@ class UserResourceIntTest : IntegrationTestBase() {
           .jsonPath("$.content[0].active").isEqualTo(false)
 
         webTestClient.get().uri {
-          it.path("/users/")
+          it.path("/users")
             .queryParam("sort", "status,username,desc")
             .build()
         }
@@ -1103,7 +1123,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       internal fun `paging information is sent in the response`() {
         webTestClient.get().uri {
-          it.path("/users/")
+          it.path("/users")
             .build()
         }
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
@@ -1120,7 +1140,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       internal fun `can request a different page size`() {
         webTestClient.get().uri {
-          it.path("/users/")
+          it.path("/users")
             .queryParam("size", "20")
             .queryParam("sort", "username,asc")
             .build()
@@ -1140,7 +1160,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       internal fun `can request a different page`() {
         webTestClient.get().uri {
-          it.path("/users/")
+          it.path("/users")
             .queryParam("size", "20")
             .queryParam("page", "3")
             .queryParam("sort", "username,asc")
@@ -1192,9 +1212,9 @@ class UserResourceIntTest : IntegrationTestBase() {
               firstName = "Test",
               lastName = "User",
               defaultCaseloadId = "BXI",
-              email = "test@test.com"
-            )
-          )
+              email = "test@test.com",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isCreated
@@ -1251,6 +1271,13 @@ class UserResourceIntTest : IntegrationTestBase() {
         .inactive()
         .buildAndSave()
 
+      dataBuilder.localAdministrator()
+        .username("BOBI.FREEMAN")
+        .firstName("BOBO")
+        .lastName("FREEMAN")
+        .atPrison("MDI")
+        .buildAndSave()
+
       with(dataBuilder) {
         generalUser().username("marco.rossi")
           .firstName("Marco")
@@ -1276,7 +1303,7 @@ class UserResourceIntTest : IntegrationTestBase() {
     @Test
     fun `they can filter by LSAs Only`() {
       webTestClient.get().uri {
-        it.path("/users/")
+        it.path("/users")
           .queryParam("showOnlyLSAs", true)
           .build()
       }
@@ -1284,13 +1311,13 @@ class UserResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("$.totalElements").isEqualTo(4)
+        .jsonPath("$.totalElements").isEqualTo(5)
         .jsonPath("$.content").value<JSONArray> {
           assertThat(it.map { m -> (m as Map<*, *>)["username"] }).contains(
             "RIZ.MARSHALL",
             "TOM.MARSHALL",
             "TIM.MARSHALL",
-            "TIM.SMITH"
+            "TIM.SMITH",
           )
         }
     }
@@ -1305,8 +1332,8 @@ class UserResourceIntTest : IntegrationTestBase() {
         .buildAndSave()
 
       webTestClient.get().uri {
-        it.path("/users/")
-          .queryParam("size", "5")
+        it.path("/users")
+          .queryParam("size", "6")
           .queryParam("showOnlyLSAs", true)
           .build()
       }
@@ -1314,13 +1341,13 @@ class UserResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("$.totalElements").isEqualTo(5)
+        .jsonPath("$.totalElements").isEqualTo(6)
     }
 
     @Test
     fun `they can filter by with LSAs Only with active caseload`() {
       webTestClient.get().uri {
-        it.path("/users/")
+        it.path("/users")
           .queryParam("activeCaseload", "LEI")
           .queryParam("showOnlyLSAs", true)
           .build()
@@ -1333,7 +1360,7 @@ class UserResourceIntTest : IntegrationTestBase() {
         .jsonPath("$.content").value<JSONArray> {
           assertThat(it.map { m -> (m as Map<*, *>)["username"] }).containsExactlyInAnyOrder(
             "TIM.MARSHALL",
-            "TIM.SMITH"
+            "TIM.SMITH",
           )
         }
     }
@@ -1341,7 +1368,7 @@ class UserResourceIntTest : IntegrationTestBase() {
     @Test
     fun `they can filter by with LSAs Only with active caseload active LSA`() {
       webTestClient.get().uri {
-        it.path("/users/")
+        it.path("/users")
           .queryParam("caseload", "MDI")
           .queryParam("showOnlyLSAs", true)
           .build()
@@ -1350,13 +1377,64 @@ class UserResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("$.totalElements").isEqualTo(4)
+        .jsonPath("$.totalElements").isEqualTo(5)
         .jsonPath("$.content").value<JSONArray> {
           assertThat(it.map { m -> (m as Map<*, *>)["username"] }).containsExactlyInAnyOrder(
             "RIZ.MARSHALL",
             "TIM.MARSHALL",
             "TOM.MARSHALL",
-            "TIM.SMITH"
+            "BOBI.FREEMAN",
+            "TIM.SMITH",
+          )
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).doesNotContain("BOB.FREEMAN")
+        }
+    }
+
+    @Test
+    fun `can only show a active LSA for specific Prison`() {
+      webTestClient.get().uri {
+        it.path("/users")
+          .queryParam("showOnlyLSAs", true)
+          .queryParam("inclusiveRoles", false)
+          .queryParam("nameFilter", "bob")
+          .queryParam("status", "ALL")
+          .queryParam("restrictToActiveGroup", true)
+          .queryParam("caseload", "MDI")
+          .queryParam("activeCaseload", "MDI")
+          .build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$.totalElements").isEqualTo(1)
+        .jsonPath("$.content").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).containsExactlyInAnyOrder(
+            "BOBI.FREEMAN",
+          )
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).doesNotContain("BOB.FREEMAN")
+        }
+    }
+
+    @Test
+    fun `can only show a active LSA for any Prison`() {
+      webTestClient.get().uri {
+        it.path("/users")
+          .queryParam("showOnlyLSAs", true)
+          .queryParam("inclusiveRoles", false)
+          .queryParam("nameFilter", "bob")
+          .queryParam("status", "ALL")
+          .queryParam("restrictToActiveGroup", true)
+          .build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$.totalElements").isEqualTo(1)
+        .jsonPath("$.content").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["username"] }).containsExactlyInAnyOrder(
+            "BOBI.FREEMAN",
           )
           assertThat(it.map { m -> (m as Map<*, *>)["username"] }).doesNotContain("BOB.FREEMAN")
         }
@@ -1365,7 +1443,7 @@ class UserResourceIntTest : IntegrationTestBase() {
     @Test
     fun `they can download filter by with LSAs Only`() {
       webTestClient.get().uri {
-        it.path("/users/download/")
+        it.path("/users/download")
           .queryParam("showOnlyLSAs", true)
           .build()
       }
@@ -1378,7 +1456,8 @@ class UserResourceIntTest : IntegrationTestBase() {
             "RIZ.MARSHALL",
             "TOM.MARSHALL",
             "TIM.MARSHALL",
-            "TIM.SMITH"
+            "BOBI.FREEMAN",
+            "TIM.SMITH",
           )
         }
     }
@@ -1386,7 +1465,7 @@ class UserResourceIntTest : IntegrationTestBase() {
     @Test
     fun `they can download filter by with LSAs Only with active caseload`() {
       webTestClient.get().uri {
-        it.path("/users/download/")
+        it.path("/users/download")
           .queryParam("activeCaseload", "LEI")
           .queryParam("showOnlyLSAs", true)
           .build()
@@ -1398,9 +1477,90 @@ class UserResourceIntTest : IntegrationTestBase() {
         .jsonPath("$").value<JSONArray> {
           assertThat(it.map { m -> (m as Map<*, *>)["username"] }).containsExactlyInAnyOrder(
             "TIM.MARSHALL",
-            "TIM.SMITH"
+            "TIM.SMITH",
           )
         }
+    }
+  }
+
+  @DisplayName("GET /users/basic/{username}")
+  @Nested
+  inner class GetUserBasicDetailsByUsername {
+    @BeforeEach
+    internal fun createUsers() {
+      with(dataBuilder) {
+        generalUser().username("marco.rossi").firstName("Marco").lastName("Rossi").status(AccountStatus.EXPIRED_GRACE).buildAndSave()
+      }
+    }
+
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    fun `access forbidden when no authority`() {
+      webTestClient.get().uri("/users/basic/marco.rossi")
+        .exchange()
+        .expectStatus().isUnauthorized
+    }
+
+    @Test
+    fun `access forbidden when no role`() {
+      webTestClient.get().uri("/users/basic/marco.rossi")
+        .headers(setAuthorisation(roles = listOf()))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `get user forbidden with wrong role`() {
+      webTestClient.get().uri("/users/basic/marco.rossi")
+        .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `get user not found`() {
+      webTestClient.get().uri("/users/basic/dummy")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isNotFound
+    }
+
+    @Test
+    fun `get user with role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN`() {
+      webTestClient.get().uri("/users/basic/marco.rossi")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("username").isEqualTo("marco.rossi")
+        .jsonPath("accountStatus").isEqualTo("EXPIRED_GRACE")
+        .jsonPath("firstName").isEqualTo("Marco")
+        .jsonPath("lastName").isEqualTo("Rossi")
+        .jsonPath("enabled").isEqualTo("true")
+        .jsonPath("activeCaseloadId").isEqualTo("WWI")
+        .jsonPath("staffId").exists()
+    }
+
+    @Test
+    fun `get user with role ROLE_MAINTAIN_ACCESS_ROLES`() {
+      webTestClient.get().uri("/users/basic/marco.rossi")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("staffId").exists()
+    }
+
+    @Test
+    fun `get user with role ROLE_MANAGE_NOMIS_USER_ACCOUNT`() {
+      webTestClient.get().uri("/users/basic/marco.rossi")
+        .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("staffId").exists()
     }
   }
 }

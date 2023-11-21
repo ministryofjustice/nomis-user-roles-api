@@ -25,7 +25,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
 @RequestMapping("/me", produces = [MediaType.APPLICATION_JSON_VALUE])
 class MeResource(
   private val userService: UserService,
-  private val authenticationFacade: AuthenticationFacade
+  private val authenticationFacade: AuthenticationFacade,
 ) {
 
   @GetMapping("")
@@ -35,24 +35,24 @@ class MeResource(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "User Information Returned"
+        description = "User Information Returned",
       ),
       ApiResponse(
         responseCode = "400",
         description = "Incorrect request to get user information",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to get a user",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
   )
   fun getMyUserDetails(): UserDetail =
 
@@ -68,7 +68,7 @@ class MeResource(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "User caseload list"
+        description = "User caseload list",
       ),
       ApiResponse(
         responseCode = "400",
@@ -76,9 +76,9 @@ class MeResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "401",
@@ -86,9 +86,9 @@ class MeResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "403",
@@ -96,11 +96,11 @@ class MeResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
-      )
-    ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
   )
   fun getMyCaseloads(): UserCaseloadDetail {
     authenticationFacade.currentUsername?.run {
@@ -116,7 +116,7 @@ class MeResource(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "User role list"
+        description = "User role list",
       ),
       ApiResponse(
         responseCode = "400",
@@ -124,9 +124,9 @@ class MeResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "401",
@@ -134,9 +134,9 @@ class MeResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "403",
@@ -144,15 +144,26 @@ class MeResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class)
-          )
-        ]
-      )
-    ]
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
   )
   fun getMyRoles(
-    @Schema(name = "include-nomis-roles", description = "Include NOMIS roles", example = "false", required = false, defaultValue = "false")
-    @RequestParam(name = "include-nomis-roles", required = false, defaultValue = "false") includeNomisRoles: Boolean = false,
+    @Schema(
+      name = "include-nomis-roles",
+      description = "Include NOMIS roles",
+      example = "false",
+      required = false,
+      defaultValue = "false",
+    )
+    @RequestParam(
+      name = "include-nomis-roles",
+      required = false,
+      defaultValue = "false",
+    )
+    includeNomisRoles: Boolean = false,
   ): UserRoleDetail {
     authenticationFacade.currentUsername?.run {
       return userService.getUserRoles(this, includeNomisRoles)

@@ -19,12 +19,12 @@ data class UserDetail(
   @Schema(
     description = "Type of user account",
     example = "GENERAL",
-    required = true
+    required = true,
   ) val accountType: UsageType = UsageType.GENERAL,
   @Schema(
     description = "Email addresses of user",
     example = "test@test.com",
-    required = false
+    required = false,
   ) val primaryEmail: String?,
   @Schema(description = "List of associated DPS Role Codes", required = false) val dpsRoleCodes: List<String>,
   @Schema(description = "Account is not locked", required = false) val accountNonLocked: Boolean?,
@@ -35,7 +35,7 @@ data class UserDetail(
   @Schema(description = "Staff Status", example = "ACTIVE", required = false) val staffStatus: String?,
 ) {
   constructor(
-    userPersonDetail: UserPersonDetail
+    userPersonDetail: UserPersonDetail,
   ) :
     this(
       username = userPersonDetail.username,
@@ -45,7 +45,7 @@ data class UserDetail(
       activeCaseloadId = userPersonDetail.activeCaseLoad?.id,
       accountStatus = userPersonDetail.accountDetail?.status,
       accountType = userPersonDetail.type,
-      primaryEmail = userPersonDetail.staff.primaryEmail()?.email,
+      primaryEmail = userPersonDetail.staff.primaryEmail()?.emailCaseSensitive,
       dpsRoleCodes = userPersonDetail.dpsRoles.map { it.role.code },
       accountNonLocked = userPersonDetail.accountDetail?.isAccountNonLocked(),
       credentialsNonExpired = userPersonDetail.accountDetail?.isCredentialsNonExpired(),

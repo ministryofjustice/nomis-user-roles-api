@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.service
 import UserSpecification
 import com.microsoft.applicationinsights.TelemetryClient
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -22,6 +23,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedGeneralUs
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedLocalAdminUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLocalAdminUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserBasicDetails
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserRoleDetail
@@ -39,6 +41,8 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleReposit
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserAndEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserAndEmailRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserBasicDetailsRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserBasicPersonalDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPasswordRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.changePasswordWithValidation
@@ -64,6 +68,8 @@ class UserService(
   private val authenticationFacade: AuthenticationFacade,
   private val passwordEncoder: PasswordEncoder,
   private val userPasswordRepository: UserPasswordRepository,
+  private val userBasicDetailsRepository: UserBasicDetailsRepository,
+  @Value("\${feature.record-logon-date:false}") private val recordLogonDate: Boolean = false,
 ) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -82,14 +88,17 @@ class UserService(
 
   @Transactional(readOnly = true)
   fun findAllByEmailAddress(emailAddress: String): List<UserDetail> =
-    userPersonDetailRepository.findByStaff_EmailsEmail(emailAddress)
+    userPersonDetailRepository.findByStaff_EmailsEmailCaseSensitiveIgnoreCase(emailAddress)
       .map(this::toUserDetail)
 
   @Transactional(readOnly = true)
   fun findAllByEmailAddressAndUsernames(emailAddress: String, usernames: List<String>?): List<UserDetail> {
-    val usersByEmail = userPersonDetailRepository.findByStaff_EmailsEmail(emailAddress)
-    val users = if (usernames.isNullOrEmpty()) usersByEmail
-    else usersByEmail.union(userPersonDetailRepository.findAllById(usernames))
+    val usersByEmail = userPersonDetailRepository.findByStaff_EmailsEmailCaseSensitiveIgnoreCase(emailAddress)
+    val users = if (usernames.isNullOrEmpty()) {
+      usersByEmail
+    } else {
+      usersByEmail.union(userPersonDetailRepository.findAllById(usernames))
+    }
     return users.map(this::toUserDetail)
   }
 
@@ -99,6 +108,15 @@ class UserService(
     val usersAndEmails = userAndEmailRepository.findUsersAndEmails()
     log.info("Done retrieving users and emails from database...")
     return usersAndEmails
+  }
+
+  @Transactional(readOnly = true)
+  fun findUserBasicDetails(username: String): UserBasicDetails {
+    log.info("Fetching  user basic details for : {}", username)
+    val userDetails = userBasicDetailsRepository.find(username)
+      .map(this::toUserBasicDetail).orElseThrow { UserNotFoundException("User not found: $username not found") }
+    log.info("Returning user basic details for : {}", username)
+    return userDetails
   }
 
   @Transactional(readOnly = true)
@@ -124,7 +142,6 @@ class UserService(
       }
 
   fun createGeneralUser(createUserRequest: CreateGeneralUserRequest): UserSummary {
-
     checkIfAccountAlreadyExists(createUserRequest.username)
 
     val staffAccount =
@@ -144,9 +161,9 @@ class UserService(
       mapOf(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
     return userPersonDetail.toUserSummary()
   }
@@ -171,15 +188,14 @@ class UserService(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
         "linked-to" to linkedUsername,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
     return userPersonDetail.toUserSummary()
   }
 
   fun createAdminUser(createUserRequest: CreateAdminUserRequest): UserSummary {
-
     checkIfAccountAlreadyExists(createUserRequest.username)
 
     val staffAccount =
@@ -199,9 +215,9 @@ class UserService(
       mapOf(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
 
     return userPersonDetail.toUserSummary()
@@ -227,16 +243,15 @@ class UserService(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
         "linked-to" to linkedUsername,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
 
     return userPersonDetail.toUserSummary()
   }
 
   fun createLocalAdminUser(createUserRequest: CreateLocalAdminUserRequest): UserSummary {
-
     checkIfAccountAlreadyExists(createUserRequest.username)
 
     val staffAccount =
@@ -249,7 +264,7 @@ class UserService(
     val userPersonDetail = createLocalAdminUserAccount(
       staffAccount,
       createUserRequest.username,
-      localAdminUserGroup = createUserRequest.localAdminGroup
+      localAdminUserGroup = createUserRequest.localAdminGroup,
     )
 
     createSchemaUser(createUserRequest.username, AccountProfile.TAG_ADMIN)
@@ -259,9 +274,9 @@ class UserService(
       mapOf(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
     return userPersonDetail.toUserSummary()
   }
@@ -279,7 +294,7 @@ class UserService(
     val userPersonDetail = createLocalAdminUserAccount(
       staffAccount,
       linkedUserRequest.username,
-      localAdminUserGroup = linkedUserRequest.localAdminGroup
+      localAdminUserGroup = linkedUserRequest.localAdminGroup,
     )
     createSchemaUser(linkedUserRequest.username, AccountProfile.TAG_ADMIN)
 
@@ -289,9 +304,9 @@ class UserService(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
         "linked-to" to linkedUsername,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
 
     return userPersonDetail.toUserSummary()
@@ -301,7 +316,7 @@ class UserService(
     val user = userPersonDetailRepository.findById(username)
       .orElseThrow(UserNotFoundException("User $username not found"))
 
-    val oldEmail = user.staff.primaryEmail()?.email
+    val oldEmail = user.staff.primaryEmail()?.emailCaseSensitive
     user.staff.setEmail(email)
 
     telemetryClient.trackEvent(
@@ -310,9 +325,9 @@ class UserService(
         "username" to username,
         "old-email" to oldEmail,
         "new-email" to email,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
 
     return user.staff.toStaffDetail()
@@ -334,9 +349,9 @@ class UserService(
           "username" to username,
           "old-name" to oldFullName,
           "new-name" to this.fullName(),
-          "admin" to authenticationFacade.currentUsername
+          "admin" to authenticationFacade.currentUsername,
         ),
-        null
+        null,
       )
     }
 
@@ -355,9 +370,9 @@ class UserService(
       mapOf(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
   }
 
@@ -368,6 +383,21 @@ class UserService(
       .orElseThrow(UserNotFoundException("Staff ID $staffId not found"))
   }
 
+  fun recordLogonDate(username: String) {
+    if (recordLogonDate) {
+      userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+      userPersonDetailRepository.recordLogonDate(username)
+
+      telemetryClient.trackEvent(
+        "NURA-record-logon-date",
+        mapOf(
+          "username" to username,
+        ),
+        null,
+      )
+    }
+  }
+
   fun lockUser(username: String) {
     userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
     userPersonDetailRepository.lockUser(username)
@@ -376,14 +406,15 @@ class UserService(
       "NURA-lock-user",
       mapOf(
         "username" to username,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
   }
 
   fun unlockUser(username: String) {
-    val user = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    val user =
+      userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
     user.staff.status = Staff.STAFF_STATUS_ACTIVE
     userPersonDetailRepository.unlockUser(username)
 
@@ -391,9 +422,9 @@ class UserService(
       "NURA-unlock-user",
       mapOf(
         "username" to username,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
   }
 
@@ -405,9 +436,9 @@ class UserService(
       "NURA-change-password",
       mapOf(
         "username" to username,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
   }
 
@@ -421,9 +452,9 @@ class UserService(
       mapOf(
         "username" to username,
         "caseload" to defaultCaseloadId,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
     return user.toUserCaseloadDetail()
   }
@@ -439,9 +470,9 @@ class UserService(
       mapOf(
         "username" to user.username,
         "caseload" to caseloadId,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
 
     return user.toUserCaseloadDetail()
@@ -476,9 +507,9 @@ class UserService(
       mapOf(
         "username" to username,
         "caseload" to caseloadId,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
 
     return user.toUserCaseloadDetail()
@@ -507,9 +538,9 @@ class UserService(
         "username" to username,
         "role-code" to roleCode,
         "caseload" to caseloadId,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
 
     return user.toUserRoleDetail()
@@ -530,9 +561,9 @@ class UserService(
                   "username" to user.username,
                   "role-code" to roleCode,
                   "caseload" to DPS_CASELOAD,
-                  "admin" to authenticationFacade.currentUsername
+                  "admin" to authenticationFacade.currentUsername,
                 ),
-                null
+                null,
               )
             }
         }
@@ -547,7 +578,7 @@ class UserService(
 
   private fun setupCaseloadForUser(
     username: String,
-    caseloadId: String
+    caseloadId: String,
   ): UserPersonDetail {
     val user =
       userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
@@ -556,7 +587,7 @@ class UserService(
     if (caseloadId == DPS_CASELOAD) {
       user.findCaseloadById(DPS_CASELOAD) ?: user.addCaseload(
         caseloadRepository.findById(DPS_CASELOAD)
-          .orElseThrow(CaseloadNotFoundException("Caseload $DPS_CASELOAD not found"))
+          .orElseThrow(CaseloadNotFoundException("Caseload $DPS_CASELOAD not found")),
       )
     }
     return user
@@ -565,7 +596,7 @@ class UserService(
   private fun addRole(
     roleCode: String,
     user: UserPersonDetail,
-    caseloadId: String
+    caseloadId: String,
   ) {
     val role = roleRepository.findByCode(roleCode).orElseThrow { UserRoleNotFoundException("Role $roleCode not found") }
     user.addRole(role, caseloadId)
@@ -576,14 +607,17 @@ class UserService(
         "username" to user.username,
         "role-code" to roleCode,
         "caseload" to caseloadId,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
   }
 
   private fun toUserDetail(user: UserPersonDetail): UserDetail {
     return UserDetail(user)
+  }
+  private fun toUserBasicDetail(user: UserBasicPersonalDetail): UserBasicDetails {
+    return UserBasicDetails(user)
   }
 
   private fun checkIfAccountAlreadyExists(username: String) {
@@ -595,7 +629,7 @@ class UserService(
     val staffAccount = Staff(
       firstName = firstName.uppercase(),
       lastName = lastName.uppercase(),
-      status = "ACTIVE"
+      status = "ACTIVE",
     )
     staffAccount.setEmail(email)
     return staffAccount
@@ -604,14 +638,13 @@ class UserService(
   private fun createUserAccount(
     staffAccount: Staff,
     username: String,
-    defaultCaseloadId: String
+    defaultCaseloadId: String,
   ): UserPersonDetail {
-
     val userPersonDetail = UserPersonDetail(
       username = username.uppercase(),
       staff = staffAccount,
       type = getUsageType(false),
-      accountDetail = null
+      accountDetail = null,
     )
     caseloadRepository.findById(DPS_CASELOAD)
       .ifPresent {
@@ -630,9 +663,8 @@ class UserService(
 
   private fun createAdminUserAccount(
     staffAccount: Staff,
-    username: String
+    username: String,
   ): UserPersonDetail {
-
     val userPersonDetail = setupUserPersonDetailForAdmins(username, staffAccount)
 
     userPersonDetailRepository.saveAndFlush(userPersonDetail)
@@ -642,9 +674,8 @@ class UserService(
   private fun createLocalAdminUserAccount(
     staffAccount: Staff,
     username: String,
-    localAdminUserGroup: String
+    localAdminUserGroup: String,
   ): UserPersonDetail {
-
     val userPersonDetail = setupUserPersonDetailForAdmins(username, staffAccount)
 
     val userGroup = caseloadRepository.findById(localAdminUserGroup)
@@ -657,13 +688,13 @@ class UserService(
 
   private fun setupUserPersonDetailForAdmins(
     username: String,
-    staffAccount: Staff
+    staffAccount: Staff,
   ): UserPersonDetail {
     val userPersonDetail = UserPersonDetail(
       username = username.uppercase(),
       staff = staffAccount,
       type = getUsageType(true),
-      accountDetail = null
+      accountDetail = null,
     )
     caseloadRepository.findById(DPS_CASELOAD)
       .ifPresent {
@@ -679,7 +710,7 @@ class UserService(
 
   private fun createSchemaUser(
     username: String,
-    profile: AccountProfile
+    profile: AccountProfile,
   ) {
     userPersonDetailRepository.createUser(username, generatePassword(), profile.name)
     userPersonDetailRepository.expirePassword(username)
@@ -703,9 +734,9 @@ class UserService(
                   "username" to user.username,
                   "role-code" to roleCode,
                   "caseload" to DPS_CASELOAD,
-                  "admin" to authenticationFacade.currentUsername
+                  "admin" to authenticationFacade.currentUsername,
                 ),
-                null
+                null,
               )
             }
         }
@@ -726,7 +757,7 @@ private fun mapSortOrderProperties(sort: Sort, sortMapper: (sortProperty: String
         .by(sortMapper(order.property))
         .with(order.direction)
     }
-    .collect(Collectors.toList())
+    .collect(Collectors.toList()),
 )
 
 class UserNotFoundException(message: String?) :

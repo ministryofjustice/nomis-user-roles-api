@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import jakarta.validation.Valid
+import jakarta.validation.constraints.Size
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
@@ -25,8 +27,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLocalAdminUserR
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
-import javax.validation.Valid
-import javax.validation.constraints.Size
 
 @RestController
 @Validated
@@ -45,34 +45,35 @@ class UserAccountResource(
       content = [
         Content(
           mediaType = "application/json",
-          schema = Schema(implementation = CreateGeneralUserRequest::class)
-        )
-      ]
+          schema = Schema(implementation = CreateGeneralUserRequest::class),
+        ),
+      ],
     ),
     responses = [
       ApiResponse(
         responseCode = "201",
-        description = "General user information returned"
+        description = "General user information returned",
       ),
       ApiResponse(
         responseCode = "400",
         description = "Incorrect request to create user information",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to create a user",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
   )
   fun createGeneralUser(
-    @RequestBody @Valid createUserRequest: CreateGeneralUserRequest
+    @RequestBody @Valid
+    createUserRequest: CreateGeneralUserRequest,
   ): UserDetail {
     val user = userService.createGeneralUser(createUserRequest)
     return userService.findByUsername(username = user.username)
@@ -89,34 +90,35 @@ class UserAccountResource(
       content = [
         Content(
           mediaType = "application/json",
-          schema = Schema(implementation = CreateLocalAdminUserRequest::class)
-        )
-      ]
+          schema = Schema(implementation = CreateLocalAdminUserRequest::class),
+        ),
+      ],
     ),
     responses = [
       ApiResponse(
         responseCode = "201",
-        description = "Local Admin user information returned"
+        description = "Local Admin user information returned",
       ),
       ApiResponse(
         responseCode = "400",
         description = "Incorrect request to create user information",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to create a user",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
   )
   fun createLocalAdminUser(
-    @RequestBody @Valid createLocalAdminUserRequest: CreateLocalAdminUserRequest
+    @RequestBody @Valid
+    createLocalAdminUserRequest: CreateLocalAdminUserRequest,
   ): UserDetail {
     val user = userService.createLocalAdminUser(createLocalAdminUserRequest)
     return userService.findByUsername(username = user.username)
@@ -133,34 +135,35 @@ class UserAccountResource(
       content = [
         Content(
           mediaType = "application/json",
-          schema = Schema(implementation = CreateAdminUserRequest::class)
-        )
-      ]
+          schema = Schema(implementation = CreateAdminUserRequest::class),
+        ),
+      ],
     ),
     responses = [
       ApiResponse(
         responseCode = "201",
-        description = "Admin user account information returned"
+        description = "Admin user account information returned",
       ),
       ApiResponse(
         responseCode = "400",
         description = "Incorrect request to create user information",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to create a user",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
   )
   fun createAdminUser(
-    @RequestBody @Valid createUserRequest: CreateAdminUserRequest
+    @RequestBody @Valid
+    createUserRequest: CreateAdminUserRequest,
   ): UserDetail {
     val user = userService.createAdminUser(createUserRequest)
     return userService.findByUsername(username = user.username)
@@ -177,36 +180,39 @@ class UserAccountResource(
       content = [
         Content(
           mediaType = "application/json",
-          schema = Schema(implementation = CreateLinkedGeneralUserRequest::class)
-        )
-      ]
+          schema = Schema(implementation = CreateLinkedGeneralUserRequest::class),
+        ),
+      ],
     ),
     responses = [
       ApiResponse(
         responseCode = "201",
-        description = "Staff account information returned"
+        description = "Staff account information returned",
       ),
       ApiResponse(
         responseCode = "400",
         description = "Incorrect request to link general account",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to link a general account",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
   )
   fun linkGeneralAccount(
     @Schema(description = "Attach account to an existing admin user account", example = "testuser2", required = true)
-    @PathVariable @Size(max = 30, min = 1, message = "Username must be between 1 and 30") linkedUsername: String,
-    @RequestBody @Valid linkedGeneralUserRequest: CreateLinkedGeneralUserRequest
+    @PathVariable
+    @Size(max = 30, min = 1, message = "Username must be between 1 and 30")
+    linkedUsername: String,
+    @RequestBody @Valid
+    linkedGeneralUserRequest: CreateLinkedGeneralUserRequest,
   ): StaffDetail {
     val linkedUser = userService.linkGeneralAccount(linkedUsername, linkedGeneralUserRequest)
     return userService.findByStaffId(linkedUser.staffId)
@@ -223,36 +229,39 @@ class UserAccountResource(
       content = [
         Content(
           mediaType = "application/json",
-          schema = Schema(implementation = CreateLinkedLocalAdminUserRequest::class)
-        )
-      ]
+          schema = Schema(implementation = CreateLinkedLocalAdminUserRequest::class),
+        ),
+      ],
     ),
     responses = [
       ApiResponse(
         responseCode = "201",
-        description = "Staff local admin account information returned"
+        description = "Staff local admin account information returned",
       ),
       ApiResponse(
         responseCode = "400",
         description = "Incorrect request to link local admin account",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to link a local admin account",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
   )
   fun linkLocalAdminAccount(
     @Schema(description = "Attach account to an existing general user account", example = "testuser2", required = true)
-    @PathVariable @Size(max = 30, min = 1, message = "Username must be between 1 and 30") linkedUsername: String,
-    @RequestBody @Valid linkedLocalAdminUserRequest: CreateLinkedLocalAdminUserRequest
+    @PathVariable
+    @Size(max = 30, min = 1, message = "Username must be between 1 and 30")
+    linkedUsername: String,
+    @RequestBody @Valid
+    linkedLocalAdminUserRequest: CreateLinkedLocalAdminUserRequest,
   ): StaffDetail {
     val linkedUser = userService.linkLocalAdminAccount(linkedUsername, linkedLocalAdminUserRequest)
     return userService.findByStaffId(linkedUser.staffId)
@@ -269,36 +278,39 @@ class UserAccountResource(
       content = [
         Content(
           mediaType = "application/json",
-          schema = Schema(implementation = CreateLinkedAdminUserRequest::class)
-        )
-      ]
+          schema = Schema(implementation = CreateLinkedAdminUserRequest::class),
+        ),
+      ],
     ),
     responses = [
       ApiResponse(
         responseCode = "201",
-        description = "Staff account information returned"
+        description = "Staff account information returned",
       ),
       ApiResponse(
         responseCode = "400",
         description = "Incorrect request to link admin account",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to link an admin account",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
   )
   fun linkAdminAccount(
     @Schema(description = "Attach account to an existing general account", example = "testuser2", required = true)
-    @PathVariable @Size(max = 30, min = 1, message = "Username must be between 1 and 30") linkedUsername: String,
-    @RequestBody @Valid linkedUserRequest: CreateLinkedAdminUserRequest
+    @PathVariable
+    @Size(max = 30, min = 1, message = "Username must be between 1 and 30")
+    linkedUsername: String,
+    @RequestBody @Valid
+    linkedUserRequest: CreateLinkedAdminUserRequest,
   ): StaffDetail {
     val linkedUser = userService.linkAdminAccount(linkedUsername, linkedUserRequest)
     return userService.findByStaffId(linkedUser.staffId)

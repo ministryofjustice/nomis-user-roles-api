@@ -32,7 +32,7 @@ class UserResourceTest {
     enabled = true,
     admin = false,
     active = true,
-    staffStatus = "ACTIVE"
+    staffStatus = "ACTIVE",
   )
 
   @Test
@@ -55,7 +55,7 @@ class UserResourceTest {
       dpsRoleCount = 3,
       email = "joe@bloggs.com",
       status = AccountStatus.OPEN,
-      staffStatus = "ACTIVE"
+      staffStatus = "ACTIVE",
     )
 
     whenever(userService.findUsersByFirstAndLastNames(any(), any())).thenReturn(listOf(user))

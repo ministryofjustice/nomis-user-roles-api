@@ -1,7 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper
 
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.SignatureAlgorithm.RS256
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpHeaders
 import org.springframework.security.oauth2.jwt.JwtDecoder
@@ -30,36 +30,35 @@ class JwtAuthHelper() {
   fun setAuthorisation(
     user: String = "AUTH_ADM",
     roles: List<String> = listOf(),
-    scopes: List<String> = listOf()
+    scopes: List<String> = listOf(),
   ): (HttpHeaders) -> Unit {
     val token = createJwt(
       subject = user,
       scope = scopes,
       expiryTime = Duration.ofHours(1L),
-      roles = roles
+      roles = roles,
     )
     return { it.set(HttpHeaders.AUTHORIZATION, "Bearer $token") }
   }
 
   internal fun createJwt(
-    subject: String?,
+    subject: String? = null,
+    userId: String? = "${subject}_ID",
     scope: List<String>? = listOf(),
     roles: List<String>? = listOf(),
     expiryTime: Duration = Duration.ofHours(1),
-    jwtId: String = UUID.randomUUID().toString()
-  ): String =
-    mutableMapOf<String, Any>()
-      .also { subject?.let { subject -> it["user_name"] = subject } }
-      .also { it["client_id"] = "nomis-user-roles" }
-      .also { roles?.let { roles -> it["authorities"] = roles } }
-      .also { scope?.let { scope -> it["scope"] = scope } }
-      .let {
-        Jwts.builder()
-          .setId(jwtId)
-          .setSubject(subject)
-          .addClaims(it.toMap())
-          .setExpiration(Date(System.currentTimeMillis() + expiryTime.toMillis()))
-          .signWith(SignatureAlgorithm.RS256, keyPair.private)
-          .compact()
-      }
+    clientId: String = "test-client-id",
+    jwtId: String = UUID.randomUUID().toString(),
+  ): String {
+    val claims = mutableMapOf<String, Any?>("user_name" to subject, "client_id" to clientId, "user_id" to userId)
+    roles?.let { claims["authorities"] = roles }
+    scope?.let { claims["scope"] = scope }
+    return Jwts.builder()
+      .setId(jwtId)
+      .setSubject(subject)
+      .addClaims(claims)
+      .setExpiration(Date(System.currentTimeMillis() + expiryTime.toMillis()))
+      .signWith(RS256, keyPair.private)
+      .compact()
+  }
 }

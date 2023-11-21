@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateRoleRequest
@@ -13,17 +14,17 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.getUsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toRoleDetail
 import java.util.function.Supplier
-import javax.transaction.Transactional
 
 @Service
 @Transactional
 class RoleService(
   private val roleRepository: RoleRepository,
   private val telemetryClient: TelemetryClient,
-  private val authenticationFacade: AuthenticationFacade
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   fun createRole(createRoleRequest: CreateRoleRequest): RoleDetail {
-    roleRepository.findByCode(createRoleRequest.code).ifPresent { throw UserRoleAlreadyExistsException("Role with code ${it.code} already exists") }
+    roleRepository.findByCode(createRoleRequest.code)
+      .ifPresent { throw UserRoleAlreadyExistsException("Role with code ${it.code} already exists") }
 
     val roleDetail = roleRepository.save(
       Role(
@@ -35,8 +36,8 @@ class RoleService(
         parent = createRoleRequest.parentRoleCode?.let {
           roleRepository.findByCode(createRoleRequest.parentRoleCode)
             .orElseThrow(UserRoleNotFoundException("Parent role with code ${createRoleRequest.parentRoleCode} not found"))
-        }
-      )
+        },
+      ),
     ).toRoleDetail()
 
     telemetryClient.trackEvent(
@@ -46,9 +47,9 @@ class RoleService(
         "name" to roleDetail.name,
         "admin-role-only" to roleDetail.adminRoleOnly.toString(),
         "type" to roleDetail.type?.name,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
     return roleDetail
   }
@@ -62,17 +63,19 @@ class RoleService(
   fun getAllDPSRoles(adminRoles: Boolean): List<RoleDetail> {
     return roleRepository.findAllByTypeAndRoleFunctionIn(
       RoleType.APP,
-      UsageType.values().toList().filter { adminRoles || it !== UsageType.ADMIN }
+      UsageType.values().toList().filter { adminRoles || it !== UsageType.ADMIN },
     ).map {
       it.toRoleDetail()
     }
   }
 
   fun findByCode(roleCode: String): RoleDetail =
-    roleRepository.findByCode(roleCode).map { it.toRoleDetail() }.orElseThrow(UserRoleNotFoundException("Role with code $roleCode not found"))
+    roleRepository.findByCode(roleCode).map { it.toRoleDetail() }
+      .orElseThrow(UserRoleNotFoundException("Role with code $roleCode not found"))
 
   fun deleteRole(roleCode: String) {
-    val roleToDelete = roleRepository.findByCode(roleCode).orElseThrow(UserRoleNotFoundException("Role with code $roleCode not found"))
+    val roleToDelete =
+      roleRepository.findByCode(roleCode).orElseThrow(UserRoleNotFoundException("Role with code $roleCode not found"))
     roleRepository.deleteById(roleToDelete.id)
 
     telemetryClient.trackEvent(
@@ -80,9 +83,9 @@ class RoleService(
       mapOf(
         "role" to roleToDelete.code,
         "name" to roleToDelete.name,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
   }
 
@@ -110,9 +113,9 @@ class RoleService(
         "name" to roleDetail.name,
         "admin-role-only" to roleDetail.adminRoleOnly.toString(),
         "type" to roleDetail.type?.name,
-        "admin" to authenticationFacade.currentUsername
+        "admin" to authenticationFacade.currentUsername,
       ),
-      null
+      null,
     )
     return roleDetail
   }

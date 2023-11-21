@@ -4,14 +4,18 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.springframework.security.crypto.password.PasswordEncoder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserBasicDetails
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountProfile
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
@@ -24,6 +28,8 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.CaseloadRep
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserAndEmailRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserBasicDetailsRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserBasicPersonalDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPasswordRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import java.time.LocalDateTime
@@ -39,6 +45,7 @@ internal class UserServiceTest {
   private val authenticationFacade: AuthenticationFacade = mock()
   private val passwordEncoder: PasswordEncoder = mock()
   private val userPasswordRepository: UserPasswordRepository = mock()
+  private val userBasicDetailsRepository: UserBasicDetailsRepository = mock()
   private val userService: UserService = UserService(
     userPersonDetailRepository,
     userAndEmailRepository,
@@ -48,8 +55,29 @@ internal class UserServiceTest {
     telemetryClient,
     authenticationFacade,
     passwordEncoder,
-    userPasswordRepository
+    userPasswordRepository,
+    userBasicDetailsRepository,
+    recordLogonDate = true,
   )
+
+  @Nested
+  internal inner class recordLogonDate {
+    @Test
+    fun `logon date recorded if user exists`() {
+      whenever(userPersonDetailRepository.findById(anyString())).thenReturn(Optional.of(mock()))
+      userService.recordLogonDate("user1")
+      verify(userPersonDetailRepository).recordLogonDate("user1")
+      verify(telemetryClient).trackEvent("NURA-record-logon-date", mapOf("username" to "user1"), null)
+    }
+
+    @Test
+    fun `logon date not recorded if user does not exist`() {
+      whenever(userPersonDetailRepository.findById(anyString())).thenReturn(Optional.empty())
+      assertThatThrownBy { userService.recordLogonDate("user1") }.isInstanceOf(UserNotFoundException::class.java)
+      verify(userPersonDetailRepository, never()).recordLogonDate(anyString())
+      verifyNoInteractions(telemetryClient)
+    }
+  }
 
   @Nested
   internal inner class authenticateUser {
@@ -92,7 +120,8 @@ internal class UserServiceTest {
 
     @Test
     fun `isCredentialsNonExpired validate accountStatuses`() {
-      val expiredAccountStatuses = setOf(AccountStatus.EXPIRED, AccountStatus.EXPIRED_LOCKED, AccountStatus.EXPIRED_LOCKED_TIMED)
+      val expiredAccountStatuses =
+        setOf(AccountStatus.EXPIRED, AccountStatus.EXPIRED_LOCKED, AccountStatus.EXPIRED_LOCKED_TIMED)
       for (accountStatus in expiredAccountStatuses) {
         assertThat(AccountDetail(accountStatus = accountStatus.desc).isCredentialsNonExpired()).isFalse
       }
@@ -109,14 +138,14 @@ internal class UserServiceTest {
 
         accountStatus = AccountStatus.OPEN.desc,
         AccountProfile.TAG_GENERAL.name,
-        LocalDateTime.now().minusMinutes(1)
+        LocalDateTime.now().minusMinutes(1),
       )
       assertThat(accountDetailPasswordExpired.isCredentialsNonExpired()).isFalse
 
       val accountDetailPasswordValid = AccountDetail(
         accountStatus = AccountStatus.OPEN.desc,
         AccountProfile.TAG_GENERAL.name,
-        LocalDateTime.now().plusMinutes(1)
+        LocalDateTime.now().plusMinutes(1),
       )
       assertThat(accountDetailPasswordValid.isCredentialsNonExpired()).isTrue
     }
@@ -129,12 +158,14 @@ internal class UserServiceTest {
         val user = UserPersonDetail(
           username = "raj.maki",
           staff = Staff(
-            staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
-            status = "ACTIVE"
+            staffId = 99,
+            firstName = "RAJ BOB",
+            lastName = "MAKI",
+            status = "ACTIVE",
           ),
           type = UsageType.GENERAL,
           activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
-          accountDetail = AccountDetail(accountStatus = accountStatus.desc)
+          accountDetail = AccountDetail(accountStatus = accountStatus.desc),
         )
 
         assertThat(user.isEnabled()).isTrue
@@ -145,12 +176,14 @@ internal class UserServiceTest {
         val user = UserPersonDetail(
           username = "raj.maki",
           staff = Staff(
-            staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
-            status = "ACTIVE"
+            staffId = 99,
+            firstName = "RAJ BOB",
+            lastName = "MAKI",
+            status = "ACTIVE",
           ),
           type = UsageType.GENERAL,
           activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
-          accountDetail = AccountDetail(accountStatus = accountStatus.desc)
+          accountDetail = AccountDetail(accountStatus = accountStatus.desc),
         )
         assertThat(user.isEnabled()).isFalse
       }
@@ -159,12 +192,14 @@ internal class UserServiceTest {
         val inactiveUser = UserPersonDetail(
           username = "raj.maki",
           staff = Staff(
-            staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
-            status = "INACTIVE"
+            staffId = 99,
+            firstName = "RAJ BOB",
+            lastName = "MAKI",
+            status = "INACTIVE",
           ),
           type = UsageType.GENERAL,
           activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
-          accountDetail = AccountDetail(accountStatus = accountStatus.desc)
+          accountDetail = AccountDetail(accountStatus = accountStatus.desc),
         )
 
         assertThat(inactiveUser.isEnabled()).isFalse
@@ -175,13 +210,13 @@ internal class UserServiceTest {
     fun `isAdmin`() {
       val accountDetailIsAdmin = AccountDetail(
         "user",
-        profile = AccountProfile.TAG_ADMIN.name
+        profile = AccountProfile.TAG_ADMIN.name,
       )
       assertThat(accountDetailIsAdmin.isAdmin()).isTrue
 
       val accountDetailIsNotAdmin = AccountDetail(
         "user",
-        profile = AccountProfile.TAG_GENERAL.name
+        profile = AccountProfile.TAG_GENERAL.name,
       )
       assertThat(accountDetailIsNotAdmin.isAdmin()).isFalse
     }
@@ -192,24 +227,28 @@ internal class UserServiceTest {
       val activeUser = UserPersonDetail(
         username = "raj.maki",
         staff = Staff(
-          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
-          status = "ACTIVE"
+          staffId = 99,
+          firstName = "RAJ BOB",
+          lastName = "MAKI",
+          status = "ACTIVE",
         ),
         type = UsageType.GENERAL,
         activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
-        accountDetail = AccountDetail(accountStatus = AccountStatus.OPEN.desc)
+        accountDetail = AccountDetail(accountStatus = AccountStatus.OPEN.desc),
       )
       assertThat(activeUser.isActive()).isTrue
 
       val inactiveUser = UserPersonDetail(
         username = "raj.maki",
         staff = Staff(
-          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
-          status = "INACTIVE"
+          staffId = 99,
+          firstName = "RAJ BOB",
+          lastName = "MAKI",
+          status = "INACTIVE",
         ),
         type = UsageType.GENERAL,
         activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
-        accountDetail = AccountDetail(accountStatus = AccountStatus.LOCKED.desc)
+        accountDetail = AccountDetail(accountStatus = AccountStatus.LOCKED.desc),
       )
       assertThat(inactiveUser.isActive()).isFalse
 
@@ -217,12 +256,14 @@ internal class UserServiceTest {
       val expiredUser = UserPersonDetail(
         username = "raj.maki",
         staff = Staff(
-          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
-          status = "ACTIVE"
+          staffId = 99,
+          firstName = "RAJ BOB",
+          lastName = "MAKI",
+          status = "ACTIVE",
         ),
         type = UsageType.GENERAL,
         activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
-        accountDetail = AccountDetail(accountStatus = AccountStatus.EXPIRED.desc)
+        accountDetail = AccountDetail(accountStatus = AccountStatus.EXPIRED.desc),
       )
       assertThat(expiredUser.isActive()).isFalse
     }
@@ -233,36 +274,42 @@ internal class UserServiceTest {
       val activeUser = UserPersonDetail(
         username = "raj.maki",
         staff = Staff(
-          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
-          status = "ACTIVE"
+          staffId = 99,
+          firstName = "RAJ BOB",
+          lastName = "MAKI",
+          status = "ACTIVE",
         ),
         type = UsageType.GENERAL,
         activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
-        accountDetail = AccountDetail(accountStatus = AccountStatus.OPEN.desc)
+        accountDetail = AccountDetail(accountStatus = AccountStatus.OPEN.desc),
       )
       assertThat(activeUser.accountDetail?.isExpired()).isFalse
 
       val graceUser = UserPersonDetail(
         username = "raj.maki",
         staff = Staff(
-          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
-          status = "INACTIVE"
+          staffId = 99,
+          firstName = "RAJ BOB",
+          lastName = "MAKI",
+          status = "INACTIVE",
         ),
         type = UsageType.GENERAL,
         activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
-        accountDetail = AccountDetail(accountStatus = AccountStatus.EXPIRED_GRACE.desc)
+        accountDetail = AccountDetail(accountStatus = AccountStatus.EXPIRED_GRACE.desc),
       )
       assertThat(graceUser.accountDetail?.isExpired()).isTrue
 
       val inactiveUser = UserPersonDetail(
         username = "raj.maki",
         staff = Staff(
-          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
-          status = "INACTIVE"
+          staffId = 99,
+          firstName = "RAJ BOB",
+          lastName = "MAKI",
+          status = "INACTIVE",
         ),
         type = UsageType.GENERAL,
         activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
-        accountDetail = AccountDetail(accountStatus = AccountStatus.LOCKED.desc)
+        accountDetail = AccountDetail(accountStatus = AccountStatus.LOCKED.desc),
       )
       assertThat(inactiveUser.accountDetail?.isExpired()).isFalse
 
@@ -270,12 +317,14 @@ internal class UserServiceTest {
       val expiredUser = UserPersonDetail(
         username = "raj.maki",
         staff = Staff(
-          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
-          status = "ACTIVE"
+          staffId = 99,
+          firstName = "RAJ BOB",
+          lastName = "MAKI",
+          status = "ACTIVE",
         ),
         type = UsageType.GENERAL,
         activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
-        accountDetail = AccountDetail(accountStatus = AccountStatus.EXPIRED.desc)
+        accountDetail = AccountDetail(accountStatus = AccountStatus.EXPIRED.desc),
       )
       assertThat(expiredUser.accountDetail?.isExpired()).isTrue
     }
@@ -286,36 +335,42 @@ internal class UserServiceTest {
       val activeUser = UserPersonDetail(
         username = "raj.maki",
         staff = Staff(
-          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
-          status = "ACTIVE"
+          staffId = 99,
+          firstName = "RAJ BOB",
+          lastName = "MAKI",
+          status = "ACTIVE",
         ),
         type = UsageType.GENERAL,
         activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
-        accountDetail = AccountDetail(accountStatus = AccountStatus.OPEN.desc)
+        accountDetail = AccountDetail(accountStatus = AccountStatus.OPEN.desc),
       )
       assertThat(activeUser.accountDetail?.isAccountNonLocked()).isTrue
 
       val graceUser = UserPersonDetail(
         username = "raj.maki",
         staff = Staff(
-          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
-          status = "ACTIVE"
+          staffId = 99,
+          firstName = "RAJ BOB",
+          lastName = "MAKI",
+          status = "ACTIVE",
         ),
         type = UsageType.GENERAL,
         activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
-        accountDetail = AccountDetail(accountStatus = AccountStatus.EXPIRED_GRACE.desc)
+        accountDetail = AccountDetail(accountStatus = AccountStatus.EXPIRED_GRACE.desc),
       )
       assertThat(graceUser.accountDetail?.isAccountNonLocked()).isTrue
 
       val inactiveUser = UserPersonDetail(
         username = "raj.maki",
         staff = Staff(
-          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
-          status = "INACTIVE"
+          staffId = 99,
+          firstName = "RAJ BOB",
+          lastName = "MAKI",
+          status = "INACTIVE",
         ),
         type = UsageType.GENERAL,
         activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
-        accountDetail = AccountDetail(accountStatus = AccountStatus.LOCKED.desc)
+        accountDetail = AccountDetail(accountStatus = AccountStatus.LOCKED.desc),
       )
       assertThat(inactiveUser.accountDetail?.isAccountNonLocked()).isFalse
 
@@ -323,17 +378,51 @@ internal class UserServiceTest {
       val expiredUser = UserPersonDetail(
         username = "raj.maki",
         staff = Staff(
-          staffId = 99, firstName = "RAJ BOB", lastName = "MAKI",
-          status = "ACTIVE"
+          staffId = 99,
+          firstName = "RAJ BOB",
+          lastName = "MAKI",
+          status = "ACTIVE",
         ),
         type = UsageType.GENERAL,
         activeCaseLoad = Caseload("WWI", "WANDSWORTH Hmped (HMP & HMPYOI)"),
-        accountDetail = AccountDetail(accountStatus = AccountStatus.EXPIRED.desc)
+        accountDetail = AccountDetail(accountStatus = AccountStatus.EXPIRED.desc),
       )
       assertThat(expiredUser.accountDetail?.isAccountNonLocked()).isTrue
     }
 
     private fun filterSetFromAccountStatuses(accountStatusesToFilter: Set<AccountStatus>) =
       AccountStatus.values().filterNot { accountStatusesToFilter.contains(it) }
+  }
+
+  @Nested
+  internal inner class GetUserBasicDetails {
+    @Test
+    fun getUserBasicDetails() {
+      val userBasicPersonalDetail =
+        UserBasicPersonalDetail(
+          username = "joe",
+          accountStatus = "EXPIRED(GRACE)",
+          activeCaseloadId = "MKI",
+          firstName = "JOE",
+          lastName = "SMITH",
+          staffId = 1,
+
+        )
+
+      val expectedUserBasicDetail =
+        UserBasicDetails(
+          username = "joe",
+          accountStatus = "EXPIRED_GRACE",
+          activeCaseloadId = "MKI",
+          firstName = "Joe",
+          lastName = "Smith",
+          staffId = 1,
+          enabled = true,
+
+        )
+      whenever(userBasicDetailsRepository.find(anyString())).thenReturn(Optional.of(userBasicPersonalDetail))
+      val userBasicDetails = userService.findUserBasicDetails("joe")
+      assertThat(userBasicDetails).isEqualTo(expectedUserBasicDetail)
+    }
   }
 }

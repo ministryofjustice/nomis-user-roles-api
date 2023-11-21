@@ -14,6 +14,7 @@ class RoleResourceIntTest : IntegrationTestBase() {
   @Nested
   inner class GetRoles {
     val matchByRoleCode = "$.[?(@.code == '%s')]"
+
     @Test
     fun `access forbidden when no authority`() {
       webTestClient.get().uri("/roles")
@@ -23,7 +24,6 @@ class RoleResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `get roles forbidden with wrong role`() {
-
       webTestClient.get().uri("/roles")
         .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
         .exchange()
@@ -32,7 +32,6 @@ class RoleResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `get roles is allowed for ROLE_MAINTAIN_ACCESS_ROLES_ADMIN and ROLE_MAINTAIN_ACCESS_ROLES`() {
-
       webTestClient.get().uri("/roles")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -62,7 +61,7 @@ class RoleResourceIntTest : IntegrationTestBase() {
         .jsonPath("$").isArray
         .jsonPath(matchByRoleCode, "300").doesNotExist()
 
-      webTestClient.get().uri { it.path("/roles/").queryParam("all-roles", "true").build() }
+      webTestClient.get().uri { it.path("/roles").queryParam("all-roles", "true").build() }
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
         .expectStatus().isOk
@@ -85,7 +84,7 @@ class RoleResourceIntTest : IntegrationTestBase() {
 
     @Test
     internal fun `can opt to only return general DPS roles`() {
-      webTestClient.get().uri { it.path("/roles/").queryParam("admin-roles", "false").build() }
+      webTestClient.get().uri { it.path("/roles").queryParam("admin-roles", "false").build() }
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
         .expectStatus().isOk
@@ -109,7 +108,6 @@ class RoleResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `access forbidden when no role`() {
-
       webTestClient.get().uri("/roles/GLOBAL_SEARCH")
         .headers(setAuthorisation(roles = listOf()))
         .exchange()
@@ -118,7 +116,6 @@ class RoleResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `get role forbidden with wrong role`() {
-
       webTestClient.get().uri("/roles/GLOBAL_SEARCH")
         .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
         .exchange()
@@ -127,7 +124,6 @@ class RoleResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `get role not found`() {
-
       webTestClient.get().uri("/roles/dummy")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -136,7 +132,6 @@ class RoleResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `get role`() {
-
       webTestClient.get().uri("/roles/GLOBAL_SEARCH")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -156,16 +151,15 @@ class RoleResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `a role cannot be created without correct role`() {
-
       webTestClient.post().uri("/roles")
         .headers(setAuthorisation(roles = listOf("ROLE_DUMMY")))
         .body(
           BodyInserters.fromValue(
             CreateRoleRequest(
               code = "TEST_ROLE1",
-              name = "A Test role"
-            )
-          )
+              name = "A Test role",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isForbidden
@@ -173,16 +167,15 @@ class RoleResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `a role can be created`() {
-
       webTestClient.post().uri("/roles")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .body(
           BodyInserters.fromValue(
             CreateRoleRequest(
               code = "test_role1",
-              name = "A Test role"
-            )
-          )
+              name = "A Test role",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isCreated
@@ -195,13 +188,12 @@ class RoleResourceIntTest : IntegrationTestBase() {
                                 "type": "APP",
                                 "adminRoleOnly": false
                             }
-                            """
+                            """,
         )
     }
 
     @Test
     fun `a sub role cannot be created if parent does not exist`() {
-
       webTestClient.post().uri("/roles")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .body(
@@ -209,9 +201,9 @@ class RoleResourceIntTest : IntegrationTestBase() {
             CreateRoleRequest(
               code = "TEST_ROLE1",
               name = "A Test role",
-              parentRoleCode = "DUMMY"
-            )
-          )
+              parentRoleCode = "DUMMY",
+            ),
+          ),
         )
         .exchange()
         .expectBody()
@@ -220,7 +212,6 @@ class RoleResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `a sub role can be created`() {
-
       webTestClient.post().uri("/roles")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .body(
@@ -229,9 +220,9 @@ class RoleResourceIntTest : IntegrationTestBase() {
               code = "TEST_ROLE2",
               name = "A Test sub role",
               parentRoleCode = "LICENCE_ROLE",
-              adminRoleOnly = true
-            )
-          )
+              adminRoleOnly = true,
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isCreated
@@ -251,7 +242,7 @@ class RoleResourceIntTest : IntegrationTestBase() {
                                     "adminRoleOnly": false
                                 }
                             }
-                            """
+                            """,
         )
     }
   }
@@ -262,15 +253,14 @@ class RoleResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `a role cannot be updated without correct role`() {
-
       webTestClient.put().uri("/roles/LICENCE_RO")
         .headers(setAuthorisation(roles = listOf("ROLE_DUMMY")))
         .body(
           BodyInserters.fromValue(
             UpdateRoleRequest(
-              name = "Updated Role Name"
-            )
-          )
+              name = "Updated Role Name",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isForbidden
@@ -278,15 +268,14 @@ class RoleResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `a role name can be updated`() {
-
       webTestClient.put().uri("/roles/LICENCE_RO")
         .headers(setAuthorisation(roles = listOf("ROLE_ROLES_ADMIN")))
         .body(
           BodyInserters.fromValue(
             UpdateRoleRequest(
-              name = "Updated Role Name"
-            )
-          )
+              name = "Updated Role Name",
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isOk
@@ -298,21 +287,20 @@ class RoleResourceIntTest : IntegrationTestBase() {
                                 "type": "APP",
                                 "adminRoleOnly": true
                             }
-                            """
+                            """,
         )
     }
 
     @Test
     fun `a role adminRoleOnly can be updated`() {
-
       webTestClient.put().uri("/roles/LICENCE_DM")
         .headers(setAuthorisation(roles = listOf("ROLE_ROLES_ADMIN")))
         .body(
           BodyInserters.fromValue(
             UpdateRoleRequest(
-              adminRoleOnly = true
-            )
-          )
+              adminRoleOnly = true,
+            ),
+          ),
         )
         .exchange()
         .expectStatus().isOk
@@ -324,7 +312,7 @@ class RoleResourceIntTest : IntegrationTestBase() {
                                 "type": "APP",
                                 "adminRoleOnly": true
                             }
-                            """
+                            """,
         )
     }
   }
@@ -335,7 +323,6 @@ class RoleResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `a role cannot be deleted without correct role`() {
-
       webTestClient.delete().uri("/roles/CATEGORISATION_READONLY")
         .headers(setAuthorisation(roles = listOf("ROLE_DUMMY")))
         .exchange()
@@ -344,7 +331,6 @@ class RoleResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `a role cannot be deleted if not exists`() {
-
       webTestClient.delete().uri("/roles/DUMMY")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -353,7 +339,6 @@ class RoleResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `a role can be deleted`() {
-
       webTestClient.delete().uri("/roles/CATEGORISATION_READONLY")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()

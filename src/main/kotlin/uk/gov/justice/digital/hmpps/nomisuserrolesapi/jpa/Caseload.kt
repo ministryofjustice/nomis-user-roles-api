@@ -1,15 +1,16 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
+import jakarta.persistence.Column
+import jakarta.persistence.Convert
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import org.hibernate.Hibernate
 import org.hibernate.annotations.BatchSize
-import org.hibernate.annotations.Type
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.FetchType
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.OneToMany
-import javax.persistence.Table
+import org.hibernate.type.YesNoConverter
 
 const val DPS_CASELOAD = "NWEB"
 const val CENTRAL_ADMIN_CASELOAD = "CADM_I"
@@ -23,7 +24,7 @@ data class Caseload(
   val id: String,
   @Column(name = "DESCRIPTION", nullable = false)
   val name: String,
-  @Type(type = "yes_no")
+  @Convert(converter = YesNoConverter::class)
   @Column(name = "ACTIVE_FLAG", nullable = false)
   val active: Boolean = true,
   @Column(name = "CASELOAD_FUNCTION", nullable = false)
@@ -55,10 +56,12 @@ data class Caseload(
 
   companion object {
     const val GENERAL_CASELOAD = "GENERAL"
+
     @Suppress("unused")
     const val ADMIN_CASELOAD = "ADMIN"
 
     const val INSTITUTION_CASELOAD = "INST"
+
     @Suppress("unused")
     const val APPLICATION_CASELOAD = "APP"
   }

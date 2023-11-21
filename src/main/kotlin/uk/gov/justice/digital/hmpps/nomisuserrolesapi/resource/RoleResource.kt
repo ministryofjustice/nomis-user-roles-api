@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import jakarta.validation.Valid
+import jakarta.validation.constraints.Size
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
@@ -26,14 +28,12 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateRoleRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.RoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UpdateRoleRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.RoleService
-import javax.validation.Valid
-import javax.validation.constraints.Size
 
 @RestController
 @Validated
 @RequestMapping("/roles", produces = [MediaType.APPLICATION_JSON_VALUE])
 class RoleResource(
-  private val roleService: RoleService
+  private val roleService: RoleService,
 ) {
 
   @PreAuthorize("hasAnyRole('ROLE_ROLES_ADMIN','ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
@@ -47,35 +47,35 @@ class RoleResource(
       content = [
         Content(
           mediaType = "application/json",
-          schema = Schema(implementation = CreateRoleRequest::class)
-        )
-      ]
+          schema = Schema(implementation = CreateRoleRequest::class),
+        ),
+      ],
     ),
     responses = [
       ApiResponse(
         responseCode = "201",
-        description = "Role Information Returned"
+        description = "Role Information Returned",
       ),
       ApiResponse(
         responseCode = "400",
         description = "Incorrect request to create role information",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to create a role",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
   )
-
   fun createRole(
-    @RequestBody @Valid createRoleRequest: CreateRoleRequest
+    @RequestBody @Valid
+    createRoleRequest: CreateRoleRequest,
   ): RoleDetail {
     return roleService.createRole(createRoleRequest)
   }
@@ -90,36 +90,39 @@ class RoleResource(
       content = [
         Content(
           mediaType = "application/json",
-          schema = Schema(implementation = UpdateRoleRequest::class)
-        )
-      ]
+          schema = Schema(implementation = UpdateRoleRequest::class),
+        ),
+      ],
     ),
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Role Information Returned"
+        description = "Role Information Returned",
       ),
       ApiResponse(
         responseCode = "400",
         description = "Incorrect request to update role information",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to update a role",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
   )
   fun updateRole(
     @Schema(description = "Role Code", example = "GLOBAL_SEARCH", required = true)
-    @PathVariable @Size(max = 30, min = 1, message = "Role code must be between 1 and 30") code: String,
-    @RequestBody @Valid updateRoleRequest: UpdateRoleRequest
+    @PathVariable
+    @Size(max = 30, min = 1, message = "Role code must be between 1 and 30")
+    code: String,
+    @RequestBody @Valid
+    updateRoleRequest: UpdateRoleRequest,
   ): RoleDetail {
     return roleService.updateRole(code, updateRoleRequest)
   }
@@ -133,36 +136,38 @@ class RoleResource(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Role Information Returned"
+        description = "Role Information Returned",
       ),
       ApiResponse(
         responseCode = "400",
         description = "Incorrect request to get role information",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to get a list of roles",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
   )
   fun getAllRoles(
     @Parameter(
       description = "Get all roles, which includes both DPS and NOMIS roles",
       example = "true",
     )
-    @RequestParam(value = "all-roles", required = false, defaultValue = "false") allRoles: Boolean = false,
+    @RequestParam(value = "all-roles", required = false, defaultValue = "false")
+    allRoles: Boolean = false,
     @Parameter(
       description = "Include DPS roles that can only be allocated by Central Admin",
       example = "true",
     )
-    @RequestParam(value = "admin-roles", required = false, defaultValue = "true") adminRoles: Boolean = true,
+    @RequestParam(value = "admin-roles", required = false, defaultValue = "true")
+    adminRoles: Boolean = true,
   ): List<RoleDetail> =
     if (allRoles) {
       roleService.getAllRoles()
@@ -179,28 +184,30 @@ class RoleResource(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Role Information Returned"
+        description = "Role Information Returned",
       ),
       ApiResponse(
         responseCode = "400",
         description = "Incorrect request to get role information",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to get a role",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
   )
   fun getRoleDetails(
     @Schema(description = "Role Code", example = "GLOBAL_SEARCH", required = true)
-    @PathVariable @Size(max = 30, min = 1, message = "Role code must be between 1 and 30") code: String
+    @PathVariable
+    @Size(max = 30, min = 1, message = "Role code must be between 1 and 30")
+    code: String,
   ): RoleDetail =
     roleService.findByCode(code)
 
@@ -215,23 +222,25 @@ class RoleResource(
       ApiResponse(
         responseCode = "400",
         description = "Incorrect request to delete role",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to delete a role",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
   )
   fun deleteRole(
     @Schema(description = "Role Code", example = "GLOBAL_SEARCH", required = true)
-    @PathVariable @Size(max = 30, min = 1, message = "role code must be between 1 and 30") roleCode: String
+    @PathVariable
+    @Size(max = 30, min = 1, message = "role code must be between 1 and 30")
+    roleCode: String,
   ) =
     roleService.deleteRole(roleCode)
 }

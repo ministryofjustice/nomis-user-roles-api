@@ -1,3 +1,13 @@
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.CriteriaQuery
+import jakarta.persistence.criteria.Expression
+import jakarta.persistence.criteria.Join
+import jakarta.persistence.criteria.JoinType
+import jakarta.persistence.criteria.JoinType.INNER
+import jakarta.persistence.criteria.JoinType.LEFT
+import jakarta.persistence.criteria.Path
+import jakarta.persistence.criteria.Predicate
+import jakarta.persistence.criteria.Root
 import org.springframework.data.jpa.domain.Specification
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
@@ -15,23 +25,13 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupAdministrator
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupAdministratorPk
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupMember
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
-import javax.persistence.criteria.CriteriaBuilder
-import javax.persistence.criteria.CriteriaQuery
-import javax.persistence.criteria.Expression
-import javax.persistence.criteria.Join
-import javax.persistence.criteria.JoinType
-import javax.persistence.criteria.JoinType.INNER
-import javax.persistence.criteria.JoinType.LEFT
-import javax.persistence.criteria.Path
-import javax.persistence.criteria.Predicate
-import javax.persistence.criteria.Root
 import kotlin.reflect.KProperty1
 
 class UserSpecification(private val filter: UserFilter) : Specification<UserPersonDetail> {
   override fun toPredicate(
     root: Root<UserPersonDetail>,
     query: CriteriaQuery<*>,
-    criteriaBuilder: CriteriaBuilder
+    criteriaBuilder: CriteriaBuilder,
   ): Predicate? {
     val predicates = mutableListOf<Predicate>()
 
@@ -47,7 +47,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
 
     fun <FROM, TO, NEXT> Join<FROM, TO>.join(
       prop: KProperty1<*, NEXT>,
-      joinType: JoinType = INNER
+      joinType: JoinType = INNER,
     ): Join<TO, NEXT> = this.join(prop.name, joinType)
 
     fun or(vararg predicates: Predicate) = criteriaBuilder.or(*predicates)
@@ -64,7 +64,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       return criteriaBuilder.exists(
         subQuery
           .select(criteriaBuilder.literal(1))
-          .where(subQueryPredicate(subQueryRoot))
+          .where(subQueryPredicate(subQueryRoot)),
       )
     }
 
@@ -75,17 +75,18 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
           .join(UserGroup::administrators)
           .get(UserGroupAdministrator::id)
           .get(UserGroupAdministratorPk::username),
-        localAdministratorUsername
+        localAdministratorUsername,
       )
     }
 
-    fun localAuthorityOfAdminGroup(activeCaseloadId: String): Predicate =
+    fun localAuthorityOfAdminGroup(activeCaseloadId: String, showOnlyLSAs: Boolean): Predicate =
       exists(UserGroupAdministrator::class.java) { subQueryRoot ->
         and(
           criteriaBuilder.equal(subQueryRoot.get(UserGroupAdministrator::user), root),
+          criteriaBuilder.equal(subQueryRoot.get(UserGroupAdministrator::active), showOnlyLSAs),
           criteriaBuilder.equal(
             subQueryRoot.get(UserGroupAdministrator::userGroup).get(UserGroup::id),
-            activeCaseloadId
+            activeCaseloadId,
           ),
         )
       }
@@ -94,7 +95,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       and(
         criteriaBuilder.equal(subQueryRoot.get(UserGroupAdministrator::user), root),
         criteriaBuilder.isNotNull(subQueryRoot.get(UserGroupAdministrator::userGroup)),
-        criteriaBuilder.isTrue(subQueryRoot.get(UserGroupAdministrator::active))
+        criteriaBuilder.isTrue(subQueryRoot.get(UserGroupAdministrator::active)),
       )
     }
 
@@ -104,21 +105,21 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
           and(
             like(
               get(UserPersonDetail::staff).get(Staff::firstName),
-              name.firstWord().uppercaseLike()
+              name.firstWord().uppercaseLike(),
             ),
             like(
               get(UserPersonDetail::staff).get(Staff::lastName),
-              name.secondWord().uppercaseLike()
+              name.secondWord().uppercaseLike(),
             ),
           ),
           and(
             like(
               get(UserPersonDetail::staff).get(Staff::firstName),
-              name.secondWord().uppercaseLike()
+              name.secondWord().uppercaseLike(),
             ),
             like(
               get(UserPersonDetail::staff).get(Staff::lastName),
-              name.firstWord().uppercaseLike()
+              name.firstWord().uppercaseLike(),
             ),
           ),
         )
@@ -126,19 +127,19 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
         or(
           like(
             get(UserPersonDetail::staff).get(Staff::firstName),
-            name.uppercaseLike()
+            name.uppercaseLike(),
           ),
           like(
             get(UserPersonDetail::staff).get(Staff::lastName),
-            name.uppercaseLike()
+            name.uppercaseLike(),
           ),
           like(
             get(UserPersonDetail::username),
-            name.uppercaseLike()
+            name.uppercaseLike(),
           ),
           like(
-            upper(join(UserPersonDetail::staff).join(Staff::emails, LEFT).get(EmailAddress::email)),
-            name.uppercaseLike()
+            upper(join(UserPersonDetail::staff).join(Staff::emails, LEFT).get(EmailAddress::emailCaseSensitive)),
+            name.uppercaseLike(),
           ),
         )
       }
@@ -158,7 +159,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       val userCaseload = join(UserPersonDetail::caseloads)
       return and(
         equal(userCaseload.get(Caseload::id).get(UserCaseloadPk::caseloadId), caseloadId),
-        equal(userCaseload.join(UserCaseload::roles).get(UserCaseloadRole::role).get(Role::code), roleCode)
+        equal(userCaseload.join(UserCaseload::roles).get(UserCaseloadRole::role).get(Role::code), roleCode),
       )
     }
 
@@ -166,15 +167,15 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       and(
         equal(
           join(UserPersonDetail::caseloads).join(UserCaseload::roles).get(UserCaseloadRole::role).get(Role::code),
-          roleCode
-        )
+          roleCode,
+        ),
       )
 
     fun roles(roleCodes: List<String>): Predicate =
       and(
         * roleCodes.map {
           equal(join(UserPersonDetail::dpsRoles).get(UserCaseloadRole::role).get(Role::code), it)
-        }.toTypedArray()
+        }.toTypedArray(),
       )
 
     fun inclusiveRoles(roleCodes: List<String>): Predicate {
@@ -202,7 +203,7 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
 
     if (filter.showOnlyLSAs == true) {
       filter.activeCaseloadId?.run {
-        predicates.add(localAuthorityOfAdminGroup(filter.activeCaseloadId))
+        predicates.add(localAuthorityOfAdminGroup(filter.activeCaseloadId, filter.showOnlyLSAs))
       } ?: predicates.add(lsaOnly())
     }
 

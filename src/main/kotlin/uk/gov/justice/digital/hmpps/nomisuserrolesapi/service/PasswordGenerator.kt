@@ -11,7 +11,6 @@ import org.apache.commons.lang3.RandomStringUtils
  * </ul>
  */
 fun generatePassword(): String {
-
   val upperCaseLetters = RandomStringUtils.random(10, 65, 90, true, false)
   val lowerCaseLetters = RandomStringUtils.random(10, 97, 122, true, false)
   val numbers = RandomStringUtils.randomNumeric(10)

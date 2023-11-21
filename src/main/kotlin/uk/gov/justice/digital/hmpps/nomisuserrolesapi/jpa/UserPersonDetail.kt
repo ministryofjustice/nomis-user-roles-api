@@ -1,5 +1,22 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Embedded
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.NamedAttributeNode
+import jakarta.persistence.NamedEntityGraph
+import jakarta.persistence.NamedSubgraph
+import jakarta.persistence.OneToMany
+import jakarta.persistence.PrimaryKeyJoinColumn
+import jakarta.persistence.SecondaryTable
+import jakarta.persistence.Table
 import org.hibernate.Hibernate
 import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.Where
@@ -10,62 +27,60 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.Abbreviati
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.CaseloadNotFoundException
 import java.time.LocalDate.now
 import java.util.function.Supplier
-import javax.persistence.CascadeType
-import javax.persistence.Column
-import javax.persistence.Embedded
-import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.FetchType
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
-import javax.persistence.NamedAttributeNode
-import javax.persistence.NamedEntityGraph
-import javax.persistence.NamedSubgraph
-import javax.persistence.OneToMany
-import javax.persistence.PrimaryKeyJoinColumn
-import javax.persistence.SecondaryTable
-import javax.persistence.Table
 
 @Suppress("DataClassEqualsAndHashCodeInspection")
 @Entity
 @Table(name = "STAFF_USER_ACCOUNTS")
 @SecondaryTable(name = "DBA_USERS", pkJoinColumns = [PrimaryKeyJoinColumn(name = "USERNAME")])
-@BatchSize(size = 100)
-
 @NamedEntityGraph(
   name = "user-person-detail-download-graph",
   attributeNodes = [
-    NamedAttributeNode("username"), NamedAttributeNode(value = "administratorOfUserGroups"),
-    NamedAttributeNode(value = "staff", subgraph = "staff-subgraph")
+    NamedAttributeNode("username"),
+    NamedAttributeNode(value = "staff", subgraph = "staff-subgraph"),
   ],
   subgraphs = [
     NamedSubgraph(
       name = "staff-subgraph",
       attributeNodes = [
-        NamedAttributeNode(value = "staffId"), NamedAttributeNode(value = "firstName"), NamedAttributeNode(
-          value = "lastName"
-        ), NamedAttributeNode(value = "status"), NamedAttributeNode(
+        NamedAttributeNode(value = "staffId"), NamedAttributeNode(value = "firstName"),
+        NamedAttributeNode(
+          value = "lastName",
+        ),
+        NamedAttributeNode(value = "status"),
+        NamedAttributeNode(
           value = "emails",
-          subgraph = "emails-subgraph"
-        )
-      ]
+          subgraph = "emails-subgraph",
+        ),
+      ],
     ),
     NamedSubgraph(
       name = "emails-subgraph",
       attributeNodes = [
         NamedAttributeNode(value = "userType"),
-        NamedAttributeNode(value = "type"), NamedAttributeNode(value = "email")
-      ]
+        NamedAttributeNode(value = "type"), NamedAttributeNode(value = "emailCaseSensitive"),
+      ],
     ),
+  ],
+)
+@NamedEntityGraph(
+  name = "user-person-detail-graph",
+  attributeNodes = [
+    NamedAttributeNode("username"),
+    NamedAttributeNode("activeCaseLoad"),
+    NamedAttributeNode(value = "staff", subgraph = "staff-subgraph"),
+  ],
+  subgraphs = [
     NamedSubgraph(
-      name = "usergroup-admin-subgraph",
+      name = "staff-subgraph",
       attributeNodes = [
-        NamedAttributeNode(value = "id"), NamedAttributeNode(value = "active")
-      ]
-    )
-  ]
+        NamedAttributeNode(value = "staffId"), NamedAttributeNode(value = "firstName"),
+        NamedAttributeNode(
+          value = "lastName",
+        ),
+        NamedAttributeNode(value = "status"),
+      ],
+    ),
+  ],
 )
 data class UserPersonDetail(
   @Id
@@ -79,29 +94,26 @@ data class UserPersonDetail(
   @OneToMany(fetch = FetchType.LAZY)
   @JoinColumn(name = "USERNAME", updatable = false, insertable = false, nullable = false)
   @Where(clause = "CASELOAD_ID = '$DPS_CASELOAD'")
-  @BatchSize(size = 100)
+  @BatchSize(size = 1000)
   val dpsRoles: List<UserCaseloadRole> = listOf(),
 
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], mappedBy = "user", orphanRemoval = true)
-  @BatchSize(size = 100)
   val caseloads: MutableList<UserCaseload> = mutableListOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-  @BatchSize(size = 100)
+  @BatchSize(size = 1000)
   val activeAndInactiveMemberOfUserGroups: MutableList<UserGroupMember> = mutableListOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   @Where(clause = "ACTIVE_FLAG = 'Y'")
-  @BatchSize(size = 100)
   val memberOfUserGroups: List<UserGroupMember> = listOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-  @BatchSize(size = 100)
   val activeAndInactiveAdministratorOfUserGroups: MutableList<UserGroupAdministrator> = mutableListOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-  @BatchSize(size = 100)
   @Where(clause = "ACTIVE_FLAG = 'Y'")
+  @BatchSize(size = 1000)
   val administratorOfUserGroups: List<UserGroupAdministrator> = listOf(),
 
   @Column(name = "STAFF_USER_TYPE", nullable = false)
@@ -110,7 +122,6 @@ data class UserPersonDetail(
 
   @JoinColumn(name = "WORKING_CASELOAD_ID", nullable = true)
   @ManyToOne(fetch = FetchType.LAZY)
-  @BatchSize(size = 100)
   var activeCaseLoad: Caseload? = null,
 
   @Column(name = "ID_SOURCE")
@@ -143,7 +154,8 @@ data class UserPersonDetail(
   }
 
   fun setDefaultCaseload(caseloadId: String) {
-    activeCaseLoad = findCaseloadById(caseloadId) ?: throw CaseloadNotFoundException("Default caseload cannot be set as user does not have $caseloadId.")
+    activeCaseLoad = findCaseloadById(caseloadId)
+      ?: throw CaseloadNotFoundException("Default caseload cannot be set as user does not have $caseloadId.")
   }
 
   fun addCaseload(caseload: Caseload) {
@@ -151,7 +163,9 @@ data class UserPersonDetail(
 
     val userCaseload = UserCaseload(
       id = UserCaseloadPk(caseloadId = caseload.id, username = this.username),
-      caseload = caseload, user = this, startDate = now(),
+      caseload = caseload,
+      user = this,
+      startDate = now(),
       roles = mutableListOf(),
     )
     caseloads.add(userCaseload)
@@ -166,10 +180,16 @@ data class UserPersonDetail(
   }
 
   fun removeCaseload(caseloadId: String) {
-    val userCaseload = caseloads.firstOrNull { caseload -> caseloadId == caseload.id.caseloadId } ?: throw CaseloadNotFoundException("Caseload cannot be removed as user does not have $caseloadId.")
+    val userCaseload = caseloads.firstOrNull { caseload -> caseloadId == caseload.id.caseloadId }
+      ?: throw CaseloadNotFoundException("Caseload cannot be removed as user does not have $caseloadId.")
 
     if (isUserGroupCaseload(userCaseload.caseload)) {
-      val userGroupMembersAssociatedWithCaseload = activeAndInactiveMemberOfUserGroups.filter { userGroupMember -> isCaseloadForUserGroup(userCaseload.caseload, userGroupMember) }
+      val userGroupMembersAssociatedWithCaseload = activeAndInactiveMemberOfUserGroups.filter { userGroupMember ->
+        isCaseloadForUserGroup(
+          userCaseload.caseload,
+          userGroupMember,
+        )
+      }
       activeAndInactiveMemberOfUserGroups.removeAll(userGroupMembersAssociatedWithCaseload)
     }
 
@@ -183,19 +203,22 @@ data class UserPersonDetail(
   }
 
   private fun addUserGroup(userGroup: UserGroup) {
-    activeAndInactiveMemberOfUserGroups.firstOrNull { it.id.userGroupCode == userGroup.id && it.id.username == this.username } ?: run {
-      val member = UserGroupMember(
-        id = UserGroupMemberPk(userGroupCode = userGroup.id, username = this.username),
-        user = this, userGroup = userGroup
-      )
-      activeAndInactiveMemberOfUserGroups.add(member)
-    }
+    activeAndInactiveMemberOfUserGroups.firstOrNull { it.id.userGroupCode == userGroup.id && it.id.username == this.username }
+      ?: run {
+        val member = UserGroupMember(
+          id = UserGroupMemberPk(userGroupCode = userGroup.id, username = this.username),
+          user = this,
+          userGroup = userGroup,
+        )
+        activeAndInactiveMemberOfUserGroups.add(member)
+      }
   }
 
   private fun addAdminUserGroup(userGroup: UserGroup) {
     val adminMember = UserGroupAdministrator(
       id = UserGroupAdministratorPk(userGroupCode = userGroup.id, username = this.username),
-      user = this, userGroup = userGroup
+      user = this,
+      userGroup = userGroup,
     )
     activeAndInactiveAdministratorOfUserGroups.add(adminMember)
   }
@@ -234,11 +257,11 @@ fun UserPersonDetail.toUserSummaryWithEmail() = UserSummaryWithEmail(
   activeCaseload = activeCaseLoad?.let { caseload ->
     PrisonCaseload(
       id = caseload.id,
-      name = caseload.name.capitalizeLeavingAbbreviations()
+      name = caseload.name.capitalizeLeavingAbbreviations(),
     )
   },
   dpsRoleCount = this.dpsRoles.size,
-  email = staff.primaryEmail()?.email,
+  email = staff.primaryEmail()?.emailCaseSensitive,
   staffStatus = staff.status,
 )
 
@@ -254,11 +277,11 @@ fun UserPersonDetail.toDownloadUserSummaryWithEmail() = UserSummaryWithEmail(
   activeCaseload = this.activeCaseLoad?.let { caseload ->
     PrisonCaseload(
       id = caseload.id,
-      name = caseload.name.capitalizeLeavingAbbreviations()
+      name = caseload.name.capitalizeLeavingAbbreviations(),
     )
   },
   dpsRoleCount = 0,
-  email = staff.primaryEmail()?.email,
+  email = staff.primaryEmail()?.emailCaseSensitive,
   staffStatus = staff.status,
 )
 
@@ -271,7 +294,7 @@ fun UserPersonDetail.toUserSummary(): UserSummary = UserSummary(
   activeCaseload = this.activeCaseLoad?.let { caseload ->
     PrisonCaseload(
       id = caseload.id,
-      name = caseload.name.capitalizeLeavingAbbreviations()
+      name = caseload.name.capitalizeLeavingAbbreviations(),
     )
   },
   dpsRoleCount = this.dpsRoles.size,

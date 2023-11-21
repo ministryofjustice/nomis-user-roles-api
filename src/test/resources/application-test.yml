@@ -23,3 +23,5 @@ spring:
   test:
     database:
       replace: none
+
+feature.record-logon-date: true

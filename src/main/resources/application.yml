@@ -41,12 +41,14 @@ spring:
       enabled: false
 
   jpa:
-    database-platform: org.hibernate.dialect.Oracle10gDialect
+    database-platform: org.hibernate.community.dialect.Oracle10gDialect
     open-in-view: false
     show-sql: false
     generate-ddl: false
     hibernate:
       ddl-auto: none
+      naming:
+        physical-strategy: uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UpperCaseNamingStrategy
 
   datasource:
     hikari:

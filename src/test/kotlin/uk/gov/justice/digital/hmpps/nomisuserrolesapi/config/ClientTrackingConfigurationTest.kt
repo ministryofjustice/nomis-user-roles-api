@@ -1,13 +1,11 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.config
 
-import com.microsoft.applicationinsights.web.internal.RequestTelemetryContext
-import com.microsoft.applicationinsights.web.internal.ThreadContext
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.data.MapEntry.entry
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
+import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.trace.Tracer
+import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.extension.RegisterExtension
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer
 import org.springframework.context.annotation.Import
@@ -18,7 +16,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.JwtAuthHelper
-import java.time.Duration
 
 @Import(JwtAuthHelper::class, ClientTrackingInterceptor::class, ClientTrackingConfiguration::class)
 @ContextConfiguration(initializers = [ConfigDataApplicationContextInitializer::class])
@@ -32,34 +29,47 @@ class ClientTrackingConfigurationTest {
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   private lateinit var jwtAuthHelper: JwtAuthHelper
-  private val res = MockHttpServletResponse()
-  private val req = MockHttpServletRequest()
 
-  @BeforeEach
-  fun setup() {
-    ThreadContext.setRequestTelemetryContext(RequestTelemetryContext(1L))
-  }
-
-  @AfterEach
-  fun tearDown() {
-    ThreadContext.remove()
-  }
+  private val tracer: Tracer = otelTesting.openTelemetry.getTracer("test")
 
   @Test
   fun shouldAddClientIdAndUserNameToInsightTelemetry() {
-    val token = jwtAuthHelper.createJwt("AUTH_ADM")
+    val token = jwtAuthHelper.createJwt("bob")
+    val req = MockHttpServletRequest()
     req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer $token")
-    clientTrackingInterceptor.preHandle(req, res, "null")
-    val insightTelemetry = ThreadContext.getRequestTelemetryContext().httpRequestTelemetry.properties
-    assertThat(insightTelemetry).contains(entry("username", "AUTH_ADM"), entry("clientId", "nomis-user-roles"))
+    val res = MockHttpServletResponse()
+    tracer.spanBuilder("span").startSpan().run {
+      makeCurrent().use { clientTrackingInterceptor.preHandle(req, res, "null") }
+      end()
+    }
+    otelTesting.assertTraces().hasTracesSatisfyingExactly({ t ->
+      t.hasSpansSatisfyingExactly({
+        it.hasAttribute(AttributeKey.stringKey("username"), "bob")
+        it.hasAttribute(AttributeKey.stringKey("clientId"), "test-client-id")
+      },)
+    },)
   }
 
   @Test
-  fun shouldAddClientIdAndUserNameToInsightTelemetryEvenIfTokenExpired() {
-    val token = jwtAuthHelper.createJwt("Fred", expiryTime = Duration.ofHours(-1L))
+  fun shouldAddOnlyClientIdIfUsernameNullToInsightTelemetry() {
+    val token = jwtAuthHelper.createJwt(null)
+    val req = MockHttpServletRequest()
     req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer $token")
-    clientTrackingInterceptor.preHandle(req, res, "null")
-    val insightTelemetry = ThreadContext.getRequestTelemetryContext().httpRequestTelemetry.properties
-    assertThat(insightTelemetry).contains(entry("username", "Fred"), entry("clientId", "nomis-user-roles"))
+    val res = MockHttpServletResponse()
+    tracer.spanBuilder("span").startSpan().run {
+      makeCurrent().use { clientTrackingInterceptor.preHandle(req, res, "null") }
+      end()
+    }
+    otelTesting.assertTraces().hasTracesSatisfyingExactly({ t ->
+      t.hasSpansSatisfyingExactly({
+        it.hasAttribute(AttributeKey.stringKey("clientId"), "test-client-id")
+      },)
+    },)
+  }
+
+  private companion object {
+    @JvmStatic
+    @RegisterExtension
+    private val otelTesting: OpenTelemetryExtension = OpenTelemetryExtension.create()
   }
 }

@@ -7,6 +7,9 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.Size
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -31,8 +34,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserAndEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
-import javax.validation.constraints.NotEmpty
-import javax.validation.constraints.Size
 
 @RestController
 @Validated
@@ -41,6 +42,9 @@ class UserResource(
   private val userService: UserService,
   private val authenticationFacade: AuthenticationFacade,
 ) {
+  companion object {
+    private val log = LoggerFactory.getLogger(this::class.java)
+  }
 
   @PreAuthorize("hasRole('ROLE_CREATE_USER')")
   @DeleteMapping("/{username}")
@@ -53,24 +57,25 @@ class UserResource(
       ApiResponse(
         responseCode = "400",
         description = "Incorrect request to delete user",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to delete a user",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
   )
-
   fun deleteUser(
     @Schema(description = "Username", example = "testuser1", required = true)
-    @PathVariable @Size(max = 30, min = 1, message = "username must be between 1 and 30") username: String
+    @PathVariable
+    @Size(max = 30, min = 1, message = "username must be between 1 and 30")
+    username: String,
   ) = userService.deleteUser(username)
 
   @PreAuthorize("hasAnyRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN', 'ROLE_MAINTAIN_ACCESS_ROLES', 'ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
@@ -78,34 +83,88 @@ class UserResource(
   @Operation(
     summary = "Get specified user details",
     description = "Information on a specific user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES or ROLE_MANAGE_NOMIS_USER_ACCOUNT",
-    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES"), SecurityRequirement(name = "ROLE_MANAGE_NOMIS_USER_ACCOUNT")],
+    security = [
+      SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES"),
+      SecurityRequirement(
+        name = "ROLE_MANAGE_NOMIS_USER_ACCOUNT",
+      ),
+    ],
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "User Information Returned"
+        description = "User Information Returned",
       ),
       ApiResponse(
         responseCode = "400",
         description = "Incorrect request to get user information",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to get a user",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
   )
   fun getUserDetails(
     @Schema(description = "Username", example = "testuser1", required = true)
-    @PathVariable username: String
-  ): UserDetail =
-    userService.findByUsername(username)
+    @PathVariable
+    username: String,
+  ): UserDetail {
+    log.info("Fetching user details for : {}", username)
+    val userDetail = userService.findByUsername(username)
+    log.info("Returning user details for : {}", username)
+    return userDetail
+  }
+
+  @PreAuthorize("hasAnyRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN', 'ROLE_MAINTAIN_ACCESS_ROLES', 'ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
+  @GetMapping("/basic/{username}")
+  @Operation(
+    summary = "Get user basic details",
+    description = "Information on a specific user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES or ROLE_MANAGE_NOMIS_USER_ACCOUNT",
+    security = [
+      SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES"),
+      SecurityRequirement(
+        name = "ROLE_MANAGE_NOMIS_USER_ACCOUNT",
+      ),
+    ],
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "User Information Returned",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to get user information",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to get a user",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "user not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun getUserBasicDetailsInfo(
+    @Schema(description = "Username", example = "testuser1", required = true)
+    @PathVariable
+    username: String,
+  ) = userService.findUserBasicDetails(username)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @GetMapping("/staff/{staffId}")
@@ -116,27 +175,28 @@ class UserResource(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Staff Information Returned"
+        description = "Staff Information Returned",
       ),
       ApiResponse(
         responseCode = "400",
         description = "Incorrect request to get staff information",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to get a staff user",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
   )
   fun getUserDetailsByStaffId(
-    @Schema(description = "Staff ID", example = "234232", required = true) @PathVariable staffId: Long
+    @Schema(description = "Staff ID", example = "234232", required = true) @PathVariable
+    staffId: Long,
   ): StaffDetail =
     userService.findByStaffId(staffId)
 
@@ -149,18 +209,20 @@ class UserResource(
       ApiResponse(
         responseCode = "200",
         description = "List of matching users",
-      )
-    ]
+      ),
+    ],
   )
   fun findUsersByFirstAndLastNames(
     @Parameter(
       description = "The first name to match. Case insensitive.",
-      example = "Fred"
-    ) @RequestParam @NotEmpty firstName: String,
+      example = "Fred",
+    ) @RequestParam @NotEmpty
+    firstName: String,
     @Parameter(
       description = "The last name to match. Case insensitive",
-      example = "Bloggs"
-    ) @RequestParam @NotEmpty lastName: String
+      example = "Bloggs",
+    ) @RequestParam @NotEmpty
+    lastName: String,
   ): List<UserSummaryWithEmail> = userService.findUsersByFirstAndLastNames(firstName, lastName)
 
   @PreAuthorize("hasRole('ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
@@ -172,15 +234,16 @@ class UserResource(
       ApiResponse(
         responseCode = "200",
         description = "List of matching users",
-      )
-    ]
+      ),
+    ],
   )
   fun findUsersByEmailAddress(
     @Parameter(
       description = "The email to match. Case insensitive",
       example = "jim@smith.com",
-      required = true
-    ) @RequestParam @NotEmpty email: String
+      required = true,
+    ) @RequestParam @NotEmpty
+    email: String,
   ): List<UserDetail> = userService.findAllByEmailAddress(email)
 
   @PreAuthorize("hasRole('ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
@@ -192,16 +255,18 @@ class UserResource(
       ApiResponse(
         responseCode = "200",
         description = "List of matching users",
-      )
-    ]
+      ),
+    ],
   )
   fun findUsersByEmailAddressAndUsernames(
     @Parameter(
       description = "The email to match. Case insensitive",
       example = "jim@smith.com",
-      required = true
-    ) @RequestParam @NotEmpty email: String,
-    @Parameter(description = "List of usernames.") @RequestBody usernames: List<String>?,
+      required = true,
+    ) @RequestParam @NotEmpty
+    email: String,
+    @Parameter(description = "List of usernames.") @RequestBody
+    usernames: List<String>?,
   ): List<UserDetail> = userService.findAllByEmailAddressAndUsernames(email, usernames)
 
   @PreAuthorize("hasRole('ROLE_MANAGE_NOMIS_USER_ACCOUNT')")
@@ -212,9 +277,9 @@ class UserResource(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "List of usernames and their email addresses"
-      )
-    ]
+        description = "List of usernames and their email addresses",
+      ),
+    ],
   )
   fun findUsersAndEmails(): List<UserAndEmail> = userService.findUsersAndEmails()
 
@@ -231,9 +296,9 @@ class UserResource(
       ApiResponse(
         responseCode = "400",
         description = "Incorrect filter supplied",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
   )
   fun getUsers(
     @PageableDefault(sort = ["lastName", "firstName"], direction = Sort.Direction.ASC)
@@ -241,45 +306,51 @@ class UserResource(
     @RequestParam(value = "nameFilter", required = false)
     @Parameter(
       description = "Filter results by name (first name and/or last name in any order), username or email address.",
-      example = "Raj"
+      example = "Raj",
     )
     nameFilter: String?,
     @RequestParam(value = "accessRoles", required = false)
     @Parameter(
       description = "Filter will match users that have all DPS role specified",
-      example = "ADD_SENSITIVE_CASE_NOTES"
+      example = "ADD_SENSITIVE_CASE_NOTES",
     )
     accessRoles: List<String>?,
     @RequestParam(value = "nomisRole", required = false)
     @Parameter(
       description = "Filter will match users that have the NOMIS role specified, should be used with a caseloadId or will get duplicates",
-      example = "201"
+      example = "201",
     )
     nomisRole: String?,
     @RequestParam(value = "status", required = false, defaultValue = "ALL")
     @Parameter(
       description = "Limit to active / inactive / show all users",
-      example = "INACTIVE"
+      example = "INACTIVE",
     )
     status: UserStatus = UserStatus.ACTIVE,
     @Parameter(
       description = "Filter results by user's currently active caseload i.e. the one they have currently selected",
-      example = "MDI"
+      example = "MDI",
     )
-    @RequestParam(value = "activeCaseload", required = false) activeCaseload: String?,
+    @RequestParam(value = "activeCaseload", required = false)
+    activeCaseload: String?,
     @Parameter(
       description = "Filter results to include only those users that have access to the specified caseload (irrespective of whether it is currently active or not",
-      example = "MDI"
+      example = "MDI",
     )
-    @RequestParam(value = "caseload", required = false) caseload: String?,
-    @RequestParam(value = "inclusiveRoles", required = false, defaultValue = "false") @Parameter(
+    @RequestParam(value = "caseload", required = false)
+    caseload: String?,
+    @RequestParam(value = "inclusiveRoles", required = false, defaultValue = "false")
+    @Parameter(
       description = "Returns result inclusive of selected roles",
-      example = "true"
-    ) inclusiveRoles: Boolean = false,
-    @RequestParam(value = "showOnlyLSAs", required = false, defaultValue = "false") @Parameter(
+      example = "true",
+    )
+    inclusiveRoles: Boolean = false,
+    @RequestParam(value = "showOnlyLSAs", required = false, defaultValue = "false")
+    @Parameter(
       description = "Returns all active LSAs",
-      example = "true"
-    ) showOnlyLSAs: Boolean = false,
+      example = "true",
+    )
+    showOnlyLSAs: Boolean = false,
   ): Page<UserSummaryWithEmail> = userService.findUsersByFilter(
     pageRequest,
     UserFilter(
@@ -291,7 +362,7 @@ class UserResource(
       roleCodes = accessRoles ?: listOf(),
       nomisRoleCode = nomisRole,
       inclusiveRoles = inclusiveRoles,
-      showOnlyLSAs = showOnlyLSAs
+      showOnlyLSAs = showOnlyLSAs,
     ),
   )
 
@@ -302,45 +373,51 @@ class UserResource(
     @RequestParam(value = "nameFilter", required = false)
     @Parameter(
       description = "Filter results by name (first name and/or last name in any order), username or email address.",
-      example = "Raj"
+      example = "Raj",
     )
     nameFilter: String?,
     @RequestParam(value = "accessRoles", required = false)
     @Parameter(
       description = "Filter will match users that have all DPS role specified",
-      example = "ADD_SENSITIVE_CASE_NOTES"
+      example = "ADD_SENSITIVE_CASE_NOTES",
     )
     accessRoles: List<String>?,
     @RequestParam(value = "nomisRole", required = false)
     @Parameter(
       description = "Filter will match users that have the NOMIS role specified, should be used with a caseloadId or will get duplicates",
-      example = "201"
+      example = "201",
     )
     nomisRole: String?,
     @RequestParam(value = "status", required = false, defaultValue = "ALL")
     @Parameter(
       description = "Limit to active / inactive / show all users",
-      example = "INACTIVE"
+      example = "INACTIVE",
     )
     status: UserStatus = UserStatus.ACTIVE,
     @Parameter(
       description = "Filter results by user's currently active caseload i.e. the one they have currently selected",
-      example = "MDI"
+      example = "MDI",
     )
-    @RequestParam(value = "activeCaseload", required = false) activeCaseload: String?,
+    @RequestParam(value = "activeCaseload", required = false)
+    activeCaseload: String?,
     @Parameter(
       description = "Filter results to include only those users that have access to the specified caseload (irrespective of whether it is currently active or not",
-      example = "MDI"
+      example = "MDI",
     )
-    @RequestParam(value = "caseload", required = false) caseload: String?,
-    @RequestParam(value = "inclusiveRoles", required = false) @Parameter(
+    @RequestParam(value = "caseload", required = false)
+    caseload: String?,
+    @RequestParam(value = "inclusiveRoles", required = false)
+    @Parameter(
       description = "Returns result inclusive of selected roles",
-      example = "true"
-    ) inclusiveRoles: Boolean?,
-    @RequestParam(value = "showOnlyLSAs", required = false, defaultValue = "false") @Parameter(
+      example = "true",
+    )
+    inclusiveRoles: Boolean?,
+    @RequestParam(value = "showOnlyLSAs", required = false, defaultValue = "false")
+    @Parameter(
       description = "Returns all active LSAs",
-      example = "true"
-    ) showOnlyLSAs: Boolean = false,
+      example = "true",
+    )
+    showOnlyLSAs: Boolean = false,
   ): List<UserSummaryWithEmail> = userService.downloadUserByFilter(
     UserFilter(
       localAdministratorUsername = localAdministratorUsernameWhenNotCentralAdministrator(),
@@ -351,7 +428,7 @@ class UserResource(
       roleCodes = accessRoles ?: listOf(),
       nomisRoleCode = nomisRole,
       inclusiveRoles = inclusiveRoles,
-      showOnlyLSAs = showOnlyLSAs
+      showOnlyLSAs = showOnlyLSAs,
     ),
   )
 

@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository
 
 import UserSpecification
+import jakarta.persistence.EntityManager
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -20,7 +21,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupAdministrator
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupMember
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import java.time.LocalDate
-import javax.persistence.EntityManager
 
 @DataJpaTest
 @Import(value = [DataBuilder::class])
@@ -52,7 +52,8 @@ class UserPersonDetailRepositoryTest {
     assertThat(user.staff.staffId).isNotNull.isGreaterThan(99L)
     assertThat(user.memberOfUserGroups).hasSize(1).allMatch { it.id.userGroupCode == "WWI" }
     assertThat(user.administratorOfUserGroups).isEmpty()
-    assertThat(user.caseloads).hasSize(2).extracting<String> { it.caseload.name }.containsExactly("WANDSWORTH (HMP)", "Nomis-Web Application")
+    assertThat(user.caseloads).hasSize(2).extracting<String> { it.caseload.name }
+      .containsExactly("WANDSWORTH (HMP)", "Nomis-Web Application")
   }
 
   @Test
@@ -147,8 +148,8 @@ class UserPersonDetailRepositoryTest {
         .transform { user ->
           user.copy(
             activeAndInactiveAdministratorOfUserGroups = user.activeAndInactiveAdministratorOfUserGroups.map(
-              makeWWIInactive
-            ).toMutableList()
+              makeWWIInactive,
+            ).toMutableList(),
           )
         }
         .save()
@@ -182,9 +183,9 @@ class UserPersonDetailRepositoryTest {
           user.copy(
             activeAndInactiveMemberOfUserGroups = user.activeAndInactiveMemberOfUserGroups.map {
               makeInactive(
-                it
+                it,
               )
-            }.toMutableList()
+            }.toMutableList(),
           )
         }
         .save()
@@ -310,14 +311,14 @@ class UserPersonDetailRepositoryTest {
         val usersMatchingIbragi =
           repository.findAll(UserSpecification(UserFilter(name = "IBraGI")), PageRequest.of(0, 10))
         assertThat(usersMatchingIbragi.content).extracting<String>(UserPersonDetail::username).containsExactly(
-          "IBRAGIM.MIHAIL"
+          "IBRAGIM.MIHAIL",
         )
 
         val usersMatchingSawyl =
           repository.findAll(UserSpecification(UserFilter(name = "sawyl")), PageRequest.of(0, 10))
         assertThat(usersMatchingSawyl.content).extracting<String>(UserPersonDetail::username).containsExactly(
           "SAWYL.ALYCIA",
-          "SAWYL.ELBERT"
+          "SAWYL.ELBERT",
         )
       }
 
@@ -325,13 +326,13 @@ class UserPersonDetailRepositoryTest {
       internal fun `will partial match on last name case insensitive`() {
         val usersMatchingMiha = repository.findAll(UserSpecification(UserFilter(name = "Miha")), PageRequest.of(0, 10))
         assertThat(usersMatchingMiha.content).extracting<String>(UserPersonDetail::username).containsExactly(
-          "IBRAGIM.MIHAIL"
+          "IBRAGIM.MIHAIL",
         )
 
         val usersMatchingChes = repository.findAll(UserSpecification(UserFilter(name = "ches")), PageRequest.of(0, 10))
         assertThat(usersMatchingChes.content).extracting<String>(UserPersonDetail::username).containsExactly(
           "MARIAN.CHESED",
-          "LEOPOLDO.CHESED"
+          "LEOPOLDO.CHESED",
         )
       }
 
@@ -341,7 +342,7 @@ class UserPersonDetailRepositoryTest {
           repository.findAll(UserSpecification(UserFilter(name = "Marian")), PageRequest.of(0, 10))
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactly(
           "MARIAN.CHESED",
-          "ALEXANDER.MARIAN"
+          "ALEXANDER.MARIAN",
         )
       }
 
@@ -350,7 +351,7 @@ class UserPersonDetailRepositoryTest {
         val users =
           repository.findAll(UserSpecification(UserFilter(name = "john.sm")), PageRequest.of(0, 10))
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactly(
-          "JOHN.SMITH"
+          "JOHN.SMITH",
         )
       }
 
@@ -395,7 +396,10 @@ class UserPersonDetailRepositoryTest {
         val usersMatchingSaw =
           repository.findAll(UserSpecification(UserFilter(name = "Saw")), PageRequest.of(0, 10))
         assertThat(usersMatchingSaw.content).extracting<String>(UserPersonDetail::username).containsExactly(
-          "SAWYL.ALYCIA", "SAWYL.ELBERT", "SAW.MICKEN", "BOB.SAW",
+          "SAWYL.ALYCIA",
+          "SAWYL.ELBERT",
+          "SAW.MICKEN",
+          "BOB.SAW",
         )
 
         val usersMatchingSawForLSAAtWandsworth =
@@ -403,14 +407,15 @@ class UserPersonDetailRepositoryTest {
             UserSpecification(
               UserFilter(
                 localAdministratorUsername = lsaAdministratorAtWandsworth,
-                name = "Saw"
-              )
+                name = "Saw",
+              ),
             ),
-            PageRequest.of(0, 10)
+            PageRequest.of(0, 10),
           )
         assertThat(usersMatchingSawForLSAAtWandsworth.content).extracting<String>(UserPersonDetail::username)
           .containsExactly(
-            "SAWYL.ALYCIA", "SAWYL.ELBERT",
+            "SAWYL.ALYCIA",
+            "SAWYL.ELBERT",
           )
 
         val usersMatchingSawForLSAAtBrixton =
@@ -418,14 +423,15 @@ class UserPersonDetailRepositoryTest {
             UserSpecification(
               UserFilter(
                 localAdministratorUsername = lsaAdministratorAtBrixton,
-                name = "Saw"
-              )
+                name = "Saw",
+              ),
             ),
-            PageRequest.of(0, 10)
+            PageRequest.of(0, 10),
           )
         assertThat(usersMatchingSawForLSAAtBrixton.content).extracting<String>(UserPersonDetail::username)
           .containsExactly(
-            "SAW.MICKEN", "BOB.SAW",
+            "SAW.MICKEN",
+            "BOB.SAW",
           )
 
         val usersMatchingSawForLSAAtBrixtonAndWandsworth =
@@ -433,14 +439,17 @@ class UserPersonDetailRepositoryTest {
             UserSpecification(
               UserFilter(
                 localAdministratorUsername = lsaAdministratorAtBrixtonAndWandsworth,
-                name = "Saw"
-              )
+                name = "Saw",
+              ),
             ),
-            PageRequest.of(0, 10)
+            PageRequest.of(0, 10),
           )
         assertThat(usersMatchingSawForLSAAtBrixtonAndWandsworth.content).extracting<String>(UserPersonDetail::username)
           .containsExactly(
-            "SAWYL.ALYCIA", "SAWYL.ELBERT", "SAW.MICKEN", "BOB.SAW",
+            "SAWYL.ALYCIA",
+            "SAWYL.ELBERT",
+            "SAW.MICKEN",
+            "BOB.SAW",
           )
       }
     }
@@ -543,10 +552,10 @@ class UserPersonDetailRepositoryTest {
             UserSpecification(
               UserFilter(
                 localAdministratorUsername = lsaAdministratorAtWandsworth,
-                status = UserStatus.ACTIVE
-              )
+                status = UserStatus.ACTIVE,
+              ),
             ),
-            PageRequest.of(0, 10)
+            PageRequest.of(0, 10),
           )
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "IBRAGIM.MIHAIL",
@@ -619,10 +628,10 @@ class UserPersonDetailRepositoryTest {
             UserSpecification(
               UserFilter(
                 localAdministratorUsername = lsaAdministratorAtWandsworth,
-                activeCaseloadId = "BXI"
-              )
+                activeCaseloadId = "BXI",
+              ),
             ),
-            PageRequest.of(0, 10)
+            PageRequest.of(0, 10),
           )
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "SAWYL.ALYCIA",
@@ -695,10 +704,10 @@ class UserPersonDetailRepositoryTest {
             UserSpecification(
               UserFilter(
                 localAdministratorUsername = lsaAdministratorAtWandsworth,
-                caseloadId = "BXI"
-              )
+                caseloadId = "BXI",
+              ),
             ),
-            PageRequest.of(0, 10)
+            PageRequest.of(0, 10),
           )
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "SAWYL.ALYCIA",
@@ -730,12 +739,33 @@ class UserPersonDetailRepositoryTest {
           .buildAndSave()
 
         listOf(
-          UserWithRoles("IBRAGIM.MIHAIL", listOf("WWI"), dpsRoleCodes = listOf("GLOBAL_SEARCH", "CREATE_CATEGORISATION", "APPROVE_CATEGORISATION")),
-          UserWithRoles("MARIAN.CHESED", listOf("WWI"), dpsRoleCodes = listOf("GLOBAL_SEARCH", "APPROVE_CATEGORISATION")),
-          UserWithRoles("LEOPOLDO.CHESED", listOf("WWI", "BXI"), dpsRoleCodes = listOf("CREATE_CATEGORISATION", "APPROVE_CATEGORISATION")),
-          UserWithRoles("SAWYL.ALYCIA", listOf("BXI"), dpsRoleCodes = listOf("GLOBAL_SEARCH", "CREATE_CATEGORISATION", "APPROVE_CATEGORISATION")),
+          UserWithRoles(
+            "IBRAGIM.MIHAIL",
+            listOf("WWI"),
+            dpsRoleCodes = listOf("GLOBAL_SEARCH", "CREATE_CATEGORISATION", "APPROVE_CATEGORISATION"),
+          ),
+          UserWithRoles(
+            "MARIAN.CHESED",
+            listOf("WWI"),
+            dpsRoleCodes = listOf("GLOBAL_SEARCH", "APPROVE_CATEGORISATION"),
+          ),
+          UserWithRoles(
+            "LEOPOLDO.CHESED",
+            listOf("WWI", "BXI"),
+            dpsRoleCodes = listOf("CREATE_CATEGORISATION", "APPROVE_CATEGORISATION"),
+          ),
+          UserWithRoles(
+            "SAWYL.ALYCIA",
+            listOf("BXI"),
+            dpsRoleCodes = listOf("GLOBAL_SEARCH", "CREATE_CATEGORISATION", "APPROVE_CATEGORISATION"),
+          ),
           UserWithRoles("SAWYL.ELBERT", listOf("BXI"), dpsRoleCodes = listOf(), nomisRoleCodes = listOf()),
-          UserWithRoles("SAW.MICKEN", listOf("MDI"), dpsRoleCodes = listOf(), nomisRoleCodes = listOf("300", "GLOBAL_SEARCH")), // invalid data
+          UserWithRoles(
+            "SAW.MICKEN",
+            listOf("MDI"),
+            dpsRoleCodes = listOf(),
+            nomisRoleCodes = listOf("300", "GLOBAL_SEARCH"),
+          ), // invalid data
           UserWithRoles("BOB.SAW", listOf("MDI"), dpsRoleCodes = listOf("UPDATE_ALERT")),
         ).forEach { createUserOf(it) }
       }
@@ -766,23 +796,32 @@ class UserPersonDetailRepositoryTest {
           "MARIAN.CHESED",
         )
       }
+
       @Test
       internal fun `will match only users that match the role belonging to NOMIS in specific caseload`() {
         val users =
-          repository.findAll(UserSpecification(UserFilter(nomisRoleCode = "GLOBAL_SEARCH", caseloadId = "MDI")), PageRequest.of(0, 10))
+          repository.findAll(
+            UserSpecification(UserFilter(nomisRoleCode = "GLOBAL_SEARCH", caseloadId = "MDI")),
+            PageRequest.of(0, 10),
+          )
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "SAW.MICKEN",
         )
       }
+
       @Test
       internal fun `will match only users that match the role belonging to NOMIS for user with same role in multiple caseloads`() {
         val users =
-          repository.findAll(UserSpecification(UserFilter(nomisRoleCode = "300", caseloadId = "BXI")), PageRequest.of(0, 10))
+          repository.findAll(
+            UserSpecification(UserFilter(nomisRoleCode = "300", caseloadId = "BXI")),
+            PageRequest.of(0, 10),
+          )
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "LEOPOLDO.CHESED",
           "SAWYL.ALYCIA",
         )
       }
+
       @Test
       internal fun `will match only users that match the role belonging to NOMIS for user regardless of caseload`() {
         val users =
@@ -791,16 +830,26 @@ class UserPersonDetailRepositoryTest {
           "IBRAGIM.MIHAIL",
           "MARIAN.CHESED",
           "LEOPOLDO.CHESED",
-          "LEOPOLDO.CHESED",
           "SAWYL.ALYCIA",
           "SAW.MICKEN",
-          "BOB.SAW"
+          "BOB.SAW",
         )
       }
+
       @Test
       internal fun `will match only users that match the all roles in filter belonging to DPS`() {
         val users =
-          repository.findAll(UserSpecification(UserFilter(roleCodes = listOf("GLOBAL_SEARCH", "CREATE_CATEGORISATION"))), PageRequest.of(0, 10))
+          repository.findAll(
+            UserSpecification(
+              UserFilter(
+                roleCodes = listOf(
+                  "GLOBAL_SEARCH",
+                  "CREATE_CATEGORISATION",
+                ),
+              ),
+            ),
+            PageRequest.of(0, 10),
+          )
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "SAWYL.ALYCIA",
           "IBRAGIM.MIHAIL",
@@ -814,10 +863,10 @@ class UserPersonDetailRepositoryTest {
             UserSpecification(
               UserFilter(
                 localAdministratorUsername = lsaAdministratorAtWandsworth,
-                roleCodes = listOf("GLOBAL_SEARCH")
-              )
+                roleCodes = listOf("GLOBAL_SEARCH"),
+              ),
             ),
-            PageRequest.of(0, 10)
+            PageRequest.of(0, 10),
           )
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "IBRAGIM.MIHAIL",

@@ -1,4 +1,17 @@
 CREATE SCHEMA IF NOT EXISTS oms_utils;
+
+CREATE ALIAS oms_utils.record_logon_date AS $$
+import java.sql.Connection;
+import java.sql.SQLException;
+@CODE
+void recordLogonDate(Connection conn, String username) throws SQLException {
+    final var recordLogonDateSql = "UPDATE staff_user_accounts SET last_logon_date = now() WHERE username = ?";
+    final var statement = conn.prepareStatement(recordLogonDateSql);
+    statement.setString(1, username);
+    statement.executeUpdate();
+}
+$$;
+
 CREATE ALIAS oms_utils.create_user AS $$
 import java.sql.Connection;
 import java.sql.SQLException;

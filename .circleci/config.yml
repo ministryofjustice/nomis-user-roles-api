@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  hmpps: ministryofjustice/hmpps@6
+  hmpps: ministryofjustice/hmpps@7
 
 parameters:
   alerts-slack-channel:
@@ -15,7 +15,7 @@ jobs:
   validate:
     executor:
       name: hmpps/java
-      tag: "19.0"
+      tag: "20.0"
     steps:
       - checkout
       - restore_cache:
@@ -53,7 +53,8 @@ workflows:
           name: deploy_dev
           env: "dev"
           jira_update: true
-          context: hmpps-common-vars
+          context:
+            - hmpps-common-vars
           filters:
             branches:
               only:
@@ -62,22 +63,10 @@ workflows:
             - validate
             - build_docker
             - helm_lint
-      - request-stage-approval:
-          type: approval
-          requires:
-            - deploy_dev
-      - hmpps/deploy_env:
-          name: deploy_stage
-          env: "stage"
-          context:
-            - hmpps-common-vars
-            - nomis-user-roles-api-stage
-          requires:
-            - request-stage-approval
       - request-preprod-approval:
           type: approval
           requires:
-            - deploy_stage
+            - deploy_dev
       - hmpps/deploy_env:
           name: deploy_preprod
           env: "preprod"
@@ -115,6 +104,7 @@ workflows:
                 - main
     jobs:
       - hmpps/gradle_owasp_dependency_check:
+          jdk_tag: "20.0"
           slack_channel: << pipeline.parameters.alerts-slack-channel >>
           context:
             - hmpps-common-vars
