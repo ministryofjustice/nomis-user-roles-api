@@ -9,20 +9,16 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.Size
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.RoleAssignmentStats
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.RoleAssignmentsSpecification
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserRoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.DPS_CASELOAD
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.RoleAssignmentsService
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
 
 @RestController
@@ -30,6 +26,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
 @RequestMapping("/users", produces = [MediaType.APPLICATION_JSON_VALUE])
 class UserRoleManagementResource(
   private val userService: UserService,
+  private val roleAssignmentsService: RoleAssignmentsService,
 ) {
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
@@ -400,6 +397,12 @@ class UserRoleManagementResource(
     @RequestBody
     users: String,
   ): List<UserRoleDetail> = userService.addRoleToUsers(users.asList(), roleCode)
+
+
+  @PreAuthorize("hasAnyRole('MAINTAIN_ACCESS_ROLES_ADMIN')")
+  fun assignRoles(@Valid @RequestBody specification: RoleAssignmentsSpecification): List<RoleAssignmentStats> {
+    return roleAssignmentsService.updateRoleAssignments(specification)
+  }
 }
 
 private fun String.asList(): List<String> = this.split(",").map { it.removeQuotes().trim() }
