@@ -9,7 +9,6 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.Size
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -398,9 +397,53 @@ class UserRoleManagementResource(
     users: String,
   ): List<UserRoleDetail> = userService.addRoleToUsers(users.asList(), roleCode)
 
-
+  @PostMapping("/reassign-roles")
   @PreAuthorize("hasAnyRole('MAINTAIN_ACCESS_ROLES_ADMIN')")
-  fun assignRoles(@Valid @RequestBody specification: RoleAssignmentsSpecification): List<RoleAssignmentStats> {
+  @Operation(
+    summary = "Reassign roles from a NOMIS role to a DPS role and removes the NOMIS role if no longer required",
+    description = "Requires role ROLE_MAINTAIN_ACCESS_ROLES",
+    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Role update details",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to re-assign a set of roles",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to re-assign a set of roles",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
+  )
+  fun reassignRoles(
+    @Valid @RequestBody
+    specification: RoleAssignmentsSpecification,
+  ): List<RoleAssignmentStats> {
     return roleAssignmentsService.updateRoleAssignments(specification)
   }
 }

@@ -6,6 +6,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadRole
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadRoleIdentity
 
 @Repository
-interface UserCaseloadRoleRepository : CrudRepository<UserCaseloadRoleIdentity, UserCaseloadRole> {
-  fun findAllById_caseloadAndRole_code(caseload: String, roleCode: String): List<UserCaseloadRole>
+interface UserCaseloadRoleRepository : CrudRepository<UserCaseloadRole, UserCaseloadRoleIdentity> {
+  fun findAllByIdCaseloadAndIdRoleId(caseload: String, roleId: Long): List<UserCaseloadRole>
 }
