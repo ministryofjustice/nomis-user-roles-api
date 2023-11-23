@@ -21,8 +21,11 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.RoleAssignmentStats
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.RoleAssignmentsSpecification
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserRoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.DPS_CASELOAD
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.RoleAssignmentsService
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
 
 @RestController
@@ -30,6 +33,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
 @RequestMapping("/users", produces = [MediaType.APPLICATION_JSON_VALUE])
 class UserRoleManagementResource(
   private val userService: UserService,
+  private val roleAssignmentsService: RoleAssignmentsService,
 ) {
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
@@ -400,6 +404,56 @@ class UserRoleManagementResource(
     @RequestBody
     users: String,
   ): List<UserRoleDetail> = userService.addRoleToUsers(users.asList(), roleCode)
+
+  @PostMapping("/reassign-roles")
+  @PreAuthorize("hasAnyRole('MAINTAIN_ACCESS_ROLES_ADMIN')")
+  @Operation(
+    summary = "Reassign roles from a NOMIS role to a DPS role and removes the NOMIS role if no longer required",
+    description = "Requires role ROLE_MAINTAIN_ACCESS_ROLES",
+    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Role update details",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to re-assign a set of roles",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to re-assign a set of roles",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
+  )
+  fun reassignRoles(
+    @Valid @RequestBody
+    specification: RoleAssignmentsSpecification,
+  ): List<RoleAssignmentStats> {
+    return roleAssignmentsService.updateRoleAssignments(specification)
+  }
 }
 
 private fun String.asList(): List<String> = this.split(",").map { it.removeQuotes().trim() }

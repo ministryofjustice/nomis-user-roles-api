@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.reactive.function.BodyInserters
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.RoleAssignmentsSpecification
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.IntegrationTestBase
 
@@ -754,6 +755,138 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .jsonPath(matchByUserName, "ROLE_USER1").exists()
         .jsonPath(matchByUserName, "ROLE_USER2").exists()
         .jsonPath(matchByUserName, "ROLE_USER3").exists()
+    }
+  }
+
+  @DisplayName("POST /users/reassign-roles")
+  @Nested
+  inner class ReassignRoles {
+    private val roleAssignmentsSpecification = RoleAssignmentsSpecification(
+      caseloads = listOf("WWI", "BXI"),
+      nomisRolesToMatch = listOf("201"),
+      dpsRolesToAssign = listOf("ADJUDICATIONS_REVIEWER"),
+      nomisRolesToRemove = listOf("200"),
+    )
+
+    @BeforeEach
+    internal fun createUsers() {
+      with(dataBuilder) {
+        generalUser()
+          .username("ROLE_USER1")
+          .dpsRoles(listOf("GLOBAL_SEARCH"))
+          .nomisRoles(listOf("201", "200"))
+          .buildAndSave()
+      }
+      with(dataBuilder) {
+        generalUser()
+          .username("ROLE_USER2")
+          .dpsRoles(listOf("CREATE_CATEGORISATION", "ADJUDICATIONS_REVIEWER"))
+          .nomisRoles(listOf("200"))
+          .buildAndSave()
+      }
+      with(dataBuilder) {
+        generalUser()
+          .username("ROLE_USER3")
+          .dpsRoles(listOf("CREATE_CATEGORISATION"))
+          .nomisRoles(listOf("201"))
+          .atPrisons("BXI", "WWI")
+          .buildAndSave()
+      }
+      with(dataBuilder) {
+        generalUser()
+          .username("ROLE_USER4")
+          .dpsRoles(listOf("GLOBAL_SEARCH"))
+          .nomisRoles(listOf("200", "201"))
+          .atPrisons("BXI", "WWI")
+          .buildAndSave()
+      }
+    }
+
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    fun `access forbidden when no authority`() {
+      webTestClient.post().uri("/users/reassign-roles")
+        .body(
+          BodyInserters.fromValue(
+            roleAssignmentsSpecification,
+          ),
+        )
+        .exchange()
+        .expectStatus().isUnauthorized
+    }
+
+    @Test
+    fun `access forbidden when no role`() {
+      webTestClient.post().uri("/users/reassign-roles")
+        .headers(setAuthorisation(roles = listOf()))
+        .body(
+          BodyInserters.fromValue(
+            roleAssignmentsSpecification,
+          ),
+        )
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `re-assign forbidden with wrong role`() {
+      webTestClient.post().uri("/users/reassign-roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
+        .body(
+          BodyInserters.fromValue(
+            roleAssignmentsSpecification,
+          ),
+        )
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `re-assign`() {
+      webTestClient.post().uri("/users/reassign-roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(
+          BodyInserters.fromValue(
+            roleAssignmentsSpecification,
+          ),
+        )
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .json(
+          """
+          [
+            {
+              "caseload": "WWI",
+              "numMatchedUsers": 3,
+              "numAssignRoleSucceeded": 3,
+              "numAssignRoleFailed": 0,
+              "numUnassignRoleSucceeded": 2,
+              "numUnassignRoleFailed": 1
+            },
+            {
+              "caseload": "BXI",
+              "numMatchedUsers": 2,
+              "numAssignRoleSucceeded": 0,
+              "numAssignRoleFailed": 2,
+              "numUnassignRoleSucceeded": 1,
+              "numUnassignRoleFailed": 1
+            }
+          ]
+          """.trimIndent(),
+        )
+
+      webTestClient.get().uri("/users/ROLE_USER1/roles?include-nomis-roles=true")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("username").isEqualTo("ROLE_USER1")
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "ADJUDICATIONS_REVIEWER").exists()
+        .jsonPath("$.nomisRoles[?(@.caseload.id == '%s')].roles[?(@.code == '%s')]", "WWI", "200").doesNotExist()
+        .jsonPath("$.nomisRoles[?(@.caseload.id == '%s')].roles[?(@.code == '%s')]", "WWI", "201").exists()
     }
   }
 }
