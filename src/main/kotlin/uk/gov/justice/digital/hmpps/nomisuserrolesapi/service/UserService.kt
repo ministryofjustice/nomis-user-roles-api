@@ -138,7 +138,7 @@ class UserService(
   fun downloadUserByFilter(filter: UserFilter): List<UserSummaryWithEmail> =
     userPersonDetailRepository.findAll(UserSpecification(filter))
       .map {
-        it.toDownloadUserSummaryWithEmail()
+        it.toUserSummaryWithEmail()
       }
 
   fun createGeneralUser(createUserRequest: CreateGeneralUserRequest): UserSummary {
