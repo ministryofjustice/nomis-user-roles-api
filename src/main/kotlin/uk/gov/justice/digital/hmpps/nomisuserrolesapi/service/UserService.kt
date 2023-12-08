@@ -46,7 +46,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserBasicPe
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPasswordRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.changePasswordWithValidation
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.toDownloadUserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.toUserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.toUserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.mapUserSummarySortProperties
@@ -138,7 +137,7 @@ class UserService(
   fun downloadUserByFilter(filter: UserFilter): List<UserSummaryWithEmail> =
     userPersonDetailRepository.findAll(UserSpecification(filter))
       .map {
-        it.toDownloadUserSummaryWithEmail()
+        it.toUserSummaryWithEmail()
       }
 
   fun createGeneralUser(createUserRequest: CreateGeneralUserRequest): UserSummary {

@@ -775,6 +775,7 @@ class UserResourceIntTest : IntegrationTestBase() {
           generalUser().username("abella.moulin").firstName("ABELLA").lastName("MOULIN").atPrison("WWI").buildAndSave()
           // first prison is set to active caseload
           generalUser().username("marco.rossi").firstName("MARCO").lastName("ROSSI").atPrisons("BXI", "WWI")
+            .dpsRoles(listOf("VIEW_PRISONER_DATA"))
             .inactive().buildAndSave()
           generalUser().username("ella.dribble").firstName("ELLA").lastName("DRIBBLE").atPrisons("WWI", "BXI")
             .inactive().buildAndSave()
@@ -872,7 +873,7 @@ class UserResourceIntTest : IntegrationTestBase() {
                                   "id": "BXI",
                                   "name": "Brixton (HMP)"
                               },
-                                  "dpsRoleCount": 0
+                                  "dpsRoleCount": 1
                             }]
                             """,
           )

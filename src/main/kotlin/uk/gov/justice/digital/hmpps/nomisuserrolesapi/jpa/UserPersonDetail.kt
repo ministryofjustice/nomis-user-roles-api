@@ -265,26 +265,6 @@ fun UserPersonDetail.toUserSummaryWithEmail() = UserSummaryWithEmail(
   staffStatus = staff.status,
 )
 
-fun UserPersonDetail.toDownloadUserSummaryWithEmail() = UserSummaryWithEmail(
-  username = username,
-  staffId = staff.staffId,
-  firstName = staff.firstName.capitalizeFully(),
-  lastName = staff.lastName.capitalizeFully(),
-  active = isActive(),
-  status = accountDetail?.status,
-  locked = accountDetail?.isLocked() ?: false,
-  expired = accountDetail?.isExpired() ?: false,
-  activeCaseload = this.activeCaseLoad?.let { caseload ->
-    PrisonCaseload(
-      id = caseload.id,
-      name = caseload.name.capitalizeLeavingAbbreviations(),
-    )
-  },
-  dpsRoleCount = 0,
-  email = staff.primaryEmail()?.emailCaseSensitive,
-  staffStatus = staff.status,
-)
-
 fun UserPersonDetail.toUserSummary(): UserSummary = UserSummary(
   username = this.username,
   staffId = this.staff.staffId,
