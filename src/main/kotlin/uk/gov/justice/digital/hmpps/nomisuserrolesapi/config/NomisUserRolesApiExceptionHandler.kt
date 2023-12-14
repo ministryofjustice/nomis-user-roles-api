@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.reactive.function.client.WebClientException
 import org.springframework.web.reactive.function.client.WebClientResponseException
+import org.springframework.web.reactive.resource.NoResourceFoundException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.CaseloadAlreadyExistsException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.InvalidRoleAssignmentException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource.UnauthorisedException
@@ -257,6 +258,19 @@ class NomisUserRolesApiExceptionHandler {
           userMessage = e.message,
           developerMessage = e.message,
           errorCode = PASSWORD_NOT_ACCEPTABLE,
+        ),
+      )
+  }
+
+  @ExceptionHandler(NoResourceFoundException::class)
+  fun handleEntityNotFoundException(e: NoResourceFoundException): ResponseEntity<ErrorResponse> {
+    return ResponseEntity
+      .status(HttpStatus.NOT_FOUND)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.NOT_FOUND.value(),
+          userMessage = e.message,
+          developerMessage = e.message,
         ),
       )
   }
