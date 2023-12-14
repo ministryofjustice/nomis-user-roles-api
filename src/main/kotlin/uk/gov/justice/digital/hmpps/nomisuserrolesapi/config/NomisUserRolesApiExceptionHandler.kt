@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.HttpStatus.UNAUTHORIZED
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -91,10 +92,10 @@ class NomisUserRolesApiExceptionHandler {
   fun handleEntityNotFoundException(e: NoResourceFoundException): ResponseEntity<ErrorResponse> {
     return ResponseEntity
       .status(HttpStatus.NOT_FOUND)
+      .contentType(MediaType.APPLICATION_JSON)
       .body(
         ErrorResponse(
           status = HttpStatus.NOT_FOUND.value(),
-          userMessage = e.message,
           developerMessage = e.message,
         ),
       )
