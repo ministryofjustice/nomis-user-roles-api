@@ -434,7 +434,7 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `delete user caseload with username not found`() {
-      webTestClient.delete().uri("/user/dummy/caseloads/WWI")
+      webTestClient.delete().uri("/users/dummy/caseloads/WWI")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
         .expectStatus().isNotFound

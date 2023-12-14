@@ -445,7 +445,7 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `delete user role with username not found`() {
-      webTestClient.delete().uri("/user/dummy/roles/APPROVE_CATEGORISATION")
+      webTestClient.delete().uri("/users/dummy/roles/APPROVE_CATEGORISATION")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
         .expectStatus().isNotFound
