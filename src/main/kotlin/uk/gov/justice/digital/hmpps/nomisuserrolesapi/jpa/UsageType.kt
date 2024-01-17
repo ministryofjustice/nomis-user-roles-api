@@ -1,7 +1,8 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa
 
 enum class UsageType {
-  GENERAL, ADMIN;
+  GENERAL,
+  ADMIN,
 }
 
 fun getUsageType(adminOnly: Boolean) =

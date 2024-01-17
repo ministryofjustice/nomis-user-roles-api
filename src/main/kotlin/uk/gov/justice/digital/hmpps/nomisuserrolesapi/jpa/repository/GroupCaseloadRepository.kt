@@ -7,5 +7,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.GroupCaseloadPk
 
 @Repository
 interface GroupCaseloadRepository : CrudRepository<GroupCaseload, GroupCaseloadPk> {
+  @Suppress("FunctionName")
   fun findAllById_Caseload(caseloadId: String): List<GroupCaseload>
 }

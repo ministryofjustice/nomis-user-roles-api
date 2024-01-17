@@ -587,7 +587,8 @@ class UserPersonDetailRepositoryTest {
         listOf(
           "IBRAGIM.MIHAIL" to listOf("WWI"),
           "MARIAN.CHESED" to listOf("WWI"),
-          "LEOPOLDO.CHESED" to listOf("WWI", "BXI"), // first in list is set to active caseload
+          // first in list is set to active caseload
+          "LEOPOLDO.CHESED" to listOf("WWI", "BXI"),
           "SAWYL.ALYCIA" to listOf("BXI", "WWI"),
           "SAWYL.ELBERT" to listOf("BXI"),
           "SAW.MICKEN" to listOf(),
@@ -764,8 +765,9 @@ class UserPersonDetailRepositoryTest {
             "SAW.MICKEN",
             listOf("MDI"),
             dpsRoleCodes = listOf(),
+            // invalid data
             nomisRoleCodes = listOf("300", "GLOBAL_SEARCH"),
-          ), // invalid data
+          ),
           UserWithRoles("BOB.SAW", listOf("MDI"), dpsRoleCodes = listOf("UPDATE_ALERT")),
         ).forEach { createUserOf(it) }
       }

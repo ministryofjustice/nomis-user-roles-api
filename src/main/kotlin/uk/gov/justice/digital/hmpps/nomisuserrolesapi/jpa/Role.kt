@@ -83,5 +83,7 @@ data class Role(
 }
 
 enum class RoleType {
-  APP, INST, COMM
+  APP,
+  INST,
+  COMM,
 }
