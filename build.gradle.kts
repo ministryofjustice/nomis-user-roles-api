@@ -1,7 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.10.1"
-  kotlin("plugin.spring") version "1.9.21"
-  kotlin("plugin.jpa") version "1.9.21"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.14.1"
+  kotlin("plugin.spring") version "1.9.22"
+  kotlin("plugin.jpa") version "1.9.22"
   idea
 }
 
@@ -21,12 +21,12 @@ dependencies {
   implementation("commons-codec:commons-codec:1.16.0")
 
   implementation("org.flywaydb:flyway-core")
-  implementation("io.hypersistence:hypersistence-utils-hibernate-60:3.6.1")
+  implementation("io.hypersistence:hypersistence-utils-hibernate-60:3.7.0")
   implementation("org.hibernate.orm:hibernate-community-dialects")
 
   implementation("javax.transaction:javax.transaction-api:1.3")
   implementation("javax.xml.bind:jaxb-api:2.3.1")
-  implementation("com.google.guava:guava:32.1.3-jre")
+  implementation("com.google.guava:guava:33.0.0-jre")
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
 
