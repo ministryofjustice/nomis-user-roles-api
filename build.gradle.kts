@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.15.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.15.2"
   kotlin("plugin.spring") version "1.9.22"
   kotlin("plugin.jpa") version "1.9.22"
   idea
@@ -18,10 +18,10 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.apache.commons:commons-lang3:3.14.0")
   implementation("org.apache.commons:commons-text:1.11.0")
-  implementation("commons-codec:commons-codec:1.16.0")
+  implementation("commons-codec:commons-codec:1.16.1")
 
   implementation("org.flywaydb:flyway-core")
-  implementation("io.hypersistence:hypersistence-utils-hibernate-60:3.7.0")
+  implementation("io.hypersistence:hypersistence-utils-hibernate-60:3.7.2")
   implementation("org.hibernate.orm:hibernate-community-dialects")
 
   implementation("javax.transaction:javax.transaction-api:1.3")
@@ -34,13 +34,13 @@ dependencies {
 
   implementation("com.zaxxer:HikariCP:5.1.0")
   runtimeOnly("com.h2database:h2:2.2.224")
-  runtimeOnly("com.oracle.database.jdbc:ojdbc10:19.21.0.0")
+  runtimeOnly("com.oracle.database.jdbc:ojdbc10:19.22.0.0")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
-  testImplementation("io.jsonwebtoken:jjwt-impl:0.12.3")
-  testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.3")
+  testImplementation("io.jsonwebtoken:jjwt-impl:0.12.5")
+  testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.5")
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   testImplementation("org.wiremock:wiremock-standalone:3.3.1")
   testImplementation("org.mockito:mockito-inline:5.2.0")
