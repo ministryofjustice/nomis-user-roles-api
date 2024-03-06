@@ -12,6 +12,7 @@ generic-service:
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     API_BASE_URL_OAUTH: https://sign-in.hmpps.service.justice.gov.uk/auth
+    FEATURE_RECORD-LOGON-DATE: true
 
   # Disabled for DSO AKS cluster
   allowlist: null
