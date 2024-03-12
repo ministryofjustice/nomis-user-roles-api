@@ -33,7 +33,7 @@ data class GroupAdminSummaryWithEmail(
   @Schema(
     description = "Groups that the user is administrator of",
     example = "[{id: BXI, description: }]",
-    )
+  )
   val groups: List<UserGroupDetail>,
   @Schema(description = "Staff status", example = "ACTIVE")
   val staffStatus: String?,

@@ -22,6 +22,7 @@ import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.Where
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.GroupAdminSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.PrisonCaseload
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserGroupDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.AbbreviationsProcessor
@@ -284,7 +285,7 @@ fun UserPersonDetail.toGroupAdminSummary() = GroupAdminSummaryWithEmail(
   dpsRoleCount = this.dpsRoles.size,
   email = staff.primaryEmail()?.emailCaseSensitive,
   groups = activeAndInactiveAdministratorOfUserGroups.filter { it -> it.active }.map { it ->
-    uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserGroupDetail(
+    UserGroupDetail(
       it.userGroup.id,
       it.userGroup.description,
     )
