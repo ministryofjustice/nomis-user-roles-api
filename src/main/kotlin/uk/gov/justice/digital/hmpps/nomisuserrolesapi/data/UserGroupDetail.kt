@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "User Group Information")
-data class UserGroup(
+data class UserGroupDetail(
   @Schema(description = "Group code", example = "BXI", required = true) val code: String,
   @Schema(description = "Group description", example = "Brixton (HMP)", required = true) val description: String,
 )

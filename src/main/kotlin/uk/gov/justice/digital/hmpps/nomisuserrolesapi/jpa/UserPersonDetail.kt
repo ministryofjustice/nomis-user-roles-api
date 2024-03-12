@@ -20,6 +20,7 @@ import jakarta.persistence.Table
 import org.hibernate.Hibernate
 import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.Where
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.GroupAdminSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.PrisonCaseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummaryWithEmail
@@ -262,6 +263,32 @@ fun UserPersonDetail.toUserSummaryWithEmail() = UserSummaryWithEmail(
   },
   dpsRoleCount = this.dpsRoles.size,
   email = staff.primaryEmail()?.emailCaseSensitive,
+  staffStatus = staff.status,
+)
+
+fun UserPersonDetail.toGroupAdminSummary() = GroupAdminSummaryWithEmail(
+  username = username,
+  staffId = staff.staffId,
+  firstName = staff.firstName.capitalizeFully(),
+  lastName = staff.lastName.capitalizeFully(),
+  active = isActive(),
+  status = accountDetail?.status,
+  locked = accountDetail?.isLocked() ?: false,
+  expired = accountDetail?.isExpired() ?: false,
+  activeCaseload = activeCaseLoad?.let { caseload ->
+    PrisonCaseload(
+      id = caseload.id,
+      name = caseload.name.capitalizeLeavingAbbreviations(),
+    )
+  },
+  dpsRoleCount = this.dpsRoles.size,
+  email = staff.primaryEmail()?.emailCaseSensitive,
+  groups = activeAndInactiveAdministratorOfUserGroups.map { it ->
+    uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserGroupDetail(
+      it.userGroup.id,
+      it.userGroup.description
+    )
+  },
   staffStatus = staff.status,
 )
 
