@@ -283,10 +283,10 @@ fun UserPersonDetail.toGroupAdminSummary() = GroupAdminSummaryWithEmail(
   },
   dpsRoleCount = this.dpsRoles.size,
   email = staff.primaryEmail()?.emailCaseSensitive,
-  groups = activeAndInactiveAdministratorOfUserGroups.map { it ->
+  groups = activeAndInactiveAdministratorOfUserGroups.filter { it -> it.active }.map { it ->
     uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserGroupDetail(
       it.userGroup.id,
-      it.userGroup.description
+      it.userGroup.description,
     )
   },
   staffStatus = staff.status,

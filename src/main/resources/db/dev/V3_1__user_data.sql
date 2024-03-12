@@ -541,7 +541,10 @@ VALUES (138250, 'STF', 4, null, null, 'EMAIL', 'Phillips@BobJustice.gov.uk',
 
 insert into LAA_ADMINISTRATORS(LOCAL_AUTHORITY_CODE,USERNAME, ACTIVE_FLAG)
 values ('CADM_I','ITAG_LADM','Y'),
+       ('BAI','ITAG_LADM','Y'),
        ('CADM_I','LAA_USER','Y'),
+       ('MDI','LAA_USER','Y'),
+       ('BAI','LAA_USER','N'),
        ('MDI','OLD_NOMIS_USER','N');
 
 insert into LAA_GENERAL_USERS(LOCAL_AUTHORITY_CODE,USERNAME, START_DATE)
