@@ -771,6 +771,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       internal fun createUsers() {
         with(dataBuilder) {
           localAdministrator().username("jane.lsa.wwi").atPrison("WWI").buildAndSave()
+          localAdministrator().username("torvald.lsa.multi").atPrisons("WWI", "BXI").buildAndSave()
 
           generalUser().username("abella.moulin").firstName("ABELLA").lastName("MOULIN").atPrison("WWI").buildAndSave()
           // first prison is set to active caseload
@@ -834,13 +835,14 @@ class UserResourceIntTest : IntegrationTestBase() {
           .exchange()
           .expectStatus().isOk
           .expectBody()
-          .jsonPath("$.numberOfElements").isEqualTo(6)
+          .jsonPath("$.numberOfElements").isEqualTo(7)
           .jsonPath(matchByUserName, "marco.rossi").exists()
           .jsonPath(matchByUserName, "dave.rossi").exists()
           .jsonPath(matchByUserName, "abella.moulin").exists()
           .jsonPath(matchByUserName, "mark.bowlan").exists()
           .jsonPath(matchByUserName, "jane.lsa.wwi").exists()
           .jsonPath(matchByUserName, "ella.dribble").exists()
+          .jsonPath(matchByUserName, "torvald.lsa.multi").exists()
       }
 
       @Test
@@ -914,28 +916,11 @@ class UserResourceIntTest : IntegrationTestBase() {
           .jsonPath(matchByUserName, "dave.rossi").exists()
           .jsonPath(matchByUserName, "ella.dribble").exists()
       }
-    }
-
-    @Nested
-    @DisplayName("when getting local group admins")
-    inner class UserGroupAdministrator {
-      @BeforeEach
-      internal fun createUsers() {
-        with(dataBuilder) {
-          localAdministrator()
-            .username("jane.lsa.wwi")
-            .atPrisons("WWI", "BXI")
-            .buildAndSave()
-        }
-      }
-
-      @AfterEach
-      internal fun deleteUsers() = dataBuilder.deleteAllUsers()
 
       @Test
-      fun `will return admin groups administered by user`() {
+      fun `they can view user groups administered by a user`() {
         webTestClient.get().uri {
-          it.path("/users/jane.lsa.wwi").build()
+          it.path("/users/torvald.lsa.multi").build()
         }
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
           .exchange()
@@ -1264,6 +1249,7 @@ class UserResourceIntTest : IntegrationTestBase() {
   }
 
   @Nested
+  @DisplayName("Show only LSAs functionality")
   inner class GetLSAsOnly {
     @BeforeEach
     internal fun createUsers() {
@@ -1473,7 +1459,7 @@ class UserResourceIntTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `they can download filter by with LSAs Only`() {
+    fun `they can download standard filter by with LSAs Only`() {
       webTestClient.get().uri {
         it.path("/users/download")
           .queryParam("showOnlyLSAs", true)
@@ -1495,7 +1481,7 @@ class UserResourceIntTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `they can download filter by with LSAs Only with active caseload`() {
+    fun `they can download standard filter by with LSAs Only with active caseload`() {
       webTestClient.get().uri {
         it.path("/users/download")
           .queryParam("activeCaseload", "LEI")
@@ -1511,6 +1497,32 @@ class UserResourceIntTest : IntegrationTestBase() {
             "TIM.MARSHALL",
             "TIM.SMITH",
           )
+        }
+    }
+
+    @Test
+    fun `they can download LSAs report`() {
+      dataBuilder.localAdministrator()
+        .username("LSA_AT_MULTIPLE_PRISONS")
+        .firstName("MULTIPLE")
+        .lastName("PRISONS")
+        .atPrisons("WWI", "LEI")
+        .buildAndSave()
+
+      webTestClient.get().uri {
+        it.path("/users/download/admins")
+          .queryParam("showOnlyLSAs", true)
+          .build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$[0].groups").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["id"] }).containsExactlyInAnyOrder("WWI")
+        }
+        .jsonPath("$[5].groups").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["id"] }).containsExactlyInAnyOrder("WWI", "LEI")
         }
     }
   }
