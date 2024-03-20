@@ -917,6 +917,37 @@ class UserResourceIntTest : IntegrationTestBase() {
     }
 
     @Nested
+    @DisplayName("when getting local group admins")
+    inner class UserGroupAdministrator {
+      @BeforeEach
+      internal fun createUsers() {
+        with(dataBuilder) {
+          localAdministrator()
+            .username("jane.lsa.wwi")
+            .atPrisons("WWI", "BXI")
+            .buildAndSave()
+        }
+      }
+
+      @AfterEach
+      internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+      @Test
+      fun `will return admin groups administered by user`() {
+        webTestClient.get().uri {
+          it.path("/users/jane.lsa.wwi").build()
+        }
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+          .exchange()
+          .expectStatus().isOk
+          .expectBody()
+          .jsonPath("$.administratorOfUserGroups.length()").isEqualTo(2)
+          .jsonPath("$.administratorOfUserGroups[0].id").isEqualTo("WWI")
+          .jsonPath("$.administratorOfUserGroups[1].id").isEqualTo("BXI")
+      }
+    }
+
+    @Nested
     @DisplayName("sorting and paging")
     inner class SortingAndPaging {
       @BeforeEach
