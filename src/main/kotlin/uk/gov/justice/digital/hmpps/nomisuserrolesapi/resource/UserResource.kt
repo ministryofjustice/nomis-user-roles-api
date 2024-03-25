@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.GroupAdminSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
@@ -419,6 +420,72 @@ class UserResource(
     )
     showOnlyLSAs: Boolean = false,
   ): List<UserSummaryWithEmail> = userService.downloadUserByFilter(
+    UserFilter(
+      localAdministratorUsername = localAdministratorUsernameWhenNotCentralAdministrator(),
+      name = nameFilter.nonBlank(),
+      status = status,
+      activeCaseloadId = activeCaseload.nonBlank(),
+      caseloadId = caseload.nonBlank(),
+      roleCodes = accessRoles ?: listOf(),
+      nomisRoleCode = nomisRole,
+      inclusiveRoles = inclusiveRoles,
+      showOnlyLSAs = showOnlyLSAs,
+    ),
+  )
+
+  @GetMapping("/download/admins")
+  fun downloadGroupAdminsByFilters(
+    @PageableDefault(sort = ["lastName", "firstName"], direction = Sort.Direction.ASC)
+    pageRequest: Pageable,
+    @RequestParam(value = "nameFilter", required = false)
+    @Parameter(
+      description = "Filter results by name (first name and/or last name in any order), username or email address.",
+      example = "Raj",
+    )
+    nameFilter: String?,
+    @RequestParam(value = "accessRoles", required = false)
+    @Parameter(
+      description = "Filter will match users that have all DPS role specified",
+      example = "ADD_SENSITIVE_CASE_NOTES",
+    )
+    accessRoles: List<String>?,
+    @RequestParam(value = "nomisRole", required = false)
+    @Parameter(
+      description = "Filter will match users that have the NOMIS role specified, should be used with a caseloadId or will get duplicates",
+      example = "201",
+    )
+    nomisRole: String?,
+    @RequestParam(value = "status", required = false, defaultValue = "ALL")
+    @Parameter(
+      description = "Limit to active / inactive / show all users",
+      example = "INACTIVE",
+    )
+    status: UserStatus = UserStatus.ACTIVE,
+    @Parameter(
+      description = "Filter results by user's currently active caseload i.e. the one they have currently selected",
+      example = "MDI",
+    )
+    @RequestParam(value = "activeCaseload", required = false)
+    activeCaseload: String?,
+    @Parameter(
+      description = "Filter results to include only those users that have access to the specified caseload (irrespective of whether it is currently active or not",
+      example = "MDI",
+    )
+    @RequestParam(value = "caseload", required = false)
+    caseload: String?,
+    @RequestParam(value = "inclusiveRoles", required = false)
+    @Parameter(
+      description = "Returns result inclusive of selected roles",
+      example = "true",
+    )
+    inclusiveRoles: Boolean?,
+    @RequestParam(value = "showOnlyLSAs", required = false, defaultValue = "false")
+    @Parameter(
+      description = "Returns all active LSAs",
+      example = "true",
+    )
+    showOnlyLSAs: Boolean = false,
+  ): List<GroupAdminSummaryWithEmail> = userService.downloadAdminByFilter(
     UserFilter(
       localAdministratorUsername = localAdministratorUsernameWhenNotCentralAdministrator(),
       name = nameFilter.nonBlank(),
