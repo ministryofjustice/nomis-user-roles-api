@@ -22,6 +22,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedAdminUser
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedGeneralUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedLocalAdminUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLocalAdminUserRequest
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.GroupAdminSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserBasicDetails
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserCaseloadDetail
@@ -46,6 +47,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserBasicPe
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPasswordRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.changePasswordWithValidation
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.toGroupAdminSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.toUserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.toUserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.mapUserSummarySortProperties
@@ -138,6 +140,13 @@ class UserService(
     userPersonDetailRepository.findAll(UserSpecification(filter))
       .map {
         it.toUserSummaryWithEmail()
+      }
+
+  @Transactional(readOnly = true)
+  fun downloadAdminByFilter(filter: UserFilter): List<GroupAdminSummaryWithEmail> =
+    userPersonDetailRepository.findAll(UserSpecification(filter))
+      .map {
+        it.toGroupAdminSummary()
       }
 
   fun createGeneralUser(createUserRequest: CreateGeneralUserRequest): UserSummary {
