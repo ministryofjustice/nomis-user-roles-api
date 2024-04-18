@@ -40,9 +40,15 @@ class ClientTrackingInterceptor : HandlerInterceptor {
           Span.current().setAttribute("username", it) // username in customDimensions
           Span.current().setAttribute("enduser.id", it) // user_Id at the top level of the request
         }
-        Span.current().setAttribute("clientId", jwtBody.getClaim("client_id").toString())
+
+        val clientId = Optional.ofNullable(jwtBody.getClaim("client_id"))
+        if (clientId.isPresent) {
+          Span.current().setAttribute("clientId", clientId.get().toString())
+        }
       } catch (e: ParseException) {
         log.warn("problem decoding jwt public key for application insights", e)
+      } catch (e: NullPointerException) {
+        log.warn("problem finding the client id for application insights", e)
       }
     }
     return true

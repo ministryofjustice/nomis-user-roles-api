@@ -67,6 +67,24 @@ class ClientTrackingConfigurationTest {
     })
   }
 
+  @Test
+  fun shouldNotAddClientIdIfNotPresentInJwt() {
+    val tokenWithoutClientId = jwtAuthHelper.createJwt("bob", null)
+    val req = MockHttpServletRequest()
+    req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer $tokenWithoutClientId")
+    val res = MockHttpServletResponse()
+    tracer.spanBuilder("span").startSpan().run {
+      makeCurrent().use { clientTrackingInterceptor.preHandle(req, res, "null") }
+      end()
+    }
+    otelTesting.assertTraces().hasTracesSatisfyingExactly({ t ->
+      t.hasSpansSatisfyingExactly({
+        it.hasAttribute(AttributeKey.stringKey("username"), "bob")
+        it.doesNotHaveAttribute(AttributeKey.stringKey("clientId"))
+      })
+    })
+  }
+
   private companion object {
     @JvmStatic
     @RegisterExtension
