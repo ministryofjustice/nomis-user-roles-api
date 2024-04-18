@@ -33,8 +33,11 @@ class AuthAwareTokenConverter : Converter<Jwt, AbstractAuthenticationToken> {
     val authorities = mutableListOf<GrantedAuthority>().apply { addAll(jwtGrantedAuthoritiesConverter.convert(jwt)!!) }
     if (jwt.claims.containsKey("authorities")) {
       @Suppress("UNCHECKED_CAST")
-      val claimAuthorities = (jwt.claims["authorities"] as Collection<String>).toList()
-      authorities.addAll(claimAuthorities.map(::SimpleGrantedAuthority))
+      val claimAuthorities = jwt.claims["authorities"]
+      when (claimAuthorities) {
+        is Collection<*> -> authorities.addAll((claimAuthorities as Collection<String>).map(::SimpleGrantedAuthority))
+        is String -> authorities.addAll(claimAuthorities.split(",").map(String::trim).map(::SimpleGrantedAuthority))
+      }
     }
     return authorities.toSet()
   }
