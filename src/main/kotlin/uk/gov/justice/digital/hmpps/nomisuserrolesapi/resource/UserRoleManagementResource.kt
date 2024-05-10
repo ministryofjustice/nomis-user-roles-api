@@ -36,12 +36,12 @@ class UserRoleManagementResource(
   private val roleAssignmentsService: RoleAssignmentsService,
 ) {
 
-  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES') or hasRole('ROLE_VIEW_NOMIS_STAFF_DETAILS')")
   @GetMapping("/{username}/roles")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
     summary = "Get list of roles associated with the users account",
-    description = "Roles for a specific user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES",
+    description = "Roles for a specific user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES or ROLE_VIEW_NOMIS_STAFF_DETAILS",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
@@ -99,12 +99,12 @@ class UserRoleManagementResource(
     includeNomisRoles: Boolean = false,
   ): UserRoleDetail = userService.getUserRoles(username, includeNomisRoles)
 
-  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES') or hasRole('ROLE_VIEW_NOMIS_STAFF_DETAILS')")
   @PostMapping("/{username}/roles/{roleCode}")
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(
     summary = "Add a role to the specified user account, all roles will be added to DPS caseload unless specified",
-    description = "Adds a role to a user, user must have caseload (if specified). Default caseload is DPS caseload (NWEB).  Cannot add an existing role to the same user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES",
+    description = "Adds a role to a user, user must have caseload (if specified). Default caseload is DPS caseload (NWEB).  Cannot add an existing role to the same user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES or ROLE_VIEW_NOMIS_STAFF_DETAILS",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
@@ -166,12 +166,12 @@ class UserRoleManagementResource(
     caseloadId: String = DPS_CASELOAD,
   ): UserRoleDetail = userService.addRoleToUser(username, roleCode, caseloadId)
 
-  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES') or hasRole('ROLE_VIEW_NOMIS_STAFF_DETAILS')")
   @PostMapping("/{username}/roles")
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(
     summary = "Add a role to the specified user account, all roles will be added to DPS caseload unless specified",
-    description = "Adds a role to a user, user must have caseload (if specified). Default caseload is DPS caseload (NWEB).  Cannot add an existing role to the same user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES",
+    description = "Adds a role to a user, user must have caseload (if specified). Default caseload is DPS caseload (NWEB).  Cannot add an existing role to the same user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES or ROLE_VIEW_NOMIS_STAFF_DETAILS",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
@@ -233,11 +233,11 @@ class UserRoleManagementResource(
     roleCodes: List<String>,
   ): UserRoleDetail = userService.addRolesToUser(username, roleCodes, caseloadId)
 
-  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES') or hasRole('ROLE_VIEW_NOMIS_STAFF_DETAILS')")
   @DeleteMapping("/{username}/roles/{roleCode}")
   @Operation(
     summary = "Remove a role from a user",
-    description = "The user must already have the role to be removed. Default role caseload is a DPS role unless specified. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES",
+    description = "The user must already have the role to be removed. Default role caseload is a DPS role unless specified. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES or ROLE_VIEW_NOMIS_STAFF_DETAILS",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
@@ -299,11 +299,11 @@ class UserRoleManagementResource(
     caseloadId: String = DPS_CASELOAD,
   ): UserRoleDetail = userService.removeRoleFromUser(username, roleCode, caseloadId)
 
-  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES') or hasRole('ROLE_VIEW_NOMIS_STAFF_DETAILS')")
   @PostMapping("/remove-roles/{roleCode}")
   @Operation(
     summary = "Bulk removes a role from a group of users",
-    description = "If the user does not have the role already it is ignored. Any users not found will also be ignored but will not be returned in the response. Only DPS roles are removed on the DPS caseload (NWEB). Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES",
+    description = "If the user does not have the role already it is ignored. Any users not found will also be ignored but will not be returned in the response. Only DPS roles are removed on the DPS caseload (NWEB). Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES or ROLE_VIEW_NOMIS_STAFF_DETAILS",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
@@ -352,11 +352,11 @@ class UserRoleManagementResource(
     users: String,
   ): List<UserRoleDetail> = userService.removeRoleFromUsers(users.asList(), roleCode)
 
-  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES') or hasRole('ROLE_VIEW_NOMIS_STAFF_DETAILS')")
   @PostMapping("/add-roles/{roleCode}")
   @Operation(
     summary = "Bulk add a role to a group of users",
-    description = "If the user has this role already it is ignored. Any users not found will also be ignored but will not be returned in the response. Only DPS roles are added to the DPS caseload (NWEB). Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES",
+    description = "If the user has this role already it is ignored. Any users not found will also be ignored but will not be returned in the response. Only DPS roles are added to the DPS caseload (NWEB). Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES or ROLE_VIEW_NOMIS_STAFF_DETAILS",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
@@ -409,7 +409,7 @@ class UserRoleManagementResource(
   @PreAuthorize("hasAnyRole('MAINTAIN_ACCESS_ROLES_ADMIN')")
   @Operation(
     summary = "Reassign roles from a NOMIS role to a DPS role and removes the NOMIS role if no longer required",
-    description = "Requires role ROLE_MAINTAIN_ACCESS_ROLES",
+    description = "Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
