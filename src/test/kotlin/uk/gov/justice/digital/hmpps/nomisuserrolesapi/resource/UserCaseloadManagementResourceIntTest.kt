@@ -75,6 +75,17 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
         .jsonPath("$.caseloads[?(@.id == '%s')]", "NWEB").doesNotExist()
         .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
         .jsonPath("$.caseloads[?(@.id == '%s')]", "WWI").exists()
+
+      webTestClient.get().uri("/users/CASELOAD_USER1/caseloads")
+        .headers(setAuthorisation(roles = listOf("ROLE_VIEW_NOMIS_STAFF_DETAILS")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("username").isEqualTo("CASELOAD_USER1")
+        .jsonPath("activeCaseload.id").isEqualTo("BXI")
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "NWEB").doesNotExist()
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
+        .jsonPath("$.caseloads[?(@.id == '%s')]", "WWI").exists()
     }
   }
 
