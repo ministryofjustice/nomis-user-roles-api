@@ -31,7 +31,7 @@ class RoleResourceIntTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `get roles is allowed for ROLE_MAINTAIN_ACCESS_ROLES_ADMIN and ROLE_MAINTAIN_ACCESS_ROLES`() {
+    fun `get roles is allowed for ROLE_MAINTAIN_ACCESS_ROLES_ADMIN and ROLE_MAINTAIN_ACCESS_ROLES and ROLE_VIEW_NOMIS_STAFF_DETAILS`() {
       webTestClient.get().uri("/roles")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -43,6 +43,15 @@ class RoleResourceIntTest : IntegrationTestBase() {
 
       webTestClient.get().uri("/roles")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").isArray
+        .jsonPath(matchByRoleCode, "GLOBAL_SEARCH").exists()
+        .jsonPath(matchByRoleCode, "DELETE_SENSITIVE_CASE_NOTES").exists()
+
+      webTestClient.get().uri("/roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_VIEW_NOMIS_STAFF_DETAILS")))
         .exchange()
         .expectStatus().isOk
         .expectBody()

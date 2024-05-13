@@ -127,11 +127,11 @@ class RoleResource(
     return roleService.updateRole(code, updateRoleRequest)
   }
 
-  @PreAuthorize("hasAnyRole('ROLE_ROLES_ADMIN','ROLE_MAINTAIN_ACCESS_ROLES_ADMIN', 'ROLE_MAINTAIN_ACCESS_ROLES')")
+  @PreAuthorize("hasAnyRole('ROLE_ROLES_ADMIN','ROLE_MAINTAIN_ACCESS_ROLES_ADMIN', 'ROLE_MAINTAIN_ACCESS_ROLES', 'ROLE_VIEW_NOMIS_STAFF_DETAILS')")
   @GetMapping
   @Operation(
     summary = "Get all roles",
-    description = "Information on a list of roles. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN, ROLE_MAINTAIN_ACCESS_ROLES or ROLES_ADMIN",
+    description = "Information on a list of roles. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN, ROLE_MAINTAIN_ACCESS_ROLES or ROLE_VIEW_NOMIS_STAFF_DETAILS or ROLES_ADMIN",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(

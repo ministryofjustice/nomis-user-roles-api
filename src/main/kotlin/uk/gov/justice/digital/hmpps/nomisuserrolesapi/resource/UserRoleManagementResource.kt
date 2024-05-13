@@ -36,12 +36,12 @@ class UserRoleManagementResource(
   private val roleAssignmentsService: RoleAssignmentsService,
 ) {
 
-  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES') or hasRole('ROLE_VIEW_NOMIS_STAFF_DETAILS')")
   @GetMapping("/{username}/roles")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
     summary = "Get list of roles associated with the users account",
-    description = "Roles for a specific user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES",
+    description = "Roles for a specific user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES or ROLE_VIEW_NOMIS_STAFF_DETAILS",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
@@ -409,7 +409,7 @@ class UserRoleManagementResource(
   @PreAuthorize("hasAnyRole('MAINTAIN_ACCESS_ROLES_ADMIN')")
   @Operation(
     summary = "Reassign roles from a NOMIS role to a DPS role and removes the NOMIS role if no longer required",
-    description = "Requires role ROLE_MAINTAIN_ACCESS_ROLES",
+    description = "Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
