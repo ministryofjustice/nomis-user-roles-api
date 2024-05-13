@@ -94,6 +94,16 @@ class UserResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("staffId").exists()
     }
+
+    @Test
+    fun `get user with role ROLE_VIEW_NOMIS_STAFF_DETAILS`() {
+      webTestClient.get().uri("/users/marco.rossi")
+        .headers(setAuthorisation(roles = listOf("ROLE_VIEW_NOMIS_STAFF_DETAILS")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("staffId").exists()
+    }
   }
 
   @DisplayName("GET /users/staff?firstName={firstName}&lastName={lastName}")
@@ -611,6 +621,20 @@ class UserResourceIntTest : IntegrationTestBase() {
       fun `they can call the endpoint with the ROLE_MAINTAIN_ACCESS_ROLES_ADMIN role`() {
         webTestClient.get().uri("/users")
           .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+          .exchange()
+          .expectStatus().isOk
+          .expectBody()
+          .jsonPath("$.numberOfElements").isEqualTo(4)
+          .jsonPath(matchByUserName, "marco.rossi").exists()
+          .jsonPath(matchByUserName, "abella.moulin").exists()
+          .jsonPath(matchByUserName, "mark.bowlan").exists()
+          .jsonPath(matchByUserName, "ella.dribble").exists()
+      }
+
+      @Test
+      fun `they can call the endpoint with the ROLE_VIEW_NOMIS_STAFF_DETAILS role`() {
+        webTestClient.get().uri("/users")
+          .headers(setAuthorisation(roles = listOf("ROLE_VIEW_NOMIS_STAFF_DETAILS")))
           .exchange()
           .expectStatus().isOk
           .expectBody()
@@ -1601,6 +1625,16 @@ class UserResourceIntTest : IntegrationTestBase() {
     fun `get user with role ROLE_MANAGE_NOMIS_USER_ACCOUNT`() {
       webTestClient.get().uri("/users/basic/marco.rossi")
         .headers(setAuthorisation(roles = listOf("ROLE_MANAGE_NOMIS_USER_ACCOUNT")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("staffId").exists()
+    }
+
+    @Test
+    fun `get user with role ROLE_VIEW_NOMIS_STAFF_DETAILS`() {
+      webTestClient.get().uri("/users/basic/marco.rossi")
+        .headers(setAuthorisation(roles = listOf("ROLE_VIEW_NOMIS_STAFF_DETAILS")))
         .exchange()
         .expectStatus().isOk
         .expectBody()
