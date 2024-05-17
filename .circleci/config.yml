@@ -111,6 +111,20 @@ workflows:
             - nomis-user-roles-api-prod
           requires:
             - request-prod-approval
+      - hmpps/deploy_env:
+          name: deploy_prod-cp
+          env: "prod-cp"
+          jira_update: false
+          jira_env_type: production
+          pipeline_id: <<pipeline.id>>
+          pipeline_number: <<pipeline.number>>
+          slack_notification: false
+          slack_channel_name: << pipeline.parameters.releases-slack-channel >>
+          context:
+            - hmpps-common-vars
+            - nomis-user-roles-api-prod-cp
+          requires:
+            - request-prod-approval
 
   security:
     triggers:
