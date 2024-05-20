@@ -10,9 +10,9 @@ generic-service:
     dso_enabled: false
     tlsSecretName: hmpps-nomis-user-roles-api-cert
 
-    allowlist:
-      groups:
-        - internal
+  allowlist:
+    groups:
+      - internal
 
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
