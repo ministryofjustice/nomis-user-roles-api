@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Order
 import org.springframework.data.domain.Sort.by
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -74,6 +75,9 @@ class UserService(
 ) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
+
+    private fun canAddAuthClients(authorities: Collection<GrantedAuthority>) = authorities.map { it.authority }
+      .any { "ROLE_OAUTH_ADMIN" == it }
   }
 
   @Transactional(readOnly = true)
@@ -606,6 +610,13 @@ class UserService(
     user: UserPersonDetail,
     caseloadId: String,
   ) {
+    if (roleCode == "OAUTH_ADMIN" && !canAddAuthClients(authenticationFacade.authentication.authorities)) {
+      (
+        throw ForbiddenRoleAssignmentException(
+          "User not allowed to add OAUTH_ADMIN role",
+        )
+        )
+    }
     val role = roleRepository.findByCode(roleCode).orElseThrow { UserRoleNotFoundException("Role $roleCode not found") }
     user.addRole(role, caseloadId)
 
@@ -624,6 +635,7 @@ class UserService(
   private fun toUserDetail(user: UserPersonDetail): UserDetail {
     return UserDetail(user)
   }
+
   private fun toUserBasicDetail(user: UserBasicPersonalDetail): UserBasicDetails {
     return UserBasicDetails(user)
   }
@@ -797,6 +809,14 @@ class PasswordTooShortException(message: String?) :
   Supplier<PasswordTooShortException> {
   override fun get(): PasswordTooShortException {
     return PasswordTooShortException(message)
+  }
+}
+
+class ForbiddenRoleAssignmentException(message: String?) :
+  RuntimeException(message),
+  Supplier<ForbiddenRoleAssignmentException> {
+  override fun get(): ForbiddenRoleAssignmentException {
+    return ForbiddenRoleAssignmentException(message)
   }
 }
 

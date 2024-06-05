@@ -254,6 +254,47 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("userMessage").isEqualTo("Role not found: Role XXX not found")
     }
+
+    @Test
+    fun `add OAUTH_ADMIN role`() {
+      webTestClient.get().uri("/users/ROLE_USER1/roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN", "ROLE_OAUTH_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("username").isEqualTo("ROLE_USER1")
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "GLOBAL_SEARCH").doesNotExist()
+
+      webTestClient.post().uri("/users/ROLE_USER1/roles/OAUTH_ADMIN")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN", "ROLE_OAUTH_ADMIN")))
+        .exchange()
+        .expectStatus().isCreated
+        .expectBody()
+        .jsonPath("username").isEqualTo("ROLE_USER1")
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "OAUTH_ADMIN").exists()
+
+      webTestClient.get().uri("/users/ROLE_USER1/roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN", "ROLE_OAUTH_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("username").isEqualTo("ROLE_USER1")
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "OAUTH_ADMIN").exists()
+    }
+
+    @Test
+    fun `admin without OAUTH_ADMIN role cannot add OAUTH_ADMIN to another user`() {
+      webTestClient.post().uri("/users/ROLE_USER1/roles/OAUTH_ADMIN")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
   }
 
   @DisplayName("POST /users/{username}/roles")
@@ -397,6 +438,29 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().is4xxClientError
         .expectBody()
         .jsonPath("userMessage").isEqualTo("Role not found: Role XXX not found")
+    }
+
+    @Test
+    fun `add roles including oauth admin to user`() {
+      webTestClient.post().uri("/users/ROLE_USER1/roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN", "ROLE_OAUTH_ADMIN")))
+        .body(BodyInserters.fromValue(listOf("GLOBAL_SEARCH", "OAUTH_ADMIN")))
+        .exchange()
+        .expectStatus().isCreated
+        .expectBody()
+        .jsonPath("username").isEqualTo("ROLE_USER1")
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "OAUTH_ADMIN").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "GLOBAL_SEARCH").exists()
+    }
+
+    @Test
+    fun `add roles including oauth admin to user fails for  admin without OAUTH_ADMIN role `() {
+      webTestClient.post().uri("/users/ROLE_USER1/roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue(listOf("GLOBAL_SEARCH", "OAUTH_ADMIN")))
+        .exchange()
+        .expectStatus().isForbidden
     }
   }
 
