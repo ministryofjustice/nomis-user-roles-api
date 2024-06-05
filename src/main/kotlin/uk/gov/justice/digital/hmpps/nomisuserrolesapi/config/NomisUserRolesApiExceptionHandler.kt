@@ -5,7 +5,10 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.TypeMismatchException
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_REQUEST
+import org.springframework.http.HttpStatus.CONFLICT
+import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
+import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.HttpStatus.UNAUTHORIZED
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -21,6 +24,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.CaseloadAlreadyExistsE
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.InvalidRoleAssignmentException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource.UnauthorisedException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.CaseloadNotFoundException
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.ForbiddenRoleAssignmentException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.PasswordTooShortException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.PasswordValidationException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.ReusedPasswordException
@@ -35,8 +39,8 @@ class NomisUserRolesApiExceptionHandler {
   fun handleAccessDeniedException(e: AccessDeniedException): ResponseEntity<ErrorResponse> {
     log.debug("Forbidden (403) returned with message {}", e.message)
     return ResponseEntity
-      .status(HttpStatus.FORBIDDEN)
-      .body(ErrorResponse(status = (HttpStatus.FORBIDDEN.value())))
+      .status(FORBIDDEN)
+      .body(ErrorResponse(status = (FORBIDDEN.value())))
   }
 
   @ExceptionHandler(WebClientResponseException::class)
@@ -91,11 +95,11 @@ class NomisUserRolesApiExceptionHandler {
   @ExceptionHandler(NoResourceFoundException::class)
   fun handleEntityNotFoundException(e: NoResourceFoundException): ResponseEntity<ErrorResponse> {
     return ResponseEntity
-      .status(HttpStatus.NOT_FOUND)
+      .status(NOT_FOUND)
       .contentType(MediaType.APPLICATION_JSON)
       .body(
         ErrorResponse(
-          status = HttpStatus.NOT_FOUND.value(),
+          status = NOT_FOUND.value(),
           developerMessage = e.message,
         ),
       )
@@ -105,10 +109,10 @@ class NomisUserRolesApiExceptionHandler {
   fun handleUserNotFoundException(e: UserNotFoundException): ResponseEntity<ErrorResponse?>? {
     log.debug("User not found exception caught: {}", e.message)
     return ResponseEntity
-      .status(HttpStatus.NOT_FOUND)
+      .status(NOT_FOUND)
       .body(
         ErrorResponse(
-          status = HttpStatus.NOT_FOUND,
+          status = NOT_FOUND,
           userMessage = "User not found: ${e.message}",
           developerMessage = e.message,
         ),
@@ -119,10 +123,10 @@ class NomisUserRolesApiExceptionHandler {
   fun handleUserAlreadyExistsException(e: UserAlreadyExistsException): ResponseEntity<ErrorResponse?>? {
     log.debug("User already exists exception caught: {}", e.message)
     return ResponseEntity
-      .status(HttpStatus.CONFLICT)
+      .status(CONFLICT)
       .body(
         ErrorResponse(
-          status = HttpStatus.CONFLICT,
+          status = CONFLICT,
           userMessage = "User already exists: ${e.message}",
           developerMessage = e.message,
         ),
@@ -133,10 +137,10 @@ class NomisUserRolesApiExceptionHandler {
   fun handleUserRoleNotFoundException(e: UserRoleNotFoundException): ResponseEntity<ErrorResponse?>? {
     log.debug("Role not found exception caught: {}", e.message)
     return ResponseEntity
-      .status(HttpStatus.NOT_FOUND)
+      .status(NOT_FOUND)
       .body(
         ErrorResponse(
-          status = HttpStatus.NOT_FOUND,
+          status = NOT_FOUND,
           userMessage = "Role not found: ${e.message}",
           developerMessage = e.message,
         ),
@@ -157,14 +161,28 @@ class NomisUserRolesApiExceptionHandler {
       )
   }
 
+  @ExceptionHandler(ForbiddenRoleAssignmentException::class)
+  fun handleForbiddenRoleAssignmentException(e: ForbiddenRoleAssignmentException): ResponseEntity<ErrorResponse?>? {
+    log.debug("Forbidden Role assignment: {}", e.message)
+    return ResponseEntity
+      .status(FORBIDDEN)
+      .body(
+        ErrorResponse(
+          status = FORBIDDEN,
+          userMessage = "Role assignment forbidden: ${e.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
   @ExceptionHandler(UserRoleAlreadyExistsException::class)
   fun handleUserRoleAlreadyExistsException(e: UserRoleAlreadyExistsException): ResponseEntity<ErrorResponse?>? {
     log.debug("Role already exists exception caught: {}", e.message)
     return ResponseEntity
-      .status(HttpStatus.CONFLICT)
+      .status(CONFLICT)
       .body(
         ErrorResponse(
-          status = HttpStatus.CONFLICT,
+          status = CONFLICT,
           userMessage = "Role already exists: ${e.message}",
           developerMessage = e.message,
         ),
@@ -175,10 +193,10 @@ class NomisUserRolesApiExceptionHandler {
   fun handleCaseloadNotFoundException(e: CaseloadNotFoundException): ResponseEntity<ErrorResponse?>? {
     log.debug("Caseload not found exception caught: {}", e.message)
     return ResponseEntity
-      .status(HttpStatus.NOT_FOUND)
+      .status(NOT_FOUND)
       .body(
         ErrorResponse(
-          status = HttpStatus.NOT_FOUND,
+          status = NOT_FOUND,
           userMessage = "Caseload not found: ${e.message}",
           developerMessage = e.message,
         ),
@@ -189,10 +207,10 @@ class NomisUserRolesApiExceptionHandler {
   fun handleCaseloadAlreadyExistsException(e: CaseloadAlreadyExistsException): ResponseEntity<ErrorResponse?>? {
     log.debug("Caseload already exists exception caught: {}", e.message)
     return ResponseEntity
-      .status(HttpStatus.CONFLICT)
+      .status(CONFLICT)
       .body(
         ErrorResponse(
-          status = HttpStatus.CONFLICT,
+          status = CONFLICT,
           userMessage = "Caseload already exists: ${e.message}",
           developerMessage = e.message,
         ),
