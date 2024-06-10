@@ -38,7 +38,7 @@ interface UserPersonDetailRepository :
   fun createUser(
     @Param("username") username: String,
     @Param("password") password: String,
-    @Param("profile") profile: String = AccountProfile.TAG_GENERAL.name
+    @Param("profile") profile: String = AccountProfile.TAG_GENERAL.name,
   )
 
   @Modifying
