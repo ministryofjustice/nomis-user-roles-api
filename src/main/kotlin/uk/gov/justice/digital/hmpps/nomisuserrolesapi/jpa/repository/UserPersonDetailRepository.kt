@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountProfile
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
@@ -27,49 +28,53 @@ interface UserPersonDetailRepository :
     value = "call oms_utils.record_logon_date(:username)",
     nativeQuery = true,
   )
-  fun recordLogonDate(username: String)
+  fun recordLogonDate(@Param("username") username: String)
 
   @Modifying
   @Query(
     value = "call oms_utils.create_user(:username, :password, :profile)",
     nativeQuery = true,
   )
-  fun createUser(username: String, password: String, profile: String = AccountProfile.TAG_GENERAL.name)
+  fun createUser(
+    @Param("username") username: String,
+    @Param("password") password: String,
+    @Param("profile") profile: String = AccountProfile.TAG_GENERAL.name
+  )
 
   @Modifying
   @Query(
     value = "call oms_utils.expire_password(:username)",
     nativeQuery = true,
   )
-  fun expirePassword(username: String)
+  fun expirePassword(@Param("username") username: String)
 
   @Modifying
   @Query(
     value = "call oms_utils.drop_user(:username)",
     nativeQuery = true,
   )
-  fun dropUser(username: String)
+  fun dropUser(@Param("username") username: String)
 
   @Modifying
   @Query(
     value = "call oms_utils.change_user_password(:username, :password)",
     nativeQuery = true,
   )
-  fun changePassword(username: String?, password: String?)
+  fun changePassword(@Param("username") username: String?, @Param("password") password: String?)
 
   @Modifying
   @Query(
     value = "call oms_utils.unlock_user(:username)",
     nativeQuery = true,
   )
-  fun unlockUser(username: String?)
+  fun unlockUser(@Param("username") username: String?)
 
   @Modifying
   @Query(
     value = "call oms_utils.lock_user(:username)",
     nativeQuery = true,
   )
-  fun lockUser(username: String?)
+  fun lockUser(@Param("username") username: String?)
 
   @EntityGraph(value = "user-person-detail-download-graph", type = EntityGraph.EntityGraphType.LOAD)
   override fun findAll(speci: Specification<UserPersonDetail>?): List<UserPersonDetail>
