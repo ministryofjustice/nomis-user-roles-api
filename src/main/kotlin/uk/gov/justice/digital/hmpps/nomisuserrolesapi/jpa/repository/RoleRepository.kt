@@ -10,5 +10,6 @@ import java.util.Optional
 @Repository
 interface RoleRepository : CrudRepository<Role, Long> {
   fun findByCode(code: String): Optional<Role>
+
   fun findAllByTypeAndRoleFunctionIn(type: RoleType, roleFunctions: List<UsageType>): List<Role>
 }

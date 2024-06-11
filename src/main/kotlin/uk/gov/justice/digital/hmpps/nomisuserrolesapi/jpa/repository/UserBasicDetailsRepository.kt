@@ -4,6 +4,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
 import java.util.Optional
@@ -13,15 +14,15 @@ interface UserBasicDetailsRepository : JpaRepository<UserBasicPersonalDetail, St
 
   @Query(
     value =
-    " SELECT sua.USERNAME as username, sua.WORKING_CASELOAD_ID as activeCaseloadId, du.ACCOUNT_STATUS as accountStatus, sua.STAFF_ID as staffId, sm.FIRST_NAME as firstName, sm.LAST_NAME as lastName" +
+    "SELECT sua.USERNAME as username, sua.WORKING_CASELOAD_ID as activeCaseloadId, du.ACCOUNT_STATUS as accountStatus, sua.STAFF_ID as staffId, sm.FIRST_NAME as firstName, sm.LAST_NAME as lastName" +
       " FROM STAFF_USER_ACCOUNTS sua " +
       "      LEFT JOIN  DBA_USERS du  ON sua.USERNAME = du.USERNAME  " +
       "     JOIN STAFF_MEMBERS sm ON sm.STAFF_ID = sua.STAFF_ID  " +
       "WHERE " +
-      "     sua.USERNAME= ?1",
+      "     sua.USERNAME= :username",
     nativeQuery = true,
   )
-  fun find(username: String): Optional<UserBasicPersonalDetail>
+  fun find(@Param("username") username: String): Optional<UserBasicPersonalDetail>
 }
 
 @Entity
