@@ -1,7 +1,9 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.15.6"
-  kotlin("plugin.spring") version "1.9.23"
-  kotlin("plugin.jpa") version "1.9.23"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.0"
+  kotlin("plugin.spring") version "2.0.0"
+  kotlin("plugin.jpa") version "2.0.0"
   idea
 }
 
@@ -18,15 +20,15 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.apache.commons:commons-lang3:3.14.0")
   implementation("org.apache.commons:commons-text:1.12.0")
-  implementation("commons-codec:commons-codec:1.16.1")
+  implementation("commons-codec:commons-codec:1.17.0")
 
   implementation("org.flywaydb:flyway-core")
-  implementation("io.hypersistence:hypersistence-utils-hibernate-60:3.7.4")
+  implementation("io.hypersistence:hypersistence-utils-hibernate-60:3.7.7")
   implementation("org.hibernate.orm:hibernate-community-dialects")
 
   implementation("javax.transaction:javax.transaction-api:1.3")
   implementation("javax.xml.bind:jaxb-api:2.3.1")
-  implementation("com.google.guava:guava:33.1.0-jre")
+  implementation("com.google.guava:guava:33.2.1-jre")
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
 
@@ -34,15 +36,15 @@ dependencies {
 
   implementation("com.zaxxer:HikariCP:5.1.0")
   runtimeOnly("com.h2database:h2:2.2.224")
-  runtimeOnly("com.oracle.database.jdbc:ojdbc10:19.22.0.0")
+  runtimeOnly("com.oracle.database.jdbc:ojdbc10:19.23.0.0")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
   testImplementation("org.awaitility:awaitility-kotlin:4.2.1")
-  testImplementation("io.jsonwebtoken:jjwt-impl:0.12.5")
-  testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.5")
+  testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
+  testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-  testImplementation("org.wiremock:wiremock-standalone:3.5.3")
+  testImplementation("org.wiremock:wiremock-standalone:3.7.0")
   testImplementation("org.mockito:mockito-inline:5.2.0")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("javax.xml.bind:jaxb-api:2.3.1")
@@ -53,9 +55,9 @@ java {
 }
 
 tasks {
-  withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+  withType<KotlinCompile> {
     kotlinOptions {
-      jvmTarget = "21"
+      compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
     }
   }
 }

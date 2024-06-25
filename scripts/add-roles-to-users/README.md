@@ -11,13 +11,15 @@ at a time.
 
 ## Adding users and roles
 
-Add the list of nomis usernames to the users file
+Add the list of nomis usernames (must be uppercase) to the users file
 
 Add the list of role codes to the roles file
 
 (one per line)
 
 ## Running the script
+
+It is normally a good idea to run the script against preprod before running it in prod
 
 You will need to obtain a bearer token from hmpps-auth and add it to the script so that 
 when the curl request called it has the necessary authorization to perform the action.
