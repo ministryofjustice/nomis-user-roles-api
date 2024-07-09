@@ -180,6 +180,39 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `add role to user - user case irrelevant`() {
+      webTestClient.get().uri("/users/ROLE_USER1/roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("username").isEqualTo("ROLE_USER1")
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "GLOBAL_SEARCH").doesNotExist()
+
+      webTestClient.post().uri("/users/role_user1/roles/GLOBAL_SEARCH")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isCreated
+        .expectBody()
+        .jsonPath("username").isEqualTo("ROLE_USER1")
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "GLOBAL_SEARCH").exists()
+
+      webTestClient.get().uri("/users/ROLE_USER1/roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("username").isEqualTo("ROLE_USER1")
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "GLOBAL_SEARCH").exists()
+    }
+
+    @Test
     fun `add non-existent role to user`() {
       webTestClient.post().uri("/users/ROLE_USER1/roles/XXX")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
