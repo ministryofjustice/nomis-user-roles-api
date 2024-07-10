@@ -11,7 +11,7 @@ at a time.
 
 ## Adding users and roles
 
-Add the list of nomis usernames (must be uppercase) to the users file
+Add the list of nomis usernames to the users file
 
 Add the list of role codes to the roles file
 

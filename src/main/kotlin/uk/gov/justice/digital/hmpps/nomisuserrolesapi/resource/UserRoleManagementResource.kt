@@ -164,7 +164,7 @@ class UserRoleManagementResource(
       message = "Caseload must be between 3-6 characters",
     )
     caseloadId: String = DPS_CASELOAD,
-  ): UserRoleDetail = userService.addRoleToUser(username, roleCode, caseloadId)
+  ): UserRoleDetail = userService.addRoleToUser(username.uppercase(), roleCode, caseloadId)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @PostMapping("/{username}/roles")
