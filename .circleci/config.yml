@@ -84,7 +84,7 @@ workflows:
       - request-prod-approval:
           type: approval
           requires:
-            - deploy_preprod
+            - deploy_preprod-cp
       - hmpps/deploy_env:
           name: deploy_prod-cp
           env: "prod-cp"
