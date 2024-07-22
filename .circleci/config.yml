@@ -72,7 +72,7 @@ workflows:
       - hmpps/deploy_env:
           name: deploy_preprod
           env: "preprod"
-          jira_update: false
+          jira_update: true
           jira_env_type: staging
           pipeline_id: <<pipeline.id>>
           pipeline_number: <<pipeline.number>>
@@ -88,11 +88,11 @@ workflows:
       - hmpps/deploy_env:
           name: deploy_prod
           env: "prod"
-          jira_update: false
+          jira_update: true
           jira_env_type: production
           pipeline_id: <<pipeline.id>>
           pipeline_number: <<pipeline.number>>
-          slack_notification: false
+          slack_notification: true
           slack_channel_name: << pipeline.parameters.releases-slack-channel >>
           context:
             - hmpps-common-vars
