@@ -9,7 +9,6 @@ generic-service:
 
   ingress:
     host: nomis-user-roles-api-dev.prison.service.justice.gov.uk
-    dso_enabled: false
     tlsSecretName: hmpps-nomis-user-roles-api-cert
 
   allowlist:
@@ -20,3 +19,6 @@ generic-service:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     API_BASE_URL_OAUTH: https://sign-in-dev.hmpps.service.justice.gov.uk/auth
     FEATURE_RECORD-LOGON-DATE: true
+
+    generic-prometheus-alerts:
+      alertSeverity: hmpps_tech_non_prod
