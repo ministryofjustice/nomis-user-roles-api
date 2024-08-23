@@ -16,7 +16,6 @@ generic-service:
 
   ingress:
     enabled: true
-    dso_enabled: true
     host: app-hostname.local    # override per environment
     tlsSecretName: nomis-user-roles-api-cert
 
