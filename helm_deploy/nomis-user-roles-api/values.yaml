@@ -49,5 +49,5 @@ generic-service:
       memory: 1240Mi
 
 
-  generic-prometheus-alerts:
-    targetApplication: nomis-user-roles-api
+generic-prometheus-alerts:
+  targetApplication: nomis-user-roles-api
