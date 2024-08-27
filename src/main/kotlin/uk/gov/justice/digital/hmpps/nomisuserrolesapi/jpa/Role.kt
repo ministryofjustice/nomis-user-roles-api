@@ -86,4 +86,5 @@ enum class RoleType {
   APP,
   INST,
   COMM,
+  SHG,
 }
