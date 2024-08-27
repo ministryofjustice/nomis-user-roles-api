@@ -47,7 +47,3 @@ generic-service:
     limits:
       cpu: 2000m
       memory: 1240Mi
-
-
-generic-prometheus-alerts:
-  targetApplication: nomis-user-roles-api
