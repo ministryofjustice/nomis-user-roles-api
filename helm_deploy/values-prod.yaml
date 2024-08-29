@@ -4,7 +4,6 @@
 generic-service:
   replicaCount: 4
 
-
   ingress:
     host: nomis-user-roles-api.prison.service.justice.gov.uk
     tlsSecretName: hmpps-nomis-user-roles-api-cert
@@ -18,5 +17,5 @@ generic-service:
     API_BASE_URL_OAUTH: https://sign-in.hmpps.service.justice.gov.uk/auth
     FEATURE_RECORD-LOGON-DATE: true
 
-  generic-prometheus-alerts:
-    alertSeverity: hmpps_tech
+generic-prometheus-alerts:
+  alertSeverity: hmpps_tech
