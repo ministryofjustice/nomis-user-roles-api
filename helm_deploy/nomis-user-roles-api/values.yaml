@@ -1,13 +1,8 @@
----
 generic-service:
   nameOverride: nomis-user-roles-api
   productId: DPS017
 
   replicaCount: 4
-
-  poddisruptionbudget:
-    enabled: true
-    minAvailable: 3
 
   image:
     repository: quay.io/hmpps/nomis-user-roles-api
@@ -47,3 +42,10 @@ generic-service:
     limits:
       cpu: 2000m
       memory: 1240Mi
+
+  allowlist:
+    groups:
+      - internal
+      -
+generic-prometheus-alerts:
+  targetApplication: nomis-user-roles-api
