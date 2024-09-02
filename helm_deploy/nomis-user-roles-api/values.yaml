@@ -46,6 +46,6 @@ generic-service:
   allowlist:
     groups:
       - internal
-      -
+
 generic-prometheus-alerts:
   targetApplication: nomis-user-roles-api
