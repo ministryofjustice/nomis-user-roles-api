@@ -65,6 +65,21 @@ workflows:
             - build_docker
             - helm_lint
           helm_timeout: 5m
+      - hmpps/deploy_env:
+          name: deploy_stage
+          env: "stage"
+          context:
+            - hmpps-common-vars
+            - hmpps-auth-stage
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - validate
+            - build_docker
+            - helm_lint
+          helm_timeout: 5m
       - request-preprod-approval:
           type: approval
           requires:

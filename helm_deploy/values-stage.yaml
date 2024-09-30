@@ -1,0 +1,15 @@
+# Per environment values which override defaults in nomis-user-roles-api/values.yaml
+
+generic-service:
+  replicaCount: 2
+
+  ingress:
+    host: nomis-user-roles-api-stage.prison.service.justice.gov.uk
+
+  env:
+    APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
+    API_BASE_URL_OAUTH: https://sign-in-stage.hmpps.service.justice.gov.uk/auth
+    FEATURE_RECORD-LOGON-DATE: true
+
+generic-prometheus-alerts:
+  alertSeverity: hmpps_tech_non_prod
