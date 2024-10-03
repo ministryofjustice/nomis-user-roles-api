@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.4"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.6"
   kotlin("plugin.spring") version "2.0.20"
   kotlin("plugin.jpa") version "2.0.20"
   idea
@@ -18,7 +18,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
-  implementation("org.apache.commons:commons-lang3:3.16.0")
+  implementation("org.apache.commons:commons-lang3:3.17.0")
   implementation("org.apache.commons:commons-text:1.12.0")
   implementation("commons-codec:commons-codec:1.17.1")
 
