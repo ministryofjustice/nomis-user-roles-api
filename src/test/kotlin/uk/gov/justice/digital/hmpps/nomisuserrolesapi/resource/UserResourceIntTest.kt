@@ -1563,7 +1563,8 @@ class UserResourceIntTest : IntegrationTestBase() {
     @BeforeEach
     internal fun createUsers() {
       with(dataBuilder) {
-        generalUser().username("marco.rossi").firstName("Marco").lastName("Rossi").status(AccountStatus.EXPIRED_GRACE).buildAndSave()
+        generalUser().username("marco.rossi").firstName("Marco").lastName("Rossi").status(AccountStatus.EXPIRED_GRACE)
+          .buildAndSave()
       }
     }
 
@@ -1645,6 +1646,62 @@ class UserResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("staffId").exists()
+    }
+  }
+
+  @DisplayName("GET /users/lastnames")
+  @Nested
+  inner class GetLastNamesAllUsers {
+
+    @BeforeEach
+    internal fun createUsers() {
+      with(dataBuilder) {
+        generalUser().username("michael.jones").firstName("Michael").lastName("Jones")
+          .status(AccountStatus.EXPIRED_GRACE).buildAndSave()
+        generalUser().username("sarah.roberts").firstName("Sarah").lastName("Roberts")
+          .status(AccountStatus.LOCKED_TIMED).buildAndSave()
+      }
+    }
+
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    fun `access forbidden when no authority`() {
+      webTestClient.get().uri("/users/lastnames")
+        .exchange()
+        .expectStatus().isUnauthorized
+    }
+
+    @Test
+    fun `access forbidden when no role`() {
+      webTestClient.get().uri("/users/lastnames")
+        .headers(setAuthorisation(roles = listOf()))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `get user forbidden with wrong role`() {
+      webTestClient.get().uri("/users/lastnames")
+        .headers(setAuthorisation(roles = listOf("ROLE_BANANAS")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `get all user Last names`() {
+      val bob = webTestClient.get().uri("/users/lastnames")
+        .headers(setAuthorisation(roles = listOf("ROLE_VIEW_NOMIS_STAFF_DETAILS")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$").value<JSONArray> {
+          assertThat(it.map { m -> (m as Map<*, *>)["lastName"] }).containsExactlyInAnyOrder(
+            "Jones",
+            "Roberts",
+          )
+        }
     }
   }
 }

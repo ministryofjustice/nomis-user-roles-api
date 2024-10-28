@@ -30,6 +30,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.GroupAdminSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserLastName
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
@@ -498,6 +499,22 @@ class UserResource(
       showOnlyLSAs = showOnlyLSAs,
     ),
   )
+
+  @PreAuthorize("hasRole('ROLE_VIEW_NOMIS_STAFF_DETAILS')")
+  @GetMapping("/lastnames")
+  @Operation(
+    summary = "Get list of all users, username and lastname",
+    description = "Requires role ROLE_VIEW_NOMIS_STAFF_DETAILS",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "List of all users",
+      ),
+    ],
+  )
+  fun getLastNameAllUsers(): List<UserLastName> {
+    return userService.getLastNameAllUsers()
+  }
 
   fun localAdministratorUsernameWhenNotCentralAdministrator(): String? =
     if (AuthenticationFacade.hasRoles("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")) null else authenticationFacade.currentUsername

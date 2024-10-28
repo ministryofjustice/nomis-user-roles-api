@@ -8,6 +8,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.PrisonCaseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserLastName
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
@@ -80,5 +81,18 @@ class UserResourceTest {
 
     val userDetails = userResource.findUsersByEmailAddressAndUsernames("test@test.com", listOf("bob", "fred"))
     assertThat(userDetails).containsExactly(user)
+  }
+
+  @Test
+  fun `Get all last name for all users`() {
+    val usersLastNames = listOf(
+      UserLastName("usernameA", "Smith"),
+      UserLastName("usernameB", "Jones"),
+    )
+    whenever(userService.getLastNameAllUsers()).thenReturn(usersLastNames)
+
+    val users = userResource.getLastNameAllUsers()
+
+    assertThat(users).isEqualTo(usersLastNames)
   }
 }

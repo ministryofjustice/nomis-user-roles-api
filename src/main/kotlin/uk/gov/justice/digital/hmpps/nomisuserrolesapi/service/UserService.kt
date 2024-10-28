@@ -28,6 +28,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserBasicDetails
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserLastName
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserRoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummaryWithEmail
@@ -37,6 +38,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.CENTRAL_ADMIN_CASELOAD
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.DPS_CASELOAD
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.capitalizeFully
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.getUsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.CaseloadRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleRepository
@@ -45,6 +47,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserAndEmai
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserAndEmailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserBasicDetailsRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserBasicPersonalDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserLastNameRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPasswordRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.changePasswordWithValidation
@@ -71,6 +74,8 @@ class UserService(
   private val passwordEncoder: PasswordEncoder,
   private val userPasswordRepository: UserPasswordRepository,
   private val userBasicDetailsRepository: UserBasicDetailsRepository,
+  private val userLastNameRepository: UserLastNameRepository,
+
   @Value("\${feature.record-logon-date:false}") private val recordLogonDate: Boolean = false,
 ) {
   companion object {
@@ -152,6 +157,13 @@ class UserService(
       .map {
         it.toGroupAdminSummary()
       }
+
+  fun getLastNameAllUsers(): List<UserLastName> = userLastNameRepository.findLastNamesAllUsers().map {
+    UserLastName(
+      username = it.username,
+      lastName = it.lastName.capitalizeFully(),
+    )
+  }
 
   fun createGeneralUser(createUserRequest: CreateGeneralUserRequest): UserSummary {
     checkIfAccountAlreadyExists(createUserRequest.username)
