@@ -124,7 +124,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - fix-veracode-vulnerability
     jobs:
       - hmpps/gradle_owasp_dependency_check:
           jdk_tag: "21.0"
