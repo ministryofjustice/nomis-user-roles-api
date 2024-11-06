@@ -17,4 +17,4 @@ Once up the application should be available on port 8101 - see the health page a
 
 Also try http://localhost:8101/swagger-ui.html to see the API specification.
 
-Set `spring.h2.console.enabled` to true in `application-dev-config.yml`. It is set to false in the repo because leaving it as true creates a security vulnerability in the cloud.
+Set `spring.h2.console.enabled` to true in `application-dev-config.yml`. It is set to false in the repo because leaving it as true creates a false positive in the veracode scan.
