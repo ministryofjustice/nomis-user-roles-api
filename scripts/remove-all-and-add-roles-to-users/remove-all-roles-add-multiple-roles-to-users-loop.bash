@@ -3,6 +3,7 @@ set -e
 
 SCRIPTS_BASE_DIR=`pwd`
 
+
 ENV=${1}
 BEARER_TOKEN=${2}
 
@@ -32,14 +33,30 @@ fi
 for user in $(cat $SCRIPTS_BASE_DIR/users); do
   echo "updating user  - $user"
 
+       removeNWEB=$(curl  -X 'DELETE' --location "$BASE_URL/users/${user}/caseloads/NWEB" \
+           --header 'Content-Type: application/json' \
+           --header "Authorization: Bearer $BEARER_TOKEN" \
+      )
+      echo "$removeNWEB"
+      echo "NEWB removed from $user"
+      echo "NEWB removed from $user" >> $SCRIPTS_BASE_DIR/added.txt
+       addNWEB=$(curl  -X 'POST' --location "$BASE_URL/users/${user}/caseloads/NWEB" \
+           --header 'Content-Type: application/json' \
+           --header "Authorization: Bearer $BEARER_TOKEN" \
+            )
+      echo "$addNWEB"
+      echo "NEWB added to $user"
+      echo "NEWB added to $user" >> $SCRIPTS_BASE_DIR/added.txt
+
     for role in $(cat $SCRIPTS_BASE_DIR/roles); do
 
     echo "adding $role to $user"
 
-    added=$(curl -X 'POST' --location "$BASE_URL/users/${user}/roles/${role}?caseloadId=NWEB" \
+     added=$(curl  -X 'POST' --location "$BASE_URL/users/${user}/roles/${role}?caseloadId=NWEB" \
     --header 'Content-Type: application/json' \
-    --header 'Authorization: Bearer <token>' \
+    --header "Authorization: Bearer $BEARER_TOKEN" \
     )
+
     echo "$added"
     echo "$role added to $user"
     echo "$user and $role = $added" >> $SCRIPTS_BASE_DIR/added.txt
