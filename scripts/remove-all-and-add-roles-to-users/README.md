@@ -1,7 +1,11 @@
-# Script to add single or multiple roles to list of users
+# Script to remove all DPS roles and then add multiple DPS roles to list of users
 
 This script takes a list of usernames (users file) and a list of role codes (roles file), 
-The script loops through the users and calls the add role endpoint to add each role one 
+The script loops through the users and calls 
+
+* the delete caseload endpoint to remove the NWEB caseload which will remove all digital roles from the user 
+* the add caseload endpoint to re-add the NEWB caseload
+* the add role endpoint to add each role one
 at a time.
 
 ## Requirements
@@ -24,7 +28,7 @@ It is normally a good idea to run the script against preprod before running it i
 You will need to obtain a bearer token from hmpps-auth and add it the bash command as a variable
 when the curl request called it has the necessary authorization to perform the action.
 
-you will also need to add the correct variable for the environment you are running the script against
+you Will also need to add the correct variable for the environment you are running the script against
 
 ```./add-multiple-roles-to-users-loop.bash <dev|preprod|prod> <bearer token>```
 
