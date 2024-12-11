@@ -58,7 +58,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.mapUserSum
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toStaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserRoleDetail
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.utils.SqlInjectionValidator
 import java.util.function.Supplier
 import java.util.stream.Collectors
 
@@ -76,7 +75,6 @@ class UserService(
   private val userPasswordRepository: UserPasswordRepository,
   private val userBasicDetailsRepository: UserBasicDetailsRepository,
   private val userLastNameRepository: UserLastNameRepository,
-  private val sqlInjectionValidator: SqlInjectionValidator,
 
   @Value("\${feature.record-logon-date:false}") private val recordLogonDate: Boolean = false,
 ) {
@@ -124,7 +122,6 @@ class UserService(
 
   @Transactional(readOnly = true)
   fun findUserBasicDetails(username: String): UserBasicDetails {
-    sqlInjectionValidator.validate(username)
     log.info("Fetching  user basic details for : {}", username)
     val userDetails = userBasicDetailsRepository.find(username)
       .map(this::toUserBasicDetail).orElseThrow { UserNotFoundException("User not found: $username not found") }
@@ -134,7 +131,6 @@ class UserService(
 
   @Transactional(readOnly = true)
   fun findUsersByFilter(pageRequest: Pageable, filter: UserFilter): Page<UserSummaryWithEmail> {
-    validateAgainstSqlInjection(filter)
     val updatePageRequest: Pageable = if (filter.inclusiveRoles == true) {
       pageRequest.withSort { "username" }
     } else {
@@ -149,13 +145,11 @@ class UserService(
   }
 
   @Transactional(readOnly = true)
-  fun downloadUserByFilter(filter: UserFilter): List<UserSummaryWithEmail> {
-    validateAgainstSqlInjection(filter)
-    return userPersonDetailRepository.findAll(UserSpecification(filter))
+  fun downloadUserByFilter(filter: UserFilter): List<UserSummaryWithEmail> =
+    userPersonDetailRepository.findAll(UserSpecification(filter))
       .map {
         it.toUserSummaryWithEmail()
       }
-  }
 
   @Transactional(readOnly = true)
   fun downloadAdminByFilter(filter: UserFilter): List<GroupAdminSummaryWithEmail> =
@@ -780,19 +774,6 @@ class UserService(
         }
           .toUserRoleDetail()
       }
-  }
-
-  private fun validateAgainstSqlInjection(filter: UserFilter) {
-    sqlInjectionValidator.validate(
-      listOf(
-        filter.localAdministratorUsername,
-        filter.name,
-        filter.activeCaseloadId,
-        filter.caseloadId,
-        filter.nomisRoleCode,
-      ),
-    )
-    sqlInjectionValidator.validate(filter.roleCodes)
   }
 }
 
