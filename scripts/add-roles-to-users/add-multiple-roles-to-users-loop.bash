@@ -38,7 +38,7 @@ for user in $(cat $SCRIPTS_BASE_DIR/users); do
 
     added=$(curl -X 'POST' --location "$BASE_URL/users/${user}/roles/${role}?caseloadId=NWEB" \
     --header 'Content-Type: application/json' \
-    --header 'Authorization: Bearer <token>' \
+    --header "Authorization: Bearer $BEARER_TOKEN" \
     )
     echo "$added"
     echo "$role added to $user"
