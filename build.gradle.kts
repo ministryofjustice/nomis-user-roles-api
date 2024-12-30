@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.1.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.1.1"
   kotlin("plugin.spring") version "2.0.21"
   kotlin("plugin.jpa") version "2.0.21"
   idea
@@ -18,9 +18,9 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
   implementation("org.apache.commons:commons-lang3:3.17.0")
-  implementation("org.apache.commons:commons-text:1.12.0")
+  implementation("org.apache.commons:commons-text:1.13.0")
   implementation("commons-codec:commons-codec:1.17.1")
-  implementation("com.google.guava:guava:33.3.1-jre")
+  implementation("com.google.guava:guava:33.4.0-jre")
 
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("io.hypersistence:hypersistence-utils-hibernate-60:3.9.0")
@@ -32,7 +32,7 @@ dependencies {
 
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
-  testImplementation("org.wiremock:wiremock-standalone:3.9.2")
+  testImplementation("org.wiremock:wiremock-standalone:3.10.0")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 
   testRuntimeOnly("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
