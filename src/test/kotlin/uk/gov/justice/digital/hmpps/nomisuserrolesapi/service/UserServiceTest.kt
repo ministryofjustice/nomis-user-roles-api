@@ -12,6 +12,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
+import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 import org.springframework.security.crypto.password.PasswordEncoder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
@@ -33,6 +34,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserBasicPe
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserLastNameRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPasswordRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.utils.SqlInjectionValidator
 import java.time.LocalDateTime
 import java.util.Optional
 
@@ -48,6 +50,7 @@ internal class UserServiceTest {
   private val userPasswordRepository: UserPasswordRepository = mock()
   private val userBasicDetailsRepository: UserBasicDetailsRepository = mock()
   private val userLastNameRepository: UserLastNameRepository = mock()
+  private val sqlInjectionValidator: SqlInjectionValidator = mock()
   private val userService: UserService = UserService(
     userPersonDetailRepository,
     userAndEmailRepository,
@@ -60,6 +63,7 @@ internal class UserServiceTest {
     userPasswordRepository,
     userBasicDetailsRepository,
     userLastNameRepository,
+    sqlInjectionValidator,
     recordLogonDate = true,
   )
 
@@ -424,8 +428,12 @@ internal class UserServiceTest {
 
         )
       whenever(userBasicDetailsRepository.find(anyString())).thenReturn(Optional.of(userBasicPersonalDetail))
+
       val userBasicDetails = userService.findUserBasicDetails("joe")
+
       assertThat(userBasicDetails).isEqualTo(expectedUserBasicDetail)
+      verify(sqlInjectionValidator).validate("joe")
+      verifyNoMoreInteractions(sqlInjectionValidator)
     }
   }
 }
