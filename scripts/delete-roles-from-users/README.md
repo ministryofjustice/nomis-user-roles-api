@@ -26,7 +26,7 @@ when the curl request called it has the necessary authorization to perform the a
 
 you will also need to add the correct variable for the environment you are running the script against
 
-```./remove-multiple-roles-from-users-loop.bash <dev|preprod|prod> <bearer token>```
+```./delete-multiple-roles-from-users-loop.bash <dev|preprod|prod> <bearer token>```
 
 if a user already has the role we are currently trying to add the response from the 
 curl request will be http 409 but the script will continue with the next role 

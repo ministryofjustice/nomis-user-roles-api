@@ -31,6 +31,7 @@ else
 fi
 
 for user in $(cat $SCRIPTS_BASE_DIR/users); do
+  user=$(echo "$user" | tr '[:lower:]' '[:upper:]')
   echo "updating user  - $user"
 
        removeNWEB=$(curl  -X 'DELETE' --location "$BASE_URL/users/${user}/caseloads/NWEB" \
