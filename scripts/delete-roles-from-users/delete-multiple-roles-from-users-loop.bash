@@ -41,7 +41,7 @@ for user in $(cat $SCRIPTS_BASE_DIR/users); do
     --header 'Content-Type: application/json' \
     --header "Authorization: Bearer $BEARER_TOKEN" \
     )
-    echo "removed"
+    echo $removed
     echo "$role removed from $user"
     echo "$user and $role = $removed" >> $SCRIPTS_BASE_DIR/removed.txt
     done

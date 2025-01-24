@@ -28,8 +28,8 @@ you will also need to add the correct variable for the environment you are runni
 
 ```./delete-multiple-roles-from-users-loop.bash <dev|preprod|prod> <bearer token>```
 
-if a user already has the role we are currently trying to add the response from the 
-curl request will be http 409 but the script will continue with the next role 
+if a user doesn't have the role we are currently trying to remove the response from the 
+curl request will be http 404, and a user"userMessage":"Role not found: Role xxx is not assigned to this user"
 
 ## output
 
