@@ -78,8 +78,7 @@ fun Caseload.toPrisonCaseload(): PrisonCaseload = PrisonCaseload(
   name = this.name.capitalizeLeavingAbbreviations(),
 )
 
-internal fun mapUserSummarySortProperties(sort: String): String =
-  userSummaryToEntityPropertyMap[sort] ?: sort
+internal fun mapUserSummarySortProperties(sort: String): String = userSummaryToEntityPropertyMap[sort] ?: sort
 
 private fun String.capitalizeFully() = WordUtils.capitalizeFully(this)
 private fun String.capitalizeLeavingAbbreviations() = AbbreviationsProcessor.capitalizeLeavingAbbreviations(this)

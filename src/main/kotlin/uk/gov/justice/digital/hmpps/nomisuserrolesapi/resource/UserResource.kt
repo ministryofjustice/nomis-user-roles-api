@@ -199,8 +199,7 @@ class UserResource(
   fun getUserDetailsByStaffId(
     @Schema(description = "Staff ID", example = "234232", required = true) @PathVariable
     staffId: Long,
-  ): StaffDetail =
-    userService.findByStaffId(staffId)
+  ): StaffDetail = userService.findByStaffId(staffId)
 
   @PreAuthorize("hasAnyRole('ROLE_USE_OF_FORCE', 'ROLE_STAFF_SEARCH')")
   @GetMapping("/staff")
@@ -512,12 +511,9 @@ class UserResource(
       ),
     ],
   )
-  fun getLastNameAllUsers(): List<UserLastName> {
-    return userService.getLastNameAllUsers()
-  }
+  fun getLastNameAllUsers(): List<UserLastName> = userService.getLastNameAllUsers()
 
-  fun localAdministratorUsernameWhenNotCentralAdministrator(): String? =
-    if (AuthenticationFacade.hasRoles("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")) null else authenticationFacade.currentUsername
+  fun localAdministratorUsernameWhenNotCentralAdministrator(): String? = if (AuthenticationFacade.hasRoles("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")) null else authenticationFacade.currentUsername
 }
 
 private fun String?.nonBlank() = if (this.isNullOrBlank()) null else this

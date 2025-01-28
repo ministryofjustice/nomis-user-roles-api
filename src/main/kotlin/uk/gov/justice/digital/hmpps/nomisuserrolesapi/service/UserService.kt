@@ -86,20 +86,17 @@ class UserService(
   }
 
   @Transactional(readOnly = true)
-  fun findByUsername(username: String): UserDetail =
-    userPersonDetailRepository.findById(username)
-      .map(this::toUserDetail)
-      .orElseThrow(UserNotFoundException("User $username not found"))
+  fun findByUsername(username: String): UserDetail = userPersonDetailRepository.findById(username)
+    .map(this::toUserDetail)
+    .orElseThrow(UserNotFoundException("User $username not found"))
 
   @Transactional(readOnly = true)
-  fun findUsersByFirstAndLastNames(firstName: String, lastName: String): List<UserSummaryWithEmail> =
-    userPersonDetailRepository.findAllByStaff_FirstNameIgnoreCaseAndStaff_LastNameIgnoreCase(firstName, lastName)
-      .map { it.toUserSummaryWithEmail() }
+  fun findUsersByFirstAndLastNames(firstName: String, lastName: String): List<UserSummaryWithEmail> = userPersonDetailRepository.findAllByStaff_FirstNameIgnoreCaseAndStaff_LastNameIgnoreCase(firstName, lastName)
+    .map { it.toUserSummaryWithEmail() }
 
   @Transactional(readOnly = true)
-  fun findAllByEmailAddress(emailAddress: String): List<UserDetail> =
-    userPersonDetailRepository.findByStaff_EmailsEmailCaseSensitiveIgnoreCase(emailAddress)
-      .map(this::toUserDetail)
+  fun findAllByEmailAddress(emailAddress: String): List<UserDetail> = userPersonDetailRepository.findByStaff_EmailsEmailCaseSensitiveIgnoreCase(emailAddress)
+    .map(this::toUserDetail)
 
   @Transactional(readOnly = true)
   fun findAllByEmailAddressAndUsernames(emailAddress: String, usernames: List<String>?): List<UserDetail> {
@@ -145,18 +142,16 @@ class UserService(
   }
 
   @Transactional(readOnly = true)
-  fun downloadUserByFilter(filter: UserFilter): List<UserSummaryWithEmail> =
-    userPersonDetailRepository.findAll(UserSpecification(filter))
-      .map {
-        it.toUserSummaryWithEmail()
-      }
+  fun downloadUserByFilter(filter: UserFilter): List<UserSummaryWithEmail> = userPersonDetailRepository.findAll(UserSpecification(filter))
+    .map {
+      it.toUserSummaryWithEmail()
+    }
 
   @Transactional(readOnly = true)
-  fun downloadAdminByFilter(filter: UserFilter): List<GroupAdminSummaryWithEmail> =
-    userPersonDetailRepository.findAll(UserSpecification(filter))
-      .map {
-        it.toGroupAdminSummary()
-      }
+  fun downloadAdminByFilter(filter: UserFilter): List<GroupAdminSummaryWithEmail> = userPersonDetailRepository.findAll(UserSpecification(filter))
+    .map {
+      it.toGroupAdminSummary()
+    }
 
   fun getLastNameAllUsers(): List<UserLastName> = userLastNameRepository.findLastNamesAllUsers().map {
     UserLastName(
@@ -401,11 +396,9 @@ class UserService(
   }
 
   @Transactional(readOnly = true)
-  fun findByStaffId(staffId: Long): StaffDetail {
-    return staffRepository.findById(staffId)
-      .map { s -> StaffDetail(s) }
-      .orElseThrow(UserNotFoundException("Staff ID $staffId not found"))
-  }
+  fun findByStaffId(staffId: Long): StaffDetail = staffRepository.findById(staffId)
+    .map { s -> StaffDetail(s) }
+    .orElseThrow(UserNotFoundException("Staff ID $staffId not found"))
 
   fun recordLogonDate(username: String) {
     if (recordLogonDate) {
@@ -516,10 +509,8 @@ class UserService(
   }
 
   @Transactional(readOnly = true)
-  fun getCaseloads(username: String): UserCaseloadDetail {
-    return userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
-      .toUserCaseloadDetail(removeDpsCaseload = true)
-  }
+  fun getCaseloads(username: String): UserCaseloadDetail = userPersonDetailRepository.findById(username).orElseThrow(UserNotFoundException("User $username not found"))
+    .toUserCaseloadDetail(removeDpsCaseload = true)
 
   fun removeCaseload(username: String, caseloadId: String): UserCaseloadDetail {
     val user =
@@ -570,29 +561,28 @@ class UserService(
     return user.toUserRoleDetail()
   }
 
-  fun removeRoleFromUsers(users: List<String>, roleCode: String): List<UserRoleDetail> =
-    users.mapNotNull { userPersonDetailRepository.findByIdOrNull(it) }
-      .map {
-        it.also { user ->
-          runCatching { user.removeRole(roleCode, DPS_CASELOAD) }
-            .onFailure { error ->
-              log.warn("Unable to remove role $roleCode from ${user.username}", error)
-            }
-            .onSuccess {
-              telemetryClient.trackEvent(
-                "NURA-remove-role-from-user",
-                mapOf(
-                  "username" to user.username,
-                  "role-code" to roleCode,
-                  "caseload" to DPS_CASELOAD,
-                  "admin" to authenticationFacade.currentUsername,
-                ),
-                null,
-              )
-            }
-        }
-          .toUserRoleDetail()
+  fun removeRoleFromUsers(users: List<String>, roleCode: String): List<UserRoleDetail> = users.mapNotNull { userPersonDetailRepository.findByIdOrNull(it) }
+    .map {
+      it.also { user ->
+        runCatching { user.removeRole(roleCode, DPS_CASELOAD) }
+          .onFailure { error ->
+            log.warn("Unable to remove role $roleCode from ${user.username}", error)
+          }
+          .onSuccess {
+            telemetryClient.trackEvent(
+              "NURA-remove-role-from-user",
+              mapOf(
+                "username" to user.username,
+                "role-code" to roleCode,
+                "caseload" to DPS_CASELOAD,
+                "admin" to authenticationFacade.currentUsername,
+              ),
+              null,
+            )
+          }
       }
+        .toUserRoleDetail()
+    }
 
   fun getUserRoles(username: String, includeNomisRoles: Boolean = false): UserRoleDetail {
     val user =
@@ -644,13 +634,9 @@ class UserService(
     )
   }
 
-  private fun toUserDetail(user: UserPersonDetail): UserDetail {
-    return UserDetail(user)
-  }
+  private fun toUserDetail(user: UserPersonDetail): UserDetail = UserDetail(user)
 
-  private fun toUserBasicDetail(user: UserBasicPersonalDetail): UserBasicDetails {
-    return UserBasicDetails(user)
-  }
+  private fun toUserBasicDetail(user: UserBasicPersonalDetail): UserBasicDetails = UserBasicDetails(user)
 
   private fun checkIfAccountAlreadyExists(username: String) {
     userPersonDetailRepository.findById(username.uppercase())
@@ -748,8 +734,7 @@ class UserService(
     userPersonDetailRepository.expirePassword(username)
   }
 
-  fun authenticateUser(username: String, password: String): Boolean =
-    passwordEncoder.matches(password, userPasswordRepository.findByIdOrNull(username)?.password)
+  fun authenticateUser(username: String, password: String): Boolean = passwordEncoder.matches(password, userPasswordRepository.findByIdOrNull(username)?.password)
 
   fun addRoleToUsers(users: List<String>, roleCode: String): List<UserRoleDetail> {
     val role = roleRepository.findByCode(roleCode).orElseThrow { UserRoleNotFoundException("Role $roleCode not found") }
@@ -777,9 +762,7 @@ class UserService(
   }
 }
 
-private fun Pageable.withSort(sortMapper: (sortProperty: String) -> String): Pageable {
-  return PageRequest.of(this.pageNumber, this.pageSize, mapSortOrderProperties(this.sort, sortMapper))
-}
+private fun Pageable.withSort(sortMapper: (sortProperty: String) -> String): Pageable = PageRequest.of(this.pageNumber, this.pageSize, mapSortOrderProperties(this.sort, sortMapper))
 
 private fun mapSortOrderProperties(sort: Sort, sortMapper: (sortProperty: String) -> String): Sort = by(
   sort
@@ -795,41 +778,31 @@ private fun mapSortOrderProperties(sort: Sort, sortMapper: (sortProperty: String
 class UserNotFoundException(message: String?) :
   RuntimeException(message),
   Supplier<UserNotFoundException> {
-  override fun get(): UserNotFoundException {
-    return UserNotFoundException(message)
-  }
+  override fun get(): UserNotFoundException = UserNotFoundException(message)
 }
 
 class UserAlreadyExistsException(message: String?) :
   RuntimeException(message),
   Supplier<UserAlreadyExistsException> {
-  override fun get(): UserAlreadyExistsException {
-    return UserAlreadyExistsException(message)
-  }
+  override fun get(): UserAlreadyExistsException = UserAlreadyExistsException(message)
 }
 
 class CaseloadNotFoundException(message: String?) :
   RuntimeException(message),
   Supplier<CaseloadNotFoundException> {
-  override fun get(): CaseloadNotFoundException {
-    return CaseloadNotFoundException(message)
-  }
+  override fun get(): CaseloadNotFoundException = CaseloadNotFoundException(message)
 }
 
 class PasswordTooShortException(message: String?) :
   RuntimeException(message),
   Supplier<PasswordTooShortException> {
-  override fun get(): PasswordTooShortException {
-    return PasswordTooShortException(message)
-  }
+  override fun get(): PasswordTooShortException = PasswordTooShortException(message)
 }
 
 class ForbiddenRoleAssignmentException(message: String?) :
   RuntimeException(message),
   Supplier<ForbiddenRoleAssignmentException> {
-  override fun get(): ForbiddenRoleAssignmentException {
-    return ForbiddenRoleAssignmentException(message)
-  }
+  override fun get(): ForbiddenRoleAssignmentException = ForbiddenRoleAssignmentException(message)
 }
 
 class PasswordValidationException(message: String) : RuntimeException(message)

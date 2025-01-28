@@ -250,14 +250,13 @@ class UserPersonDetailRepositoryTest {
       private val lsaAdministratorAtBrixton = "bobbly.made"
       private val lsaAdministratorAtBrixtonAndWandsworth = "micky.bishop"
 
-      private fun createUppercaseUserOf(firstName: String, lastName: String, prison: String = "WWI") =
-        dataBuilder.generalUser()
-          .username("$firstName.$lastName".uppercase())
-          .firstName(firstName.uppercase())
-          .lastName(lastName.uppercase())
-          .atPrison(prison)
-          .email("$firstName-$lastName@digital.justice.gov.uk")
-          .buildAndSave()
+      private fun createUppercaseUserOf(firstName: String, lastName: String, prison: String = "WWI") = dataBuilder.generalUser()
+        .username("$firstName.$lastName".uppercase())
+        .firstName(firstName.uppercase())
+        .lastName(lastName.uppercase())
+        .atPrison(prison)
+        .email("$firstName-$lastName@digital.justice.gov.uk")
+        .buildAndSave()
 
       @BeforeEach
       internal fun createUsers() {
@@ -459,14 +458,13 @@ class UserPersonDetailRepositoryTest {
     inner class StatusFilter {
       private val lsaAdministratorAtWandsworth = "RIZ.MARSHALL"
 
-      private fun createUserOf(username: String, status: AccountStatus, prison: String = "WWI") =
-        dataBuilder.generalUser()
-          .username(username.uppercase())
-          .firstName(username.split(".")[0].uppercase())
-          .lastName(username.split(".")[1].uppercase())
-          .atPrison(prison)
-          .status(status)
-          .buildAndSave()
+      private fun createUserOf(username: String, status: AccountStatus, prison: String = "WWI") = dataBuilder.generalUser()
+        .username(username.uppercase())
+        .firstName(username.split(".")[0].uppercase())
+        .lastName(username.split(".")[1].uppercase())
+        .atPrison(prison)
+        .status(status)
+        .buildAndSave()
 
       @BeforeEach
       internal fun createUsers() {
@@ -569,13 +567,12 @@ class UserPersonDetailRepositoryTest {
     inner class ActiveCaseloadFilter {
       private val lsaAdministratorAtWandsworth = "RIZ.MARSHALL"
 
-      private fun createUserOf(username: String, prisons: List<String> = listOf("WWI")) =
-        dataBuilder.generalUser()
-          .username(username.uppercase())
-          .firstName(username.split(".")[0].uppercase())
-          .lastName(username.split(".")[1].uppercase())
-          .atPrisons(prisons)
-          .buildAndSave()
+      private fun createUserOf(username: String, prisons: List<String> = listOf("WWI")) = dataBuilder.generalUser()
+        .username(username.uppercase())
+        .firstName(username.split(".")[0].uppercase())
+        .lastName(username.split(".")[1].uppercase())
+        .atPrisons(prisons)
+        .buildAndSave()
 
       @BeforeEach
       internal fun createUsers() {
@@ -645,13 +642,12 @@ class UserPersonDetailRepositoryTest {
     inner class CaseloadFilter {
       private val lsaAdministratorAtWandsworth = "RIZ.MARSHALL"
 
-      private fun createUserOf(username: String, prisons: List<String> = listOf("WWI")) =
-        dataBuilder.generalUser()
-          .username(username.uppercase())
-          .firstName(username.split(".")[0].uppercase())
-          .lastName(username.split(".")[1].uppercase())
-          .atPrisons(prisons)
-          .buildAndSave()
+      private fun createUserOf(username: String, prisons: List<String> = listOf("WWI")) = dataBuilder.generalUser()
+        .username(username.uppercase())
+        .firstName(username.split(".")[0].uppercase())
+        .lastName(username.split(".")[1].uppercase())
+        .atPrisons(prisons)
+        .buildAndSave()
 
       @BeforeEach
       internal fun createUsers() {
@@ -722,15 +718,14 @@ class UserPersonDetailRepositoryTest {
     inner class RoleFilter {
       private val lsaAdministratorAtWandsworth = "RIZ.MARSHALL"
 
-      private fun createUserOf(user: UserWithRoles) =
-        dataBuilder.generalUser()
-          .username(user.username.uppercase())
-          .firstName(user.username.split(".")[0].uppercase())
-          .lastName(user.username.split(".")[1].uppercase())
-          .atPrisons(user.prisons)
-          .dpsRoles(user.dpsRoleCodes)
-          .nomisRoles(user.nomisRoleCodes)
-          .buildAndSave()
+      private fun createUserOf(user: UserWithRoles) = dataBuilder.generalUser()
+        .username(user.username.uppercase())
+        .firstName(user.username.split(".")[0].uppercase())
+        .lastName(user.username.split(".")[1].uppercase())
+        .atPrisons(user.prisons)
+        .dpsRoles(user.dpsRoleCodes)
+        .nomisRoles(user.nomisRoleCodes)
+        .buildAndSave()
 
       @BeforeEach
       internal fun createUsers() {
@@ -879,8 +874,7 @@ class UserPersonDetailRepositoryTest {
   }
 }
 
-fun List<UserGroupAdministrator>.userGroupOf(userGroupCode: String) =
-  this.find { it.id.userGroupCode == userGroupCode }!!.userGroup
+fun List<UserGroupAdministrator>.userGroupOf(userGroupCode: String) = this.find { it.id.userGroupCode == userGroupCode }!!.userGroup
 
 data class UserWithRoles(
   val username: String,

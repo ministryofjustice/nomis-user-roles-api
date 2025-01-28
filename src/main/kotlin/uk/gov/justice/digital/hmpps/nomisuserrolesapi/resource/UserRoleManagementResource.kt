@@ -451,9 +451,7 @@ class UserRoleManagementResource(
   fun reassignRoles(
     @Valid @RequestBody
     specification: RoleAssignmentsSpecification,
-  ): List<RoleAssignmentStats> {
-    return roleAssignmentsService.updateRoleAssignments(specification)
-  }
+  ): List<RoleAssignmentStats> = roleAssignmentsService.updateRoleAssignments(specification)
 }
 
 private fun String.asList(): List<String> = this.split(",").map { it.removeQuotes().trim() }

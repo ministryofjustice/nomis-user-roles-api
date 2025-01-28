@@ -54,11 +54,9 @@ class MeResource(
       ),
     ],
   )
-  fun getMyUserDetails(): UserDetail =
-
-    authenticationFacade.currentUsername?.run {
-      return userService.findByUsername(this)
-    } ?: throw UserNotFoundException("No user in context")
+  fun getMyUserDetails(): UserDetail = authenticationFacade.currentUsername?.run {
+    return userService.findByUsername(this)
+  } ?: throw UserNotFoundException("No user in context")
 
   @GetMapping("/caseloads")
   @ResponseStatus(HttpStatus.OK)

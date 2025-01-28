@@ -47,8 +47,7 @@ data class Staff(
 
   fun adminAccount(): UserPersonDetail? = users.firstOrNull { u -> UsageType.ADMIN == u.type }
 
-  fun primaryEmail(): EmailAddress? =
-    emails.firstOrNull { e -> e.emailCaseSensitive.contains("justice.gov.uk") } ?: run { emails.firstOrNull() }
+  fun primaryEmail(): EmailAddress? = emails.firstOrNull { e -> e.emailCaseSensitive.contains("justice.gov.uk") } ?: run { emails.firstOrNull() }
 
   val isActive: Boolean
     get() = STAFF_STATUS_ACTIVE == status
@@ -74,9 +73,7 @@ data class Staff(
   override fun hashCode(): Int = staffId.hashCode()
 
   @Override
-  override fun toString(): String {
-    return this::class.simpleName + "(staffId = $staffId )"
-  }
+  override fun toString(): String = this::class.simpleName + "(staffId = $staffId )"
 }
 
 fun String.capitalizeFully(): String = WordUtils.capitalizeFully(this)

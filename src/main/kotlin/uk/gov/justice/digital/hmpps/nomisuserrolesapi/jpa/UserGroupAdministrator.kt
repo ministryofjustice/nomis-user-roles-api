@@ -57,7 +57,5 @@ data class UserGroupAdministrator(
 
   override fun hashCode(): Int = id.hashCode()
 
-  override fun toString(): String {
-    return this::class.simpleName + id.toString()
-  }
+  override fun toString(): String = this::class.simpleName + id.toString()
 }

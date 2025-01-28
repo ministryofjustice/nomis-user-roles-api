@@ -9,7 +9,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toPrisonCa
 
 @Service
 class ReferenceDataService(private val caseloadRepository: CaseloadRepository) {
-  fun getActiveGeneralCaseloads(): List<PrisonCaseload> =
-    caseloadRepository.findByActiveAndFunctionAndTypeOrderByNameAsc(true, GENERAL_CASELOAD, INSTITUTION_CASELOAD)
-      .map { it.toPrisonCaseload() }
+  fun getActiveGeneralCaseloads(): List<PrisonCaseload> = caseloadRepository.findByActiveAndFunctionAndTypeOrderByNameAsc(true, GENERAL_CASELOAD, INSTITUTION_CASELOAD)
+    .map { it.toPrisonCaseload() }
 }

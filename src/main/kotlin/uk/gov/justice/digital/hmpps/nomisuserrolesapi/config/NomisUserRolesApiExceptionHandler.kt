@@ -93,17 +93,15 @@ class NomisUserRolesApiExceptionHandler {
   }
 
   @ExceptionHandler(NoResourceFoundException::class)
-  fun handleEntityNotFoundException(e: NoResourceFoundException): ResponseEntity<ErrorResponse> {
-    return ResponseEntity
-      .status(NOT_FOUND)
-      .contentType(MediaType.APPLICATION_JSON)
-      .body(
-        ErrorResponse(
-          status = NOT_FOUND.value(),
-          developerMessage = e.message,
-        ),
-      )
-  }
+  fun handleEntityNotFoundException(e: NoResourceFoundException): ResponseEntity<ErrorResponse> = ResponseEntity
+    .status(NOT_FOUND)
+    .contentType(MediaType.APPLICATION_JSON)
+    .body(
+      ErrorResponse(
+        status = NOT_FOUND.value(),
+        developerMessage = e.message,
+      ),
+    )
 
   @ExceptionHandler(UserNotFoundException::class)
   fun handleUserNotFoundException(e: UserNotFoundException): ResponseEntity<ErrorResponse?>? {

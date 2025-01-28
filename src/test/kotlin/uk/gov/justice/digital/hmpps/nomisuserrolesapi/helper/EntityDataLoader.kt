@@ -40,19 +40,17 @@ class GeneralUserBuilder(
   nomsRoles = listOf(),
 ) {
 
-  private fun generalUsersOf(prisonCodes: List<String>): MutableList<UserGroupMember> {
-    return prisonCodes.map { caseload ->
-      groupCaseloadRepository.findAllById_Caseload(caseload).map {
-        UserGroupMember(
-          UserGroupMemberPk(it.userGroup.id, this.userPersonDetail.username),
-          active = true,
-          startDate = LocalDate.now().minusDays(1),
-          userGroup = it.userGroup,
-          user = this.userPersonDetail,
-        )
-      }
-    }.flatten().toMutableList()
-  }
+  private fun generalUsersOf(prisonCodes: List<String>): MutableList<UserGroupMember> = prisonCodes.map { caseload ->
+    groupCaseloadRepository.findAllById_Caseload(caseload).map {
+      UserGroupMember(
+        UserGroupMemberPk(it.userGroup.id, this.userPersonDetail.username),
+        active = true,
+        startDate = LocalDate.now().minusDays(1),
+        userGroup = it.userGroup,
+        user = this.userPersonDetail,
+      )
+    }
+  }.flatten().toMutableList()
 
   override fun build(): GeneralUserBuilder {
     userPersonDetail =
@@ -100,18 +98,16 @@ class LocalAdministratorBuilder(
   nomsRoles = listOf(),
 ) {
 
-  private fun adminUsersOf(prisonCodes: List<String>): MutableList<UserGroupAdministrator> {
-    return prisonCodes.map { caseload ->
-      groupCaseloadRepository.findAllById_Caseload(caseload).map {
-        UserGroupAdministrator(
-          UserGroupAdministratorPk(it.userGroup.id, this.userPersonDetail.username),
-          active = this.userPersonDetail.isActive(),
-          userGroup = it.userGroup,
-          user = this.userPersonDetail,
-        )
-      }
-    }.flatten().toMutableList()
-  }
+  private fun adminUsersOf(prisonCodes: List<String>): MutableList<UserGroupAdministrator> = prisonCodes.map { caseload ->
+    groupCaseloadRepository.findAllById_Caseload(caseload).map {
+      UserGroupAdministrator(
+        UserGroupAdministratorPk(it.userGroup.id, this.userPersonDetail.username),
+        active = this.userPersonDetail.isActive(),
+        userGroup = it.userGroup,
+        user = this.userPersonDetail,
+      )
+    }
+  }.flatten().toMutableList()
 
   override fun build(): LocalAdministratorBuilder {
     userPersonDetail =
@@ -158,16 +154,14 @@ fun generalUserEntityCreator(
   roleRepository: RoleRepository,
   userPersonDetail: UserPersonDetail = defaultPerson(),
   prisonCodes: List<String> = listOf("WWI"),
-): GeneralUserBuilder {
-  return GeneralUserBuilder(
-    repository = repository,
-    groupCaseloadRepository = groupCaseloadRepository,
-    caseloadRepository = caseloadRepository,
-    roleRepository = roleRepository,
-    userPersonDetail = userPersonDetail,
-    prisonCodes = prisonCodes,
-  )
-}
+): GeneralUserBuilder = GeneralUserBuilder(
+  repository = repository,
+  groupCaseloadRepository = groupCaseloadRepository,
+  caseloadRepository = caseloadRepository,
+  roleRepository = roleRepository,
+  userPersonDetail = userPersonDetail,
+  prisonCodes = prisonCodes,
+)
 
 fun localAdministratorEntityCreator(
   repository: UserPersonDetailRepository,
@@ -176,25 +170,21 @@ fun localAdministratorEntityCreator(
   roleRepository: RoleRepository,
   userPersonDetail: UserPersonDetail = defaultPerson(),
   prisonCodes: List<String> = listOf("WWI"),
-): LocalAdministratorBuilder {
-  return LocalAdministratorBuilder(
-    repository = repository,
-    roleRepository = roleRepository,
-    groupCaseloadRepository = groupCaseloadRepository,
-    caseloadRepository = caseloadRepository,
-    userPersonDetail = userPersonDetail,
-    prisonCodes = prisonCodes,
-  )
-}
+): LocalAdministratorBuilder = LocalAdministratorBuilder(
+  repository = repository,
+  roleRepository = roleRepository,
+  groupCaseloadRepository = groupCaseloadRepository,
+  caseloadRepository = caseloadRepository,
+  userPersonDetail = userPersonDetail,
+  prisonCodes = prisonCodes,
+)
 
-fun defaultPerson(): UserPersonDetail {
-  return UserPersonDetail(
-    username = "tony",
-    staff = Staff(firstName = "John", lastName = "Smith", status = "ACTIVE"),
-    type = UsageType.GENERAL,
-    accountDetail = AccountDetail(accountStatus = AccountStatus.OPEN.desc, profile = AccountProfile.TAG_GENERAL.name),
-  )
-}
+fun defaultPerson(): UserPersonDetail = UserPersonDetail(
+  username = "tony",
+  staff = Staff(firstName = "John", lastName = "Smith", status = "ACTIVE"),
+  type = UsageType.GENERAL,
+  accountDetail = AccountDetail(accountStatus = AccountStatus.OPEN.desc, profile = AccountProfile.TAG_GENERAL.name),
+)
 
 abstract class UserBuilder<T>(
   private val repository: UserPersonDetailRepository,
@@ -267,8 +257,7 @@ abstract class UserBuilder<T>(
     return this
   }
 
-  internal fun asRoles(userCaseload: UserCaseload, roleCodes: List<String>): MutableList<UserCaseloadRole> =
-    roleCodes.map { userCaseloadRole(userCaseload, it) }.toMutableList()
+  internal fun asRoles(userCaseload: UserCaseload, roleCodes: List<String>): MutableList<UserCaseloadRole> = roleCodes.map { userCaseloadRole(userCaseload, it) }.toMutableList()
 
   private fun userCaseloadRole(userCaseload: UserCaseload, roleCode: String): UserCaseloadRole {
     val role = roleRepository.findByCode(roleCode).orElseThrow()

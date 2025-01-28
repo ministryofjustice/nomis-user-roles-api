@@ -50,9 +50,7 @@ data class Caseload(
   override fun hashCode(): Int = id.hashCode()
 
   @Override
-  override fun toString(): String {
-    return this::class.simpleName + "(id = $id )"
-  }
+  override fun toString(): String = this::class.simpleName + "(id = $id )"
 
   companion object {
     const val GENERAL_CASELOAD = "GENERAL"
