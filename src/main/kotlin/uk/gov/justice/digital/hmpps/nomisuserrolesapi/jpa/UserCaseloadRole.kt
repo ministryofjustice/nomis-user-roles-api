@@ -43,7 +43,5 @@ data class UserCaseloadRole(
   override fun hashCode(): Int = Objects.hash(id)
 
   @Override
-  override fun toString(): String {
-    return this::class.simpleName + "(EmbeddedId = $id )"
-  }
+  override fun toString(): String = this::class.simpleName + "(EmbeddedId = $id )"
 }

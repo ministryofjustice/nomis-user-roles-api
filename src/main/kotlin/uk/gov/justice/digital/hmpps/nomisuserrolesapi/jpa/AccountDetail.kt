@@ -26,8 +26,7 @@ data class AccountDetail(
 
   fun isAccountNonLocked(): Boolean = !isLocked()
 
-  fun isLocked(): Boolean =
-    AccountStatus.values().filter { it.isLocked }.contains(status)
+  fun isLocked(): Boolean = AccountStatus.values().filter { it.isLocked }.contains(status)
 
   fun isCredentialsNonExpired(): Boolean {
     val statusNonExpired =
@@ -36,17 +35,11 @@ data class AccountDetail(
     return statusNonExpired && (passwordExpiry == null || passwordExpiry.isAfter(LocalDateTime.now()))
   }
 
-  fun isEnabled(): Boolean {
-    return isAccountNonLocked()
-  }
+  fun isEnabled(): Boolean = isAccountNonLocked()
 
-  fun isExpired(): Boolean {
-    return AccountStatus.values().filter { it.isExpired }.contains(status)
-  }
+  fun isExpired(): Boolean = AccountStatus.values().filter { it.isExpired }.contains(status)
 
-  fun isActive(): Boolean {
-    return AccountStatus.activeStatuses().contains(status)
-  }
+  fun isActive(): Boolean = AccountStatus.activeStatuses().contains(status)
 
   fun isAdmin(): Boolean = accountProfile === AccountProfile.TAG_ADMIN
 }

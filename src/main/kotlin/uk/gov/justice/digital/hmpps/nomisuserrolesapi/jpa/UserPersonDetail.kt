@@ -151,13 +151,9 @@ data class UserPersonDetail(
 
   override fun hashCode(): Int = username.hashCode()
 
-  private fun findUserCaseloadById(caseloadId: String): UserCaseload? {
-    return caseloads.firstOrNull { caseloadId == it.id.caseloadId }
-  }
+  private fun findUserCaseloadById(caseloadId: String): UserCaseload? = caseloads.firstOrNull { caseloadId == it.id.caseloadId }
 
-  fun findCaseloadById(caseloadId: String): Caseload? {
-    return findUserCaseloadById(caseloadId = caseloadId)?.caseload
-  }
+  fun findCaseloadById(caseloadId: String): Caseload? = findUserCaseloadById(caseloadId = caseloadId)?.caseload
 
   fun setDefaultCaseload(caseloadId: String) {
     activeCaseLoad = findCaseloadById(caseloadId)
@@ -204,9 +200,7 @@ data class UserPersonDetail(
 
   private fun isUserGroupCaseload(caseload: Caseload) = (type == UsageType.GENERAL) && !caseload.isDpsCaseload()
 
-  private fun isCaseloadForUserGroup(caseload: Caseload, userGroupMember: UserGroupMember): Boolean {
-    return caseload.userGroups.firstOrNull { groupCaseload -> groupCaseload.userGroup === userGroupMember.userGroup && userGroupMember.user === this } !== null
-  }
+  private fun isCaseloadForUserGroup(caseload: Caseload, userGroupMember: UserGroupMember): Boolean = caseload.userGroups.firstOrNull { groupCaseload -> groupCaseload.userGroup === userGroupMember.userGroup && userGroupMember.user === this } !== null
 
   private fun addUserGroup(userGroup: UserGroup) {
     activeAndInactiveMemberOfUserGroups.firstOrNull { it.id.userGroupCode == userGroup.id && it.id.username == this.username }
@@ -246,9 +240,7 @@ data class UserPersonDetail(
 class CaseloadAlreadyExistsException(message: String?) :
   RuntimeException(message),
   Supplier<CaseloadAlreadyExistsException> {
-  override fun get(): CaseloadAlreadyExistsException {
-    return CaseloadAlreadyExistsException(message)
-  }
+  override fun get(): CaseloadAlreadyExistsException = CaseloadAlreadyExistsException(message)
 }
 
 fun UserPersonDetail.toUserSummaryWithEmail() = UserSummaryWithEmail(

@@ -50,14 +50,12 @@ class OracleSha1PasswordEncoder : PasswordEncoder {
     return PasswordEncoderUtils.equals(encodedPassword, rawPasswordEncoded)
   }
 
-  private fun extractSalt(prefixEncodedPassword: String?): String {
-    return if (prefixEncodedPassword != null && prefixEncodedPassword.length >= 62) {
-      prefixEncodedPassword.substring(
-        42,
-        62,
-      )
-    } else {
-      ""
-    }
+  private fun extractSalt(prefixEncodedPassword: String?): String = if (prefixEncodedPassword != null && prefixEncodedPassword.length >= 62) {
+    prefixEncodedPassword.substring(
+      42,
+      62,
+    )
+  } else {
+    ""
   }
 }

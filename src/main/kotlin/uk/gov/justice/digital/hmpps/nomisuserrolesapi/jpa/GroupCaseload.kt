@@ -55,7 +55,5 @@ data class GroupCaseload(
 
   override fun hashCode(): Int = id.hashCode()
 
-  override fun toString(): String {
-    return this::class.simpleName + "(code = $id )"
-  }
+  override fun toString(): String = this::class.simpleName + "(code = $id )"
 }

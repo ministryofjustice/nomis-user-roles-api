@@ -39,12 +39,9 @@ data class UserBasicPersonalDetail(
   val status: AccountStatus?
     get() = accountStatus?.let { AccountStatus.get(it) }
 
-  private fun isLocked(): Boolean =
-    AccountStatus.values().filter { it.isLocked }.contains(status)
+  private fun isLocked(): Boolean = AccountStatus.values().filter { it.isLocked }.contains(status)
 
   private fun isAccountNonLocked(): Boolean = !isLocked()
 
-  fun isEnabled(): Boolean {
-    return isAccountNonLocked()
-  }
+  fun isEnabled(): Boolean = isAccountNonLocked()
 }

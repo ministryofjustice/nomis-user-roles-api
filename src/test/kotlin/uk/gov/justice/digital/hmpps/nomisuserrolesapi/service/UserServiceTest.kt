@@ -393,8 +393,7 @@ internal class UserServiceTest {
       assertThat(expiredUser.accountDetail?.isAccountNonLocked()).isTrue
     }
 
-    private fun filterSetFromAccountStatuses(accountStatusesToFilter: Set<AccountStatus>) =
-      AccountStatus.values().filterNot { accountStatusesToFilter.contains(it) }
+    private fun filterSetFromAccountStatuses(accountStatusesToFilter: Set<AccountStatus>) = AccountStatus.values().filterNot { accountStatusesToFilter.contains(it) }
   }
 
   @Nested

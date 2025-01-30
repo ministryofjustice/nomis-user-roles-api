@@ -5,9 +5,8 @@ enum class UsageType {
   ADMIN,
 }
 
-fun getUsageType(adminOnly: Boolean) =
-  if (adminOnly) {
-    UsageType.ADMIN
-  } else {
-    UsageType.GENERAL
-  }
+fun getUsageType(adminOnly: Boolean) = if (adminOnly) {
+  UsageType.ADMIN
+} else {
+  UsageType.GENERAL
+}
