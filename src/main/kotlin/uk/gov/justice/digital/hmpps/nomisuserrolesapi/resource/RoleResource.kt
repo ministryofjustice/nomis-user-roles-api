@@ -211,13 +211,13 @@ class RoleResource(
   ): RoleDetail =
     roleService.findByCode(code)
 
-  @PreAuthorize("hasAnyRole('ROLE_ROLES_ADMIN','ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
+  @PreAuthorize("hasRole('ROLE_DELETE ROLES_ADMIN')")
   @DeleteMapping("/{roleCode}")
   @Hidden
   @Operation(
     summary = "Delete Role",
-    description = "Delete Role. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLES_ADMIN",
-    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
+    description = "Delete Role. Requires role ROLE_DELETE_ROLES_ADMIN",
+    security = [SecurityRequirement(name = "DELETE_ROLES_ADMIN")],
     responses = [
       ApiResponse(
         responseCode = "400",
