@@ -77,9 +77,7 @@ data class Role(
   override fun hashCode(): Int = code.hashCode()
 
   @Override
-  override fun toString(): String {
-    return this::class.simpleName + "(code = $code )"
-  }
+  override fun toString(): String = this::class.simpleName + "(code = $code )"
 }
 
 enum class RoleType {

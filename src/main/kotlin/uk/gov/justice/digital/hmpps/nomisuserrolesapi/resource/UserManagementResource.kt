@@ -276,9 +276,7 @@ class UserManagementResource(
     @RequestBody
     @Valid
     email: String,
-  ): StaffDetail {
-    return userService.updateEmail(username, email)
-  }
+  ): StaffDetail = userService.updateEmail(username, email)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @PutMapping("/{username}/change-name")
@@ -316,13 +314,11 @@ class UserManagementResource(
     username: String,
     @Schema(description = "Staff name details", required = true) @RequestBody @Valid
     nameDetails: NameDetail,
-  ): StaffDetail {
-    return userService.updateStaffName(
-      username = username,
-      firstName = nameDetails.firstName,
-      lastName = nameDetails.lastName,
-    )
-  }
+  ): StaffDetail = userService.updateStaffName(
+    username = username,
+    firstName = nameDetails.firstName,
+    lastName = nameDetails.lastName,
+  )
 
   @Operation(
     summary = "Authenticate a username and password against NOMIS database",

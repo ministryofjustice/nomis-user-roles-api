@@ -79,9 +79,7 @@ class UserCaseloadManagementResource(
     @Schema(description = "Username", example = "TEST_USER1", required = true)
     @PathVariable
     username: String,
-  ): UserCaseloadDetail {
-    return userService.getCaseloads(username)
-  }
+  ): UserCaseloadDetail = userService.getCaseloads(username)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @PostMapping("/{username}/caseloads/{caseloadId}")
@@ -140,9 +138,7 @@ class UserCaseloadManagementResource(
     @PathVariable
     @Size(max = 6, min = 3, message = "Caseload must be between 3 and 6")
     caseloadId: String,
-  ): UserCaseloadDetail {
-    return userService.addCaseloadToUser(username, caseloadId)
-  }
+  ): UserCaseloadDetail = userService.addCaseloadToUser(username, caseloadId)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @PostMapping("/{username}/caseloads")
@@ -199,9 +195,7 @@ class UserCaseloadManagementResource(
     username: String,
     @RequestBody @Valid
     caseloadIds: List<String>,
-  ): UserCaseloadDetail {
-    return userService.addCaseloadsToUser(username, caseloadIds)
-  }
+  ): UserCaseloadDetail = userService.addCaseloadsToUser(username, caseloadIds)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES')")
   @PutMapping("/{username}/default-caseload/{defaultCaseloadId}")
@@ -259,9 +253,7 @@ class UserCaseloadManagementResource(
     @PathVariable
     @Size(max = 6, min = 3, message = "Caseload must be between 3 and 6")
     defaultCaseloadId: String,
-  ): UserCaseloadDetail {
-    return userService.setDefaultCaseload(username, defaultCaseloadId)
-  }
+  ): UserCaseloadDetail = userService.setDefaultCaseload(username, defaultCaseloadId)
 
   @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @DeleteMapping("/{username}/caseloads/{caseloadId}")
@@ -319,7 +311,5 @@ class UserCaseloadManagementResource(
     @PathVariable
     @Size(max = 6, min = 3, message = "Caseload must be between 3 and 6")
     caseloadId: String,
-  ): UserCaseloadDetail {
-    return userService.removeCaseload(username, caseloadId)
-  }
+  ): UserCaseloadDetail = userService.removeCaseload(username, caseloadId)
 }

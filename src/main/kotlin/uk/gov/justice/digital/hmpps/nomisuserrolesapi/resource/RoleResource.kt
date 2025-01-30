@@ -76,9 +76,7 @@ class RoleResource(
   fun createRole(
     @RequestBody @Valid
     createRoleRequest: CreateRoleRequest,
-  ): RoleDetail {
-    return roleService.createRole(createRoleRequest)
-  }
+  ): RoleDetail = roleService.createRole(createRoleRequest)
 
   @PreAuthorize("hasAnyRole('ROLE_ROLES_ADMIN','ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @PutMapping("/{code}")
@@ -123,9 +121,7 @@ class RoleResource(
     code: String,
     @RequestBody @Valid
     updateRoleRequest: UpdateRoleRequest,
-  ): RoleDetail {
-    return roleService.updateRole(code, updateRoleRequest)
-  }
+  ): RoleDetail = roleService.updateRole(code, updateRoleRequest)
 
   @PreAuthorize("hasAnyRole('ROLE_ROLES_ADMIN','ROLE_MAINTAIN_ACCESS_ROLES_ADMIN', 'ROLE_MAINTAIN_ACCESS_ROLES', 'ROLE_VIEW_NOMIS_STAFF_DETAILS')")
   @GetMapping
@@ -168,12 +164,11 @@ class RoleResource(
     )
     @RequestParam(value = "admin-roles", required = false, defaultValue = "true")
     adminRoles: Boolean = true,
-  ): List<RoleDetail> =
-    if (allRoles) {
-      roleService.getAllRoles()
-    } else {
-      roleService.getAllDPSRoles(adminRoles)
-    }
+  ): List<RoleDetail> = if (allRoles) {
+    roleService.getAllRoles()
+  } else {
+    roleService.getAllDPSRoles(adminRoles)
+  }
 
   @PreAuthorize("hasAnyRole('ROLE_ROLES_ADMIN','ROLE_MAINTAIN_ACCESS_ROLES_ADMIN')")
   @GetMapping("/{code}")
@@ -208,8 +203,7 @@ class RoleResource(
     @PathVariable
     @Size(max = 30, min = 1, message = "Role code must be between 1 and 30")
     code: String,
-  ): RoleDetail =
-    roleService.findByCode(code)
+  ): RoleDetail = roleService.findByCode(code)
 
   @PreAuthorize("hasRole('ROLE_DELETE ROLES_ADMIN')")
   @DeleteMapping("/{roleCode}")
@@ -241,6 +235,5 @@ class RoleResource(
     @PathVariable
     @Size(max = 30, min = 1, message = "role code must be between 1 and 30")
     roleCode: String,
-  ) =
-    roleService.deleteRole(roleCode)
+  ) = roleService.deleteRole(roleCode)
 }

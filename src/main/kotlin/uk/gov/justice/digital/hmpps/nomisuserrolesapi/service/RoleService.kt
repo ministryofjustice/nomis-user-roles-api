@@ -54,24 +54,19 @@ class RoleService(
     return roleDetail
   }
 
-  fun getAllRoles(): List<RoleDetail> {
-    return roleRepository.findAll().map {
-      it.toRoleDetail()
-    }
+  fun getAllRoles(): List<RoleDetail> = roleRepository.findAll().map {
+    it.toRoleDetail()
   }
 
-  fun getAllDPSRoles(adminRoles: Boolean): List<RoleDetail> {
-    return roleRepository.findAllByTypeAndRoleFunctionIn(
-      RoleType.APP,
-      UsageType.values().toList().filter { adminRoles || it !== UsageType.ADMIN },
-    ).map {
-      it.toRoleDetail()
-    }
+  fun getAllDPSRoles(adminRoles: Boolean): List<RoleDetail> = roleRepository.findAllByTypeAndRoleFunctionIn(
+    RoleType.APP,
+    UsageType.values().toList().filter { adminRoles || it !== UsageType.ADMIN },
+  ).map {
+    it.toRoleDetail()
   }
 
-  fun findByCode(roleCode: String): RoleDetail =
-    roleRepository.findByCode(roleCode).map { it.toRoleDetail() }
-      .orElseThrow(UserRoleNotFoundException("Role with code $roleCode not found"))
+  fun findByCode(roleCode: String): RoleDetail = roleRepository.findByCode(roleCode).map { it.toRoleDetail() }
+    .orElseThrow(UserRoleNotFoundException("Role with code $roleCode not found"))
 
   fun deleteRole(roleCode: String) {
     val roleToDelete =
@@ -124,15 +119,11 @@ class RoleService(
 class UserRoleNotFoundException(message: String?) :
   RuntimeException(message),
   Supplier<UserRoleNotFoundException> {
-  override fun get(): UserRoleNotFoundException {
-    return UserRoleNotFoundException(message)
-  }
+  override fun get(): UserRoleNotFoundException = UserRoleNotFoundException(message)
 }
 
 class UserRoleAlreadyExistsException(message: String?) :
   RuntimeException(message),
   Supplier<UserRoleAlreadyExistsException> {
-  override fun get(): UserRoleAlreadyExistsException {
-    return UserRoleAlreadyExistsException(message)
-  }
+  override fun get(): UserRoleAlreadyExistsException = UserRoleAlreadyExistsException(message)
 }

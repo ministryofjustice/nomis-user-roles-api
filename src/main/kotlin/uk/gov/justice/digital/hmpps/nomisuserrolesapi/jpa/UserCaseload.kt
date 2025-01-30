@@ -61,9 +61,7 @@ data class UserCaseload(
   override fun hashCode(): Int = Objects.hash(id)
 
   @Override
-  override fun toString(): String {
-    return this::class.simpleName + "(EmbeddedId = $id )"
-  }
+  override fun toString(): String = this::class.simpleName + "(EmbeddedId = $id )"
 
   fun addRole(role: Role): UserCaseloadRole {
     findRoleByCode(role.code)?.run {
@@ -95,7 +93,5 @@ data class UserCaseload(
 class InvalidRoleAssignmentException(message: String?) :
   RuntimeException(message),
   Supplier<InvalidRoleAssignmentException> {
-  override fun get(): InvalidRoleAssignmentException {
-    return InvalidRoleAssignmentException(message)
-  }
+  override fun get(): InvalidRoleAssignmentException = InvalidRoleAssignmentException(message)
 }

@@ -124,12 +124,11 @@ class UserResourceIntTest : IntegrationTestBase() {
     @AfterEach
     internal fun deleteUsers() = dataBuilder.deleteAllUsers()
 
-    private fun spec(surname: String = "Rossi") =
-      webTestClient.get().uri {
-        it.path("/users/staff")
-          .queryParam("firstName", "Marco")
-          .queryParam("lastName", surname).build()
-      }
+    private fun spec(surname: String = "Rossi") = webTestClient.get().uri {
+      it.path("/users/staff")
+        .queryParam("firstName", "Marco")
+        .queryParam("lastName", surname).build()
+    }
 
     @Test
     fun `access forbidden when no authority`() {

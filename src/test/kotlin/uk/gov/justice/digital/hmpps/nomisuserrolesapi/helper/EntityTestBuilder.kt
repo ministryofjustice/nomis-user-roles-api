@@ -13,24 +13,23 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadRoleIdenti
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import java.time.LocalDate
 
-fun userPersonalDetails(username: String = "raj.maki", caseLoadId: String = "WWI", roles: List<String> = listOf()) =
-  UserPersonDetail(
-    username = username,
-    staff = Staff(staffId = 99, firstName = "RAJ", lastName = "MAKI", status = "ACTIVE"),
-    type = UsageType.GENERAL,
-    activeCaseLoad = Caseload(caseLoadId, "Prison for $caseLoadId"),
-    dpsRoles = listOf(),
-  ).apply {
-    val userPersonDetail = this
-    // resolve circular immutable reference with reflection cheat (like JPA would do :-) )
-    UserPersonDetail::class.java.getDeclaredField("dpsRoles").apply {
-      this.isAccessible = true
-      this.set(
-        userPersonDetail,
-        roles.mapIndexed { index, roleCode -> userPersonDetail.userCaseloadRole(roleId = index.toLong(), roleCode) },
-      )
-    }
+fun userPersonalDetails(username: String = "raj.maki", caseLoadId: String = "WWI", roles: List<String> = listOf()) = UserPersonDetail(
+  username = username,
+  staff = Staff(staffId = 99, firstName = "RAJ", lastName = "MAKI", status = "ACTIVE"),
+  type = UsageType.GENERAL,
+  activeCaseLoad = Caseload(caseLoadId, "Prison for $caseLoadId"),
+  dpsRoles = listOf(),
+).apply {
+  val userPersonDetail = this
+  // resolve circular immutable reference with reflection cheat (like JPA would do :-) )
+  UserPersonDetail::class.java.getDeclaredField("dpsRoles").apply {
+    this.isAccessible = true
+    this.set(
+      userPersonDetail,
+      roles.mapIndexed { index, roleCode -> userPersonDetail.userCaseloadRole(roleId = index.toLong(), roleCode) },
+    )
   }
+}
 
 private fun UserPersonDetail.userCaseloadRole(
   roleId: Long = 1,

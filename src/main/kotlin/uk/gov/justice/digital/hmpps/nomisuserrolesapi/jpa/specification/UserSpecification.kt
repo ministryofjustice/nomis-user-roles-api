@@ -39,11 +39,9 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     fun <PROP> Path<*>.get(prop: KProperty1<*, PROP>): Path<PROP> = this.get(prop.name)
     fun <PROP> Root<*>.get(prop: KProperty1<*, PROP>): Path<PROP> = this.get(prop.name)
     fun <PROP> get(prop: KProperty1<*, PROP>): Path<PROP> = root.get(prop)
-    fun <FROM, TO> join(prop: KProperty1<FROM, List<TO>>, joinType: JoinType = INNER): Join<FROM, TO> =
-      root.join(prop.name, joinType)
+    fun <FROM, TO> join(prop: KProperty1<FROM, List<TO>>, joinType: JoinType = INNER): Join<FROM, TO> = root.join(prop.name, joinType)
 
-    fun <FROM, TO> join(prop: KProperty1<FROM, TO>, joinType: JoinType = INNER): Join<FROM, TO> =
-      root.join(prop.name, joinType)
+    fun <FROM, TO> join(prop: KProperty1<FROM, TO>, joinType: JoinType = INNER): Join<FROM, TO> = root.join(prop.name, joinType)
 
     fun <FROM, TO, NEXT> Join<FROM, TO>.join(
       prop: KProperty1<*, NEXT>,
@@ -68,28 +66,25 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       )
     }
 
-    fun administeredBy(localAdministratorUsername: String): Predicate {
-      return equal(
-        join(UserPersonDetail::memberOfUserGroups)
-          .join(UserGroupMember::userGroup)
-          .join(UserGroup::administrators)
-          .get(UserGroupAdministrator::id)
-          .get(UserGroupAdministratorPk::username),
-        localAdministratorUsername,
+    fun administeredBy(localAdministratorUsername: String): Predicate = equal(
+      join(UserPersonDetail::memberOfUserGroups)
+        .join(UserGroupMember::userGroup)
+        .join(UserGroup::administrators)
+        .get(UserGroupAdministrator::id)
+        .get(UserGroupAdministratorPk::username),
+      localAdministratorUsername,
+    )
+
+    fun localAuthorityOfAdminGroup(activeCaseloadId: String, showOnlyLSAs: Boolean): Predicate = exists(UserGroupAdministrator::class.java) { subQueryRoot ->
+      and(
+        criteriaBuilder.equal(subQueryRoot.get(UserGroupAdministrator::user), root),
+        criteriaBuilder.equal(subQueryRoot.get(UserGroupAdministrator::active), showOnlyLSAs),
+        criteriaBuilder.equal(
+          subQueryRoot.get(UserGroupAdministrator::userGroup).get(UserGroup::id),
+          activeCaseloadId,
+        ),
       )
     }
-
-    fun localAuthorityOfAdminGroup(activeCaseloadId: String, showOnlyLSAs: Boolean): Predicate =
-      exists(UserGroupAdministrator::class.java) { subQueryRoot ->
-        and(
-          criteriaBuilder.equal(subQueryRoot.get(UserGroupAdministrator::user), root),
-          criteriaBuilder.equal(subQueryRoot.get(UserGroupAdministrator::active), showOnlyLSAs),
-          criteriaBuilder.equal(
-            subQueryRoot.get(UserGroupAdministrator::userGroup).get(UserGroup::id),
-            activeCaseloadId,
-          ),
-        )
-      }
 
     fun lsaOnly(): Predicate = exists(UserGroupAdministrator::class.java) { subQueryRoot ->
       and(
@@ -99,61 +94,57 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       )
     }
 
-    fun nameMatch(name: String): Predicate =
-      if (name.isFullName()) {
-        or(
-          and(
-            like(
-              get(UserPersonDetail::staff).get(Staff::firstName),
-              name.firstWord().uppercaseLike(),
-            ),
-            like(
-              get(UserPersonDetail::staff).get(Staff::lastName),
-              name.secondWord().uppercaseLike(),
-            ),
-          ),
-          and(
-            like(
-              get(UserPersonDetail::staff).get(Staff::firstName),
-              name.secondWord().uppercaseLike(),
-            ),
-            like(
-              get(UserPersonDetail::staff).get(Staff::lastName),
-              name.firstWord().uppercaseLike(),
-            ),
-          ),
-        )
-      } else {
-        or(
+    fun nameMatch(name: String): Predicate = if (name.isFullName()) {
+      or(
+        and(
           like(
             get(UserPersonDetail::staff).get(Staff::firstName),
-            name.uppercaseLike(),
+            name.firstWord().uppercaseLike(),
           ),
           like(
             get(UserPersonDetail::staff).get(Staff::lastName),
-            name.uppercaseLike(),
+            name.secondWord().uppercaseLike(),
+          ),
+        ),
+        and(
+          like(
+            get(UserPersonDetail::staff).get(Staff::firstName),
+            name.secondWord().uppercaseLike(),
           ),
           like(
-            get(UserPersonDetail::username),
-            name.uppercaseLike(),
+            get(UserPersonDetail::staff).get(Staff::lastName),
+            name.firstWord().uppercaseLike(),
           ),
-          like(
-            upper(join(UserPersonDetail::staff).join(Staff::emails, LEFT).get(EmailAddress::emailCaseSensitive)),
-            name.uppercaseLike(),
-          ),
-        )
-      }
+        ),
+      )
+    } else {
+      or(
+        like(
+          get(UserPersonDetail::staff).get(Staff::firstName),
+          name.uppercaseLike(),
+        ),
+        like(
+          get(UserPersonDetail::staff).get(Staff::lastName),
+          name.uppercaseLike(),
+        ),
+        like(
+          get(UserPersonDetail::username),
+          name.uppercaseLike(),
+        ),
+        like(
+          upper(join(UserPersonDetail::staff).join(Staff::emails, LEFT).get(EmailAddress::emailCaseSensitive)),
+          name.uppercaseLike(),
+        ),
+      )
+    }
 
-    fun statusMatch(status: UserStatus): Predicate? =
-      status.databaseStatus()?.let {
-        inList(get(UserPersonDetail::accountDetail).get(AccountDetail::accountStatus), it)
-      }
+    fun statusMatch(status: UserStatus): Predicate? = status.databaseStatus()?.let {
+      inList(get(UserPersonDetail::accountDetail).get(AccountDetail::accountStatus), it)
+    }
 
-    fun activeCaseload(caseloadId: String): Predicate =
-      equal(get(UserPersonDetail::activeCaseLoad).get(Caseload::id), caseloadId)
+    fun activeCaseload(caseloadId: String): Predicate = equal(get(UserPersonDetail::activeCaseLoad).get(Caseload::id), caseloadId)
 
-    fun caseload(caseloadId: String): Predicate =
-      equal(join(UserPersonDetail::caseloads).get(Caseload::id).get(UserCaseloadPk::caseloadId), caseloadId)
+    fun caseload(caseloadId: String): Predicate = equal(join(UserPersonDetail::caseloads).get(Caseload::id).get(UserCaseloadPk::caseloadId), caseloadId)
 
     fun nomisRoles(caseloadId: String, roleCode: String): Predicate {
       val userCaseload = join(UserPersonDetail::caseloads)
@@ -163,20 +154,18 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
       )
     }
 
-    fun nomisRoles(roleCode: String): Predicate =
-      and(
-        equal(
-          join(UserPersonDetail::caseloads).join(UserCaseload::roles).get(UserCaseloadRole::role).get(Role::code),
-          roleCode,
-        ),
-      )
+    fun nomisRoles(roleCode: String): Predicate = and(
+      equal(
+        join(UserPersonDetail::caseloads).join(UserCaseload::roles).get(UserCaseloadRole::role).get(Role::code),
+        roleCode,
+      ),
+    )
 
-    fun roles(roleCodes: List<String>): Predicate =
-      and(
-        * roleCodes.map {
-          equal(join(UserPersonDetail::dpsRoles).get(UserCaseloadRole::role).get(Role::code), it)
-        }.toTypedArray(),
-      )
+    fun roles(roleCodes: List<String>): Predicate = and(
+      * roleCodes.map {
+        equal(join(UserPersonDetail::dpsRoles).get(UserCaseloadRole::role).get(Role::code), it)
+      }.toTypedArray(),
+    )
 
     fun inclusiveRoles(roleCodes: List<String>): Predicate {
       query.distinct(true)
