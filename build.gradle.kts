@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "7.0.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "7.1.0"
   kotlin("plugin.spring") version "2.1.10"
   kotlin("plugin.jpa") version "2.1.10"
   idea
@@ -23,7 +23,7 @@ dependencies {
   implementation("com.google.guava:guava:33.4.0-jre")
 
   runtimeOnly("org.flywaydb:flyway-core")
-  runtimeOnly("io.hypersistence:hypersistence-utils-hibernate-60:3.9.0")
+  runtimeOnly("io.hypersistence:hypersistence-utils-hibernate-60:3.9.1")
   runtimeOnly("org.hibernate.orm:hibernate-community-dialects")
   runtimeOnly("com.h2database:h2:2.3.232")
   runtimeOnly("com.oracle.database.jdbc:ojdbc10:19.25.0.0")
@@ -32,7 +32,7 @@ dependencies {
 
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
-  testImplementation("org.wiremock:wiremock-standalone:3.10.0")
+  testImplementation("org.wiremock:wiremock-standalone:3.11.0")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 
   testRuntimeOnly("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
