@@ -80,9 +80,15 @@ class UserService(
 ) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
+    private val protectedRoles = setOf(
+      "OAUTH_ADMIN",
+      "MANAGE_USER_ALLOW_LIST",
+    )
 
-    private fun canAddAuthClients(authorities: Collection<GrantedAuthority>) = authorities.map { it.authority }
-      .any { "ROLE_OAUTH_ADMIN" == it }
+    private fun canAddRole(roleCode: String, authorities: Collection<GrantedAuthority>): Boolean = when (roleCode) {
+      in protectedRoles -> authorities.map { it.authority }.any { it == "ROLE_$roleCode" }
+      else -> true
+    }
   }
 
   @Transactional(readOnly = true)
@@ -300,7 +306,10 @@ class UserService(
     return userPersonDetail.toUserSummary()
   }
 
-  fun linkLocalAdminAccount(linkedUsername: String, linkedUserRequest: CreateLinkedLocalAdminUserRequest): UserSummary {
+  fun linkLocalAdminAccount(
+    linkedUsername: String,
+    linkedUserRequest: CreateLinkedLocalAdminUserRequest,
+  ): UserSummary {
     checkIfAccountAlreadyExists(linkedUserRequest.username)
 
     val staffAccount = userPersonDetailRepository.findById(linkedUsername).map { it.staff }
@@ -612,12 +621,8 @@ class UserService(
     user: UserPersonDetail,
     caseloadId: String,
   ) {
-    if (roleCode == "OAUTH_ADMIN" && !canAddAuthClients(authenticationFacade.authentication.authorities)) {
-      (
-        throw ForbiddenRoleAssignmentException(
-          "User not allowed to add OAUTH_ADMIN role",
-        )
-        )
+    if (!canAddRole(roleCode, authenticationFacade.authentication.authorities)) {
+      throw ForbiddenRoleAssignmentException("User not allowed to add $roleCode role")
     }
     val role = roleRepository.findByCode(roleCode).orElseThrow { UserRoleNotFoundException("Role $roleCode not found") }
     user.addRole(role, caseloadId)
@@ -737,7 +742,8 @@ class UserService(
   fun authenticateUser(username: String, password: String): Boolean = passwordEncoder.matches(password, userPasswordRepository.findByIdOrNull(username)?.password)
 
   fun addRoleToUsers(users: List<String>, roleCode: String): List<UserRoleDetail> {
-    val role = roleRepository.findByCode(roleCode).orElseThrow { UserRoleNotFoundException("Role $roleCode not found") }
+    val role =
+      roleRepository.findByCode(roleCode).orElseThrow { UserRoleNotFoundException("Role $roleCode not found") }
 
     return users.mapNotNull { userPersonDetailRepository.findByIdOrNull(it) }
       .map {

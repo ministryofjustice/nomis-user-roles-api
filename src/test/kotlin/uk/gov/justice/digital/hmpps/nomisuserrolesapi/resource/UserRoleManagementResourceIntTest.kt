@@ -328,6 +328,47 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isForbidden
     }
+
+    @Test
+    fun `add MANAGE_USER_ALLOW_LIST role`() {
+      webTestClient.get().uri("/users/ROLE_USER1/roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN", "ROLE_MANAGE_USER_ALLOW_LIST")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("username").isEqualTo("ROLE_USER1")
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "MANAGE_USER_ALLOW_LIST").doesNotExist()
+
+      webTestClient.post().uri("/users/ROLE_USER1/roles/MANAGE_USER_ALLOW_LIST")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN", "ROLE_MANAGE_USER_ALLOW_LIST")))
+        .exchange()
+        .expectStatus().isCreated
+        .expectBody()
+        .jsonPath("username").isEqualTo("ROLE_USER1")
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "MANAGE_USER_ALLOW_LIST").exists()
+
+      webTestClient.get().uri("/users/ROLE_USER1/roles")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN", "ROLE_MANAGE_USER_ALLOW_LIST")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("username").isEqualTo("ROLE_USER1")
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
+        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "MANAGE_USER_ALLOW_LIST").exists()
+    }
+
+    @Test
+    fun `admin without MANAGE_USER_ALLOW_LIST role cannot add MANAGE_USER_ALLOW_LIST to another user`() {
+      webTestClient.post().uri("/users/ROLE_USER1/roles/MANAGE_USER_ALLOW_LIST")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
   }
 
   @DisplayName("POST /users/{username}/roles")
