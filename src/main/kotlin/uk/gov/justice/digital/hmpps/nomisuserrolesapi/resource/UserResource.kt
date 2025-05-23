@@ -284,11 +284,11 @@ class UserResource(
   )
   fun findUsersAndEmails(): List<UserAndEmail> = userService.findUsersAndEmails()
 
-  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES') or hasRole('ROLE_VIEW_NOMIS_STAFF_DETAILS')")
+  @PreAuthorize("hasRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN') or hasRole('ROLE_MAINTAIN_ACCESS_ROLES') or hasRole('ROLE_VIEW_NOMIS_STAFF_DETAILS') or hasRole('ROLE_NOMIS_MANAGE_USERS__USER_ACCOUNTS__RO')")
   @GetMapping
   @Operation(
     summary = "Get all users filtered as specified",
-    description = "Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES or ROLE_VIEW_NOMIS_STAFF_DETAILS. <br/>Get all users with filter.<br/> For local administrators this will implicitly filter users in the prisons they administer, therefore username is expected in the authorisation token. <br/>For users with role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN this allows access to all staff.",
+    description = "Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN or ROLE_MAINTAIN_ACCESS_ROLES or ROLE_VIEW_NOMIS_STAFF_DETAILS or ROLE_NOMIS_MANAGE_USERS__USER_ACCOUNTS__RO. <br/>Get all users with filter.<br/> For local administrators this will implicitly filter users in the prisons they administer, therefore username is expected in the authorisation token. <br/>For users with role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN this allows access to all staff.",
     responses = [
       ApiResponse(
         responseCode = "200",
