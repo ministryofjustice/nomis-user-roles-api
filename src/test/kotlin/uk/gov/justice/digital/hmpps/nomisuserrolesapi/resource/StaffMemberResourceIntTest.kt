@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -42,6 +43,14 @@ class StaffMemberResourceIntTest : IntegrationTestBase() {
 
   @BeforeEach
   fun setup() {
+    staffLocationRoleRepository.deleteAll()
+    staffRepository.deleteAll()
+    referenceDataRepository.deleteAll()
+  }
+
+  @AfterEach
+  fun clearDown() {
+    staffLocationRoleRepository.deleteAll()
     staffRepository.deleteAll()
     referenceDataRepository.deleteAll()
   }
@@ -233,7 +242,8 @@ class StaffMemberResourceIntTest : IntegrationTestBase() {
     caseloads.add(UserCaseload(UserCaseloadPk(caseload.id, username), caseload, this, now().minusDays(7)))
   }
 
-  private fun referenceData(key: ReferenceDataKey, active: Boolean = true) = ReferenceData(key, active)
+  private fun referenceData(key: ReferenceDataKey, active: Boolean = true) = ReferenceData(key, "Description of ${key.code}", active)
+
   private fun givenReferenceData(rd: ReferenceData) = referenceDataRepository.save(rd)
 
   private fun StaffJobClassification.verifyAgainst(

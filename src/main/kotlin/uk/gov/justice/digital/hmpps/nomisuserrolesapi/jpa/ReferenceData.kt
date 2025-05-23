@@ -19,6 +19,8 @@ class ReferenceData(
   @EmbeddedId
   val key: ReferenceDataKey,
 
+  val description: String,
+
   @Column(name = "ACTIVE_FLAG")
   @Convert(converter = YesNoConverter::class)
   val active: Boolean,
