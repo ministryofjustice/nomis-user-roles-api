@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.1.0"
-  kotlin("plugin.spring") version "2.1.20"
-  kotlin("plugin.jpa") version "2.1.20"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.2.0"
+  kotlin("plugin.spring") version "2.1.21"
+  kotlin("plugin.jpa") version "2.1.21"
   idea
 }
 
@@ -16,7 +16,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
   implementation("org.apache.commons:commons-lang3:3.17.0")
   implementation("org.apache.commons:commons-text:1.13.1")
   implementation("commons-codec:commons-codec:1.18.0")
@@ -26,7 +26,7 @@ dependencies {
   runtimeOnly("io.hypersistence:hypersistence-utils-hibernate-60:3.9.4")
   runtimeOnly("org.hibernate.orm:hibernate-community-dialects")
   runtimeOnly("com.h2database:h2:2.3.232")
-  runtimeOnly("com.oracle.database.jdbc:ojdbc10:19.26.0.0")
+  runtimeOnly("com.oracle.database.jdbc:ojdbc10:19.27.0.0")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
