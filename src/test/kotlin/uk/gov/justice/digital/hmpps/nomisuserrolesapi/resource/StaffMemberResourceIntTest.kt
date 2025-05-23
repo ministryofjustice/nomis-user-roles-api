@@ -69,8 +69,7 @@ class StaffMemberResourceIntTest : IntegrationTestBase() {
 
   @Test
   fun `staff member not found`() {
-    setStaffMemberRole(-1, roles = listOf("ROLE_NE_OTHER__RW"))
-      .expectStatus().isForbidden
+    setStaffMemberRole(-1).expectStatus().isNotFound
   }
 
   @ParameterizedTest
