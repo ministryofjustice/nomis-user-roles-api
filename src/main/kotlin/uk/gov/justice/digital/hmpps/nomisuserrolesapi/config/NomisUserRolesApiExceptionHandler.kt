@@ -28,6 +28,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.ForbiddenRoleAssig
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.PasswordTooShortException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.PasswordValidationException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.ReusedPasswordException
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.StaffNotFoundException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserAlreadyExistsException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserNotFoundException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserRoleAlreadyExistsException
@@ -112,6 +113,20 @@ class NomisUserRolesApiExceptionHandler {
         ErrorResponse(
           status = NOT_FOUND,
           userMessage = "User not found: ${e.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
+  @ExceptionHandler(StaffNotFoundException::class)
+  fun handleStaffNotFoundException(e: StaffNotFoundException): ResponseEntity<ErrorResponse?>? {
+    log.debug("Staff not found exception caught: {}", e.message)
+    return ResponseEntity
+      .status(NOT_FOUND)
+      .body(
+        ErrorResponse(
+          status = NOT_FOUND,
+          userMessage = "Staff member not found",
           developerMessage = e.message,
         ),
       )
