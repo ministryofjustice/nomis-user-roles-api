@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateGeneralUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.JobClassificationRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffJobClassification
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.StaffMemberService
