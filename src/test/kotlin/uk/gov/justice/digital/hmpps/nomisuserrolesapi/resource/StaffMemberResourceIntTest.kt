@@ -27,6 +27,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadPk
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.of
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDate.now
 
@@ -141,7 +142,7 @@ class StaffMemberResourceIntTest : IntegrationTestBase() {
       null,
       position.code,
       scheduleType,
-      40,
+      BigDecimal(40),
     )
 
     val res = setStaffMemberRole(staff.staffId, role.code, jobClassification)
@@ -188,7 +189,7 @@ class StaffMemberResourceIntTest : IntegrationTestBase() {
       null,
       position.code,
       scheduleType,
-      40,
+      BigDecimal(40),
     )
     givenStaffLocationRole(
       "LEI",
@@ -198,7 +199,7 @@ class StaffMemberResourceIntTest : IntegrationTestBase() {
       now().minusDays(7),
       position.code,
       scheduleType,
-      40,
+      BigDecimal(40),
     )
 
     val res = setStaffMemberRole(staff.staffId, role.code, jobClassification)
@@ -267,7 +268,7 @@ class StaffMemberResourceIntTest : IntegrationTestBase() {
     toDate: LocalDate?,
     position: String,
     scheduleType: ReferenceData,
-    hoursPerWeek: Int,
+    hoursPerWeek: BigDecimal,
   ) = staffLocationRoleRepository.save(
     StaffLocationRole(agencyId, staffId, fromDate, position, role)
       .apply { modify(toDate, scheduleType, hoursPerWeek) },
@@ -279,7 +280,7 @@ class StaffMemberResourceIntTest : IntegrationTestBase() {
     private fun jobClassification(
       position: String = "POS",
       scheduleType: String = "FT",
-      hoursPerWeek: Int = 37,
+      hoursPerWeek: BigDecimal = BigDecimal(37.5),
       fromDate: LocalDate = now().minusDays(7),
       toDate: LocalDate? = null,
     ) = JobClassificationRequest(position, scheduleType, hoursPerWeek, fromDate, toDate)
@@ -287,8 +288,12 @@ class StaffMemberResourceIntTest : IntegrationTestBase() {
     @JvmStatic
     fun invalidJobClassificationRequests() = listOf(
       Arguments.of(
-        jobClassification(hoursPerWeek = -1),
-        "Validation failure: hours per week must be a positive integer",
+        jobClassification(hoursPerWeek = BigDecimal(-1.0)),
+        "Validation failure: hours per week must be greater than zero",
+      ),
+      Arguments.of(
+        jobClassification(hoursPerWeek = BigDecimal(37.585)),
+        "Validation failure: hours per week must match nnnn.nn",
       ),
       Arguments.of(
         jobClassification(fromDate = now().plusDays(1)),
