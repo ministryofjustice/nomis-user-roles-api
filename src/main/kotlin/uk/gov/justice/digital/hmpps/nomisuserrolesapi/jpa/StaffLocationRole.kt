@@ -7,6 +7,7 @@ import jakarta.persistence.IdClass
 import jakarta.persistence.Table
 import org.springframework.data.repository.CrudRepository
 import java.io.Serializable
+import java.math.BigDecimal
 import java.time.LocalDate
 
 @Entity
@@ -42,10 +43,10 @@ class StaffLocationRole(
     private set
 
   @Column(name = "HOURS_PER_WEEK")
-  var hoursPerWeek: Int = 0
+  var hoursPerWeek: BigDecimal = BigDecimal.ZERO
     private set
 
-  fun modify(toDate: LocalDate?, scheduleType: ReferenceData, hoursPerWeek: Int): Boolean {
+  fun modify(toDate: LocalDate?, scheduleType: ReferenceData, hoursPerWeek: BigDecimal): Boolean {
     val changeDetected =
       this.toDate != toDate || this.scheduleType != scheduleType.code || this.hoursPerWeek != hoursPerWeek
     this.toDate = toDate
