@@ -513,7 +513,7 @@ class UserResource(
   )
   fun getLastNameAllUsers(): List<UserLastName> = userService.getLastNameAllUsers()
 
-  fun localAdministratorUsernameWhenNotCentralAdministrator(): String? = if (AuthenticationFacade.hasRoles("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")) null else authenticationFacade.currentUsername
+  fun localAdministratorUsernameWhenNotCentralAdministrator(): String? = if (AuthenticationFacade.hasRoles("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN", "ROLE_NOMIS_MANAGE_USERS__USER_ACCOUNTS__RO")) null else authenticationFacade.currentUsername
 }
 
 private fun String?.nonBlank() = if (this.isNullOrBlank()) null else this
