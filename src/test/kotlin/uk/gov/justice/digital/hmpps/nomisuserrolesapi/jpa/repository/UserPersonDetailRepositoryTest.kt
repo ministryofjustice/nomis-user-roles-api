@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupAdministrator
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupMember
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
@@ -559,6 +560,44 @@ class UserPersonDetailRepositoryTest {
           "IBRAGIM.MIHAIL",
           "MARIAN.CHESED",
         )
+      }
+    }
+
+    @Nested
+    @DisplayName("with a type filter")
+    inner class TypeFilter {
+      private val generalUsername = "general-user"
+      private val adminUsername = "admin-user"
+
+      @BeforeEach
+      internal fun createUsers() {
+        dataBuilder.localAdministrator()
+          .username(adminUsername)
+          .atPrison("WWI")
+          .buildAndSave()
+        dataBuilder.generalUser()
+          .username(generalUsername)
+          .atPrison("WWI")
+          .buildAndSave()
+      }
+
+      @Test
+      internal fun `will match all users when type not supplied`() {
+        val users = repository.findAll(UserSpecification(UserFilter(userType = null)), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username)
+          .containsExactlyInAnyOrder(generalUsername, adminUsername)
+      }
+
+      @Test
+      internal fun `will match only admin when filter is ADMIN`() {
+        val users = repository.findAll(UserSpecification(UserFilter(userType = UsageType.ADMIN)), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactly(adminUsername)
+      }
+
+      @Test
+      internal fun `will match only general when filter is GENERAL`() {
+        val users = repository.findAll(UserSpecification(UserFilter(userType = UsageType.GENERAL)), PageRequest.of(0, 10))
+        assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactly(generalUsername)
       }
     }
 

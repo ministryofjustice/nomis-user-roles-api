@@ -947,6 +947,18 @@ class UserResourceIntTest : IntegrationTestBase() {
       }
 
       @Test
+      fun `they can filter by type`() {
+        webTestClient.get().uri { it.path("/users").queryParam("userType", "admin").build() }
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN"), user = "jane.lsa.wwi"))
+          .exchange()
+          .expectStatus().isOk
+          .expectBody()
+          .jsonPath("$.numberOfElements").isEqualTo(2)
+          .jsonPath(matchByUserName, "torvald.lsa.multi").exists()
+          .jsonPath(matchByUserName, "jane.lsa.wwi").exists()
+      }
+
+      @Test
       fun `they can view user groups administered by a user`() {
         webTestClient.get().uri {
           it.path("/users/torvald.lsa.multi").build()
