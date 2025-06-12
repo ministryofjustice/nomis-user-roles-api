@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.EmailAddress
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Role
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadPk
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserCaseloadRole
@@ -208,6 +209,10 @@ class UserSpecification(private val filter: UserFilter) : Specification<UserPers
     filter.nomisRoleCode?.run {
       filter.caseloadId
         ?: predicates.add(nomisRoles(this))
+    }
+
+    filter.userType?.also {
+      predicates.add(criteriaBuilder.equal(root.get<UsageType>(UserPersonDetail::type.name), it))
     }
 
     filter.roleCodes.takeIf { it.isEmpty().not() }?.run {

@@ -34,6 +34,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserLastName
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserAndEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
 
@@ -352,6 +353,12 @@ class UserResource(
       example = "true",
     )
     showOnlyLSAs: Boolean = false,
+    @RequestParam(value = "userType", required = false, defaultValue = "null")
+    @Parameter(
+      description = "allows filtering on user type (admin | general)",
+      example = "GENERAL",
+    )
+    userType: String? = null,
   ): Page<UserSummaryWithEmail> = userService.findUsersByFilter(
     pageRequest,
     UserFilter(
@@ -364,6 +371,7 @@ class UserResource(
       nomisRoleCode = nomisRole,
       inclusiveRoles = inclusiveRoles,
       showOnlyLSAs = showOnlyLSAs,
+      userType = UsageType.from(userType),
     ),
   )
 
