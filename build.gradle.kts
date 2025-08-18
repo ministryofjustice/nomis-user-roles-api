@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.3.3"
-  kotlin("plugin.spring") version "2.2.0"
-  kotlin("plugin.jpa") version "2.2.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.3.6"
+  kotlin("plugin.spring") version "2.2.10"
+  kotlin("plugin.jpa") version "2.2.10"
   idea
 }
 
@@ -18,20 +18,20 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
   implementation("org.apache.commons:commons-lang3:3.18.0")
-  implementation("org.apache.commons:commons-text:1.13.1")
-  implementation("commons-codec:commons-codec:1.18.0")
+  implementation("org.apache.commons:commons-text:1.14.0")
+  implementation("commons-codec:commons-codec:1.19.0")
   implementation("com.google.guava:guava:33.4.8-jre")
 
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("io.hypersistence:hypersistence-utils-hibernate-60:3.9.4")
   runtimeOnly("org.hibernate.orm:hibernate-community-dialects")
   runtimeOnly("com.h2database:h2:2.3.232")
-  runtimeOnly("com.oracle.database.jdbc:ojdbc10:19.27.0.0")
+  runtimeOnly("com.oracle.database.jdbc:ojdbc10:19.28.0.0")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-  testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
-  testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
+  testImplementation("io.jsonwebtoken:jjwt-impl:0.12.7")
+  testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.7")
   testImplementation("org.wiremock:wiremock-standalone:3.13.1")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 
