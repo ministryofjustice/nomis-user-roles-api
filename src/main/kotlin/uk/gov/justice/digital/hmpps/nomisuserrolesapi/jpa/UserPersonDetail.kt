@@ -40,6 +40,8 @@ import java.util.function.Supplier
   attributeNodes = [
     NamedAttributeNode("username"),
     NamedAttributeNode(value = "staff", subgraph = "staff-subgraph"),
+    NamedAttributeNode(value = "activeCaseLoad", subgraph = "caseload-subgraph"),
+    NamedAttributeNode(value = "activeAndInactiveAdministratorOfUserGroups", subgraph = "admins-subgraph"),
   ],
   subgraphs = [
     NamedSubgraph(
@@ -61,6 +63,18 @@ import java.util.function.Supplier
       attributeNodes = [
         NamedAttributeNode(value = "userType"),
         NamedAttributeNode(value = "type"), NamedAttributeNode(value = "emailCaseSensitive"),
+      ],
+    ),
+    NamedSubgraph(
+      name = "caseload-subgraph",
+      attributeNodes = [
+        NamedAttributeNode(value = "id"), NamedAttributeNode(value = "name"),
+      ],
+    ),
+    NamedSubgraph(
+      name = "admins-subgraph",
+      attributeNodes = [
+        NamedAttributeNode(value = "active"), NamedAttributeNode(value = "id"),
       ],
     ),
   ],
@@ -263,7 +277,7 @@ fun UserPersonDetail.toUserSummaryWithEmail() = UserSummaryWithEmail(
   staffStatus = staff.status,
 )
 
-fun UserPersonDetail.toGroupAdminSummary() = GroupAdminSummaryWithEmail(
+fun UserPersonDetail.toUserSummaryWithEmail(dpsRoleCountMap: Map<String, Long>) = UserSummaryWithEmail(
   username = username,
   staffId = staff.staffId,
   firstName = staff.firstName.capitalizeFully(),
@@ -278,9 +292,29 @@ fun UserPersonDetail.toGroupAdminSummary() = GroupAdminSummaryWithEmail(
       name = caseload.name.capitalizeLeavingAbbreviations(),
     )
   },
-  dpsRoleCount = this.dpsRoles.size,
+  dpsRoleCount = dpsRoleCountMap[username]?.toInt() ?: 0,
   email = staff.primaryEmail()?.emailCaseSensitive,
-  groups = activeAndInactiveAdministratorOfUserGroups.filter { it -> it.active }.map { it ->
+  staffStatus = staff.status,
+)
+
+fun UserPersonDetail.toGroupAdminSummary(dpsRoleCountMap: Map<String, Long>) = GroupAdminSummaryWithEmail(
+  username = username,
+  staffId = staff.staffId,
+  firstName = staff.firstName.capitalizeFully(),
+  lastName = staff.lastName.capitalizeFully(),
+  active = isActive(),
+  status = accountDetail?.status,
+  locked = accountDetail?.isLocked() ?: false,
+  expired = accountDetail?.isExpired() ?: false,
+  activeCaseload = activeCaseLoad?.let { caseload ->
+    PrisonCaseload(
+      id = caseload.id,
+      name = caseload.name.capitalizeLeavingAbbreviations(),
+    )
+  },
+  dpsRoleCount = dpsRoleCountMap[username]?.toInt() ?: 0,
+  email = staff.primaryEmail()?.emailCaseSensitive,
+  groups = activeAndInactiveAdministratorOfUserGroups.filter { it.active }.map {
     UserGroupDetail(
       it.userGroup.id,
       it.userGroup.description,
@@ -305,3 +339,8 @@ fun UserPersonDetail.toUserSummary(): UserSummary = UserSummary(
 )
 
 private fun String.capitalizeLeavingAbbreviations() = AbbreviationsProcessor.capitalizeLeavingAbbreviations(this)
+
+data class UserPersonDpsRoleCount(
+  val username: String,
+  val dpsRoleCount: Long,
+)
