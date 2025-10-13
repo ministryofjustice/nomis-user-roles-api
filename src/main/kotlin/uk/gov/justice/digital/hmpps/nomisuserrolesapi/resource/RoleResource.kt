@@ -205,7 +205,7 @@ class RoleResource(
     code: String,
   ): RoleDetail = roleService.findByCode(code)
 
-  @PreAuthorize("hasRole('ROLE_DELETE ROLES_ADMIN')")
+  @PreAuthorize("hasRole('ROLE_DELETE_ROLES_ADMIN')")
   @DeleteMapping("/{roleCode}")
   @Hidden
   @Operation(

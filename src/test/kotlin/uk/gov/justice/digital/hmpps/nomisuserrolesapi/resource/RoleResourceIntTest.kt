@@ -341,7 +341,7 @@ class RoleResourceIntTest : IntegrationTestBase() {
     @Test
     fun `a role cannot be deleted if not exists`() {
       webTestClient.delete().uri("/roles/DUMMY")
-        .headers(setAuthorisation(roles = listOf("ROLE_DELETE ROLES_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ROLE_DELETE_ROLES_ADMIN")))
         .exchange()
         .expectStatus().isNotFound
     }
@@ -349,7 +349,7 @@ class RoleResourceIntTest : IntegrationTestBase() {
     @Test
     fun `a role can be deleted`() {
       webTestClient.delete().uri("/roles/CATEGORISATION_READONLY")
-        .headers(setAuthorisation(roles = listOf("ROLE_DELETE ROLES_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ROLE_DELETE_ROLES_ADMIN")))
         .exchange()
         .expectStatus().isOk
 
