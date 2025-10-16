@@ -142,16 +142,25 @@ class UserService(
   }
 
   @Transactional(readOnly = true)
-  fun downloadUserByFilter(filter: UserFilter): List<UserSummaryWithEmail> = userPersonDetailRepository.findAll(UserSpecification(filter))
-    .map {
-      it.toUserSummaryWithEmail()
-    }
+  fun downloadUserByFilter(filter: UserFilter): List<UserSummaryWithEmail> {
+    val (userPersonDetailList, dpsRoleCountMap) = getUserDetailsAndDpsRoleCounts(filter)
+    return userPersonDetailList.map { it.toUserSummaryWithEmail(dpsRoleCountMap) }
+  }
 
   @Transactional(readOnly = true)
-  fun downloadAdminByFilter(filter: UserFilter): List<GroupAdminSummaryWithEmail> = userPersonDetailRepository.findAll(UserSpecification(filter))
-    .map {
-      it.toGroupAdminSummary()
-    }
+  fun downloadAdminByFilter(filter: UserFilter): List<GroupAdminSummaryWithEmail> {
+    val (userPersonDetailList, dpsRoleCountMap) = getUserDetailsAndDpsRoleCounts(filter)
+    return userPersonDetailList.map { it.toGroupAdminSummary(dpsRoleCountMap) }
+  }
+
+  private fun getUserDetailsAndDpsRoleCounts(filter: UserFilter): Pair<List<UserPersonDetail>, Map<String, Long>> {
+    val userPersonDetailList = userPersonDetailRepository.findAll(UserSpecification(filter))
+    // Fetch the role count explicitly here instead of individually fetching roles in the summary mapping in order to improve performance
+    val dpsRoleCountMap =
+      userPersonDetailRepository.findUserDpsRolesCountByUsernames(userPersonDetailList.map { it.username })
+        .associate { it.username to it.dpsRoleCount }
+    return Pair(userPersonDetailList, dpsRoleCountMap)
+  }
 
   fun getLastNameAllUsers(): List<UserLastName> = userLastNameRepository.findLastNamesAllUsers().map {
     UserLastName(

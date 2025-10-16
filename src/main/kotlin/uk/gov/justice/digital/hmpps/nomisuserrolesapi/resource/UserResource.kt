@@ -377,8 +377,6 @@ class UserResource(
 
   @GetMapping("/download")
   fun downloadUsersByFilters(
-    @PageableDefault(sort = ["lastName", "firstName"], direction = Sort.Direction.ASC)
-    pageRequest: Pageable,
     @RequestParam(value = "nameFilter", required = false)
     @Parameter(
       description = "Filter results by name (first name and/or last name in any order), username or email address.",
@@ -443,8 +441,6 @@ class UserResource(
 
   @GetMapping("/download/admins")
   fun downloadGroupAdminsByFilters(
-    @PageableDefault(sort = ["lastName", "firstName"], direction = Sort.Direction.ASC)
-    pageRequest: Pageable,
     @RequestParam(value = "nameFilter", required = false)
     @Parameter(
       description = "Filter results by name (first name and/or last name in any order), username or email address.",
