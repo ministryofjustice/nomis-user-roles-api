@@ -44,6 +44,7 @@ for user in $(cat $SCRIPTS_BASE_DIR/users); do
     echo $removed
     echo "$role removed from $user"
     echo "$user and $role = $removed" >> $SCRIPTS_BASE_DIR/removed.txt
+    sleep .3
     done
 done
 

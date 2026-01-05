@@ -44,6 +44,7 @@ for user in $(cat $SCRIPTS_BASE_DIR/users); do
     echo "$added"
     echo "$caseload added to $user"
     echo "$user and $caseload = $added" >> $SCRIPTS_BASE_DIR/added.txt
+    sleep .3
     done
 done
 
