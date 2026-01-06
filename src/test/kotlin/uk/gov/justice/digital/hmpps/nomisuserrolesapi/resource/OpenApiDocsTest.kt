@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -54,6 +55,6 @@ class OpenApiDocsTest {
       .exchange()
       .expectStatus().isOk
       .expectBody().jsonPath("info.version")
-      .value { it: Any -> assert((it as String).contains(DateTimeFormatter.ISO_DATE.format(LocalDate.now()))) }
+      .value { it: Any -> assertThat((it as String).contains(DateTimeFormatter.ISO_DATE.format(LocalDate.now()))) }
   }
 }
