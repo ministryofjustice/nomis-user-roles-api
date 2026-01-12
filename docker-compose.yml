@@ -1,8 +1,7 @@
 version: "3"
 services:
   nomis-user-roles-api:
-    build:
-      context: .
+    image: quay.io/hmpps/nomis-user-roles-api:latest
     container_name: nomis-user-roles-api
     ports:
       - "8081:8080"
