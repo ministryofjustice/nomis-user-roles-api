@@ -45,7 +45,7 @@ internal class UserPersonDetailKtTest {
 
       assertThat(data.firstName).isEqualTo("Raj Bob")
       assertThat(data.lastName).isEqualTo("Maki")
-      assertThat(data.activeCaseload).isEqualTo(PrisonCaseload("WWI", "Wandsworth Hmped (HMP & HMPYOI)"))
+      assertThat(data.activeCaseload).isEqualTo(PrisonCaseload("WWI", "Wandsworth Hmped (HMP & HMPYOI)", "GENERAL"))
     }
 
     @Test
@@ -107,7 +107,7 @@ internal class UserPersonDetailKtTest {
 
       assertThat(data.firstName).isEqualTo("Raj Bob")
       assertThat(data.lastName).isEqualTo("Maki")
-      assertThat(data.activeCaseload).isEqualTo(PrisonCaseload("WWI", "Wandsworth Hmped (HMP & HMPYOI)"))
+      assertThat(data.activeCaseload).isEqualTo(PrisonCaseload("WWI", "Wandsworth Hmped (HMP & HMPYOI)", "GENERAL"))
     }
 
     @Test
