@@ -270,6 +270,7 @@ fun UserPersonDetail.toUserSummaryWithEmail() = UserSummaryWithEmail(
     PrisonCaseload(
       id = caseload.id,
       name = caseload.name.capitalizeLeavingAbbreviations(),
+      function = caseload.function,
     )
   },
   dpsRoleCount = this.dpsRoles.size,
@@ -290,6 +291,7 @@ fun UserPersonDetail.toUserSummaryWithEmail(dpsRoleCountMap: Map<String, Long>) 
     PrisonCaseload(
       id = caseload.id,
       name = caseload.name.capitalizeLeavingAbbreviations(),
+      function = caseload.function,
     )
   },
   dpsRoleCount = dpsRoleCountMap[username]?.toInt() ?: 0,
@@ -310,6 +312,7 @@ fun UserPersonDetail.toGroupAdminSummary(dpsRoleCountMap: Map<String, Long>) = G
     PrisonCaseload(
       id = caseload.id,
       name = caseload.name.capitalizeLeavingAbbreviations(),
+      function = caseload.function,
     )
   },
   dpsRoleCount = dpsRoleCountMap[username]?.toInt() ?: 0,
@@ -333,6 +336,7 @@ fun UserPersonDetail.toUserSummary(): UserSummary = UserSummary(
     PrisonCaseload(
       id = caseload.id,
       name = caseload.name.capitalizeLeavingAbbreviations(),
+      function = caseload.function,
     )
   },
   dpsRoleCount = this.dpsRoles.size,

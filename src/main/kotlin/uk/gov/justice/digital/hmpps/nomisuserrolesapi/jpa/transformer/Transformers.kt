@@ -25,6 +25,7 @@ fun UserPersonDetail.toUserCaseloadDetail(removeDpsCaseload: Boolean = false): U
       PrisonCaseload(
         id = uc.id.caseloadId,
         name = uc.caseload.name.capitalizeLeavingAbbreviations(),
+        function = uc.caseload.function,
       )
     },
 )
@@ -76,6 +77,7 @@ fun UserPersonDetail.toUserRoleDetail(includeNomisRoles: Boolean = false): UserR
 fun Caseload.toPrisonCaseload(): PrisonCaseload = PrisonCaseload(
   id = this.id,
   name = this.name.capitalizeLeavingAbbreviations(),
+  function = this.function,
 )
 
 internal fun mapUserSummarySortProperties(sort: String): String = userSummaryToEntityPropertyMap[sort] ?: sort

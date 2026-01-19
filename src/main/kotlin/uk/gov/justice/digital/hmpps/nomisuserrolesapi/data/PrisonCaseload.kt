@@ -7,4 +7,6 @@ data class PrisonCaseload(
   val id: String,
   @Schema(description = "name of caseload, typically prison name", example = "WANDSWORTH (HMP)")
   val name: String,
+  @Schema(description = "function of caseload", example = "GENERAL")
+  val function: String,
 )
