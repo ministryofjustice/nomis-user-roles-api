@@ -11,18 +11,19 @@ import java.util.Optional
 
 @Repository
 interface UserBasicDetailsRepository : JpaRepository<UserBasicPersonalDetail, String> {
-
-  @Query(
-    value =
-    "SELECT sua.USERNAME as username, sua.WORKING_CASELOAD_ID as activeCaseloadId, du.ACCOUNT_STATUS as accountStatus, sua.STAFF_ID as staffId, sm.FIRST_NAME as firstName, sm.LAST_NAME as lastName" +
-      " FROM STAFF_USER_ACCOUNTS sua " +
-      "      LEFT JOIN  DBA_USERS du  ON sua.USERNAME = du.USERNAME  " +
-      "     JOIN STAFF_MEMBERS sm ON sm.STAFF_ID = sua.STAFF_ID  " +
-      "WHERE " +
-      "     sua.USERNAME= :username",
-    nativeQuery = true,
-  )
+  @Query(value = "$BASIC_FIND_QUERY WHERE sua.USERNAME = :username", nativeQuery = true)
   fun find(@Param("username") username: String): Optional<UserBasicPersonalDetail>
+
+  @Query(value = "$BASIC_FIND_QUERY WHERE sua.USERNAME IN :usernames", nativeQuery = true)
+  fun find(@Param("usernames") usernames: List<String>): List<UserBasicPersonalDetail>
+
+  companion object {
+    private const val BASIC_FIND_QUERY =
+      "SELECT sua.USERNAME as username, sua.WORKING_CASELOAD_ID as activeCaseloadId, du.ACCOUNT_STATUS as accountStatus, sua.STAFF_ID as staffId, sm.FIRST_NAME as firstName, sm.LAST_NAME as lastName " +
+        " FROM STAFF_USER_ACCOUNTS sua " +
+        "  LEFT JOIN  DBA_USERS du  ON sua.USERNAME = du.USERNAME " +
+        "  JOIN STAFF_MEMBERS sm ON sm.STAFF_ID = sua.STAFF_ID "
+  }
 }
 
 @Entity
@@ -34,7 +35,6 @@ data class UserBasicPersonalDetail(
   val firstName: String,
   val lastName: String,
   val staffId: Long,
-
 ) {
   val status: AccountStatus?
     get() = accountStatus?.let { AccountStatus.get(it) }

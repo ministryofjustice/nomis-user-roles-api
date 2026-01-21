@@ -119,10 +119,20 @@ class UserService(
 
   @Transactional(readOnly = true)
   fun findUserBasicDetails(username: String): UserBasicDetails {
-    log.info("Fetching  user basic details for : {}", username)
+    log.info("Fetching user basic details for : {}", username)
     val userDetails = userBasicDetailsRepository.find(username)
       .map(this::toUserBasicDetail).orElseThrow { UserNotFoundException("User not found: $username not found") }
     log.info("Returning user basic details for : {}", username)
+    return userDetails
+  }
+
+  @Transactional(readOnly = true)
+  fun findUserBasicDetails(usernames: List<String>): Map<String, UserBasicDetails> {
+    log.info("Fetching user basic details for {} usernames", usernames.size)
+    val userDetails = userBasicDetailsRepository.find(usernames)
+      .map(this::toUserBasicDetail)
+      .associateBy { it.username }
+    log.info("Returning {} user basic details for {} usernames", userDetails.size, usernames.size)
     return userDetails
   }
 
