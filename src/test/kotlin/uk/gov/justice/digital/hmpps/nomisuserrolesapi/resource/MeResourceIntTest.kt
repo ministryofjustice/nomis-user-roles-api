@@ -49,7 +49,7 @@ class MeResourceIntTest : IntegrationTestBase() {
     @Test
     fun `get user in context not found`() {
       webTestClient.get().uri("/me")
-        .headers(setAuthorisation(user = "dummy"))
+        .headers(setAuthorisation(username = "dummy"))
         .exchange()
         .expectStatus().isNotFound
     }
@@ -69,7 +69,7 @@ class MeResourceIntTest : IntegrationTestBase() {
     @Test
     fun `get user roles in context not found`() {
       webTestClient.get().uri("/me/roles")
-        .headers(setAuthorisation(user = "dummy"))
+        .headers(setAuthorisation(username = "dummy"))
         .exchange()
         .expectStatus().isNotFound
     }
@@ -105,7 +105,7 @@ class MeResourceIntTest : IntegrationTestBase() {
     @Test
     fun `get user caseloads in context not found`() {
       webTestClient.get().uri("/me/caseloads")
-        .headers(setAuthorisation(user = "dummy"))
+        .headers(setAuthorisation(username = "dummy"))
         .exchange()
         .expectStatus().isNotFound
     }

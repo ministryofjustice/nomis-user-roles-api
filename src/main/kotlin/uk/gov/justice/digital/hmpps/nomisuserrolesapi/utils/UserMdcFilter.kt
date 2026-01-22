@@ -10,19 +10,19 @@ import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
+import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
 import java.io.IOException
 
 @Component
 @Order(1)
-class UserMdcFilter @Autowired constructor(private val authenticationFacade: AuthenticationFacade) : Filter {
+class UserMdcFilter @Autowired constructor(private val hmppsAuthenticationHolder: HmppsAuthenticationHolder) : Filter {
   override fun init(filterConfig: FilterConfig) {
     // Initialise - no functionality
   }
 
   @Throws(IOException::class, ServletException::class)
   override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
-    val currentUsername = authenticationFacade.currentUsername
+    val currentUsername = hmppsAuthenticationHolder.username
     try {
       if (currentUsername != null) {
         MDC.put(USER_ID_HEADER, currentUsername)

@@ -16,7 +16,6 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateAdminUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateGeneralUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedAdminUserRequest
@@ -58,6 +57,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.mapUserSum
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toStaffDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toUserRoleDetail
+import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
 import java.util.function.Supplier
 import java.util.stream.Collectors
 
@@ -70,7 +70,7 @@ class UserService(
   private val staffRepository: StaffRepository,
   private val roleRepository: RoleRepository,
   private val telemetryClient: TelemetryClient,
-  private val authenticationFacade: AuthenticationFacade,
+  private val hmppsAuthenticationHolder: HmppsAuthenticationHolder,
   private val passwordEncoder: PasswordEncoder,
   private val userPasswordRepository: UserPasswordRepository,
   private val userBasicDetailsRepository: UserBasicDetailsRepository,
@@ -189,7 +189,7 @@ class UserService(
       mapOf(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
-        "admin" to authenticationFacade.currentUsername,
+        "admin" to hmppsAuthenticationHolder.username,
       ),
       null,
     )
@@ -216,7 +216,7 @@ class UserService(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
         "linked-to" to linkedUsername,
-        "admin" to authenticationFacade.currentUsername,
+        "admin" to hmppsAuthenticationHolder.username,
       ),
       null,
     )
@@ -243,7 +243,7 @@ class UserService(
       mapOf(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
-        "admin" to authenticationFacade.currentUsername,
+        "admin" to hmppsAuthenticationHolder.username,
       ),
       null,
     )
@@ -271,7 +271,7 @@ class UserService(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
         "linked-to" to linkedUsername,
-        "admin" to authenticationFacade.currentUsername,
+        "admin" to hmppsAuthenticationHolder.username,
       ),
       null,
     )
@@ -302,7 +302,7 @@ class UserService(
       mapOf(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
-        "admin" to authenticationFacade.currentUsername,
+        "admin" to hmppsAuthenticationHolder.username,
       ),
       null,
     )
@@ -332,7 +332,7 @@ class UserService(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
         "linked-to" to linkedUsername,
-        "admin" to authenticationFacade.currentUsername,
+        "admin" to hmppsAuthenticationHolder.username,
       ),
       null,
     )
@@ -353,7 +353,7 @@ class UserService(
         "username" to username,
         "old-email" to oldEmail,
         "new-email" to email,
-        "admin" to authenticationFacade.currentUsername,
+        "admin" to hmppsAuthenticationHolder.username,
       ),
       null,
     )
@@ -377,7 +377,7 @@ class UserService(
           "username" to username,
           "old-name" to oldFullName,
           "new-name" to this.fullName(),
-          "admin" to authenticationFacade.currentUsername,
+          "admin" to hmppsAuthenticationHolder.username,
         ),
         null,
       )
@@ -398,7 +398,7 @@ class UserService(
       mapOf(
         "username" to userPersonDetail.username,
         "type" to userPersonDetail.type.name,
-        "admin" to authenticationFacade.currentUsername,
+        "admin" to hmppsAuthenticationHolder.username,
       ),
       null,
     )
@@ -432,7 +432,7 @@ class UserService(
       "NURA-lock-user",
       mapOf(
         "username" to username,
-        "admin" to authenticationFacade.currentUsername,
+        "admin" to hmppsAuthenticationHolder.username,
       ),
       null,
     )
@@ -448,7 +448,7 @@ class UserService(
       "NURA-unlock-user",
       mapOf(
         "username" to username,
-        "admin" to authenticationFacade.currentUsername,
+        "admin" to hmppsAuthenticationHolder.username,
       ),
       null,
     )
@@ -462,7 +462,7 @@ class UserService(
       "NURA-change-password",
       mapOf(
         "username" to username,
-        "admin" to authenticationFacade.currentUsername,
+        "admin" to hmppsAuthenticationHolder.username,
       ),
       null,
     )
@@ -478,7 +478,7 @@ class UserService(
       mapOf(
         "username" to username,
         "caseload" to defaultCaseloadId,
-        "admin" to authenticationFacade.currentUsername,
+        "admin" to hmppsAuthenticationHolder.username,
       ),
       null,
     )
@@ -496,7 +496,7 @@ class UserService(
       mapOf(
         "username" to user.username,
         "caseload" to caseloadId,
-        "admin" to authenticationFacade.currentUsername,
+        "admin" to hmppsAuthenticationHolder.username,
       ),
       null,
     )
@@ -531,7 +531,7 @@ class UserService(
       mapOf(
         "username" to username,
         "caseload" to caseloadId,
-        "admin" to authenticationFacade.currentUsername,
+        "admin" to hmppsAuthenticationHolder.username,
       ),
       null,
     )
@@ -562,7 +562,7 @@ class UserService(
         "username" to username,
         "role-code" to roleCode,
         "caseload" to caseloadId,
-        "admin" to authenticationFacade.currentUsername,
+        "admin" to hmppsAuthenticationHolder.username,
       ),
       null,
     )
@@ -584,7 +584,7 @@ class UserService(
                 "username" to user.username,
                 "role-code" to roleCode,
                 "caseload" to DPS_CASELOAD,
-                "admin" to authenticationFacade.currentUsername,
+                "admin" to hmppsAuthenticationHolder.username,
               ),
               null,
             )
@@ -621,7 +621,7 @@ class UserService(
     user: UserPersonDetail,
     caseloadId: String,
   ) {
-    if (roleCode == "OAUTH_ADMIN" && !canAddAuthClients(authenticationFacade.authentication.authorities)) {
+    if (roleCode == "OAUTH_ADMIN" && !canAddAuthClients(hmppsAuthenticationHolder.authentication.authorities)) {
       (
         throw ForbiddenRoleAssignmentException(
           "User not allowed to add OAUTH_ADMIN role",
@@ -637,7 +637,7 @@ class UserService(
         "username" to user.username,
         "role-code" to roleCode,
         "caseload" to caseloadId,
-        "admin" to authenticationFacade.currentUsername,
+        "admin" to hmppsAuthenticationHolder.username,
       ),
       null,
     )
@@ -760,7 +760,7 @@ class UserService(
                   "username" to user.username,
                   "role-code" to roleCode,
                   "caseload" to DPS_CASELOAD,
-                  "admin" to authenticationFacade.currentUsername,
+                  "admin" to hmppsAuthenticationHolder.username,
                 ),
                 null,
               )
