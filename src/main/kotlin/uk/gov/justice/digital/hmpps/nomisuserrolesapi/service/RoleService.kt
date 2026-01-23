@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.service
 import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateRoleRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.RoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UpdateRoleRequest
@@ -13,6 +12,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.getUsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toRoleDetail
+import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
 import java.util.function.Supplier
 
 @Service
@@ -20,7 +20,7 @@ import java.util.function.Supplier
 class RoleService(
   private val roleRepository: RoleRepository,
   private val telemetryClient: TelemetryClient,
-  private val authenticationFacade: AuthenticationFacade,
+  private val hmppsAuthenticationHolder: HmppsAuthenticationHolder,
 ) {
   fun createRole(createRoleRequest: CreateRoleRequest): RoleDetail {
     roleRepository.findByCode(createRoleRequest.code)
@@ -47,7 +47,7 @@ class RoleService(
         "name" to roleDetail.name,
         "admin-role-only" to roleDetail.adminRoleOnly.toString(),
         "type" to roleDetail.type?.name,
-        "admin" to authenticationFacade.currentUsername,
+        "admin" to hmppsAuthenticationHolder.username,
       ),
       null,
     )
@@ -78,7 +78,7 @@ class RoleService(
       mapOf(
         "role" to roleToDelete.code,
         "name" to roleToDelete.name,
-        "admin" to authenticationFacade.currentUsername,
+        "admin" to hmppsAuthenticationHolder.username,
       ),
       null,
     )
@@ -108,7 +108,7 @@ class RoleService(
         "name" to roleDetail.name,
         "admin-role-only" to roleDetail.adminRoleOnly.toString(),
         "type" to roleDetail.type?.name,
-        "admin" to authenticationFacade.currentUsername,
+        "admin" to hmppsAuthenticationHolder.username,
       ),
       null,
     )

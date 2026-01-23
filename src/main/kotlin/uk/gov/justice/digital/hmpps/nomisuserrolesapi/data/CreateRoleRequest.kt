@@ -43,7 +43,6 @@ data class CreateRoleRequest(
   val type: RoleType = RoleType.APP,
 
   @Schema(description = "Role Code", example = "true", required = false, defaultValue = "false")
-  @NotBlank
   val adminRoleOnly: Boolean = false,
 
 )

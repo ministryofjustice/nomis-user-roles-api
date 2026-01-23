@@ -5,19 +5,19 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.PrisonCaseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserLastName
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
+import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
 
 class UserResourceTest {
 
   private val userService: UserService = mock()
-  private val authenticationFacade: AuthenticationFacade = mock()
-  private val userResource = UserResource(userService, authenticationFacade)
+  private val hmppsAuthenticationHolder: HmppsAuthenticationHolder = mock()
+  private val userResource = UserResource(userService, hmppsAuthenticationHolder)
 
   private val user = UserDetail(
     username = "testuser1",

@@ -1,5 +1,6 @@
-package uk.gov.justice.digital.hmpps.nomisuserrolesapi.utils
+package uk.gov.justice.hmpps.prison.web.filter
 
+import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.servlet.Filter
 import jakarta.servlet.FilterChain
 import jakarta.servlet.FilterConfig
@@ -7,29 +8,34 @@ import jakarta.servlet.ServletException
 import jakarta.servlet.ServletRequest
 import jakarta.servlet.ServletResponse
 import org.slf4j.MDC
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
+import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
 import java.io.IOException
 
 @Component
 @Order(1)
-class UserMdcFilter @Autowired constructor(private val authenticationFacade: AuthenticationFacade) : Filter {
-  override fun init(filterConfig: FilterConfig) {
+class UserMdcFilter : Filter {
+  private val hmppsAuthenticationHolder: HmppsAuthenticationHolder? = null
+  private val telemetryClient: TelemetryClient? = null
+
+  override fun init(filterConfig: FilterConfig?) {
     // Initialise - no functionality
   }
 
   @Throws(IOException::class, ServletException::class)
-  override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
-    val currentUsername = authenticationFacade.currentUsername
+  override fun doFilter(request: ServletRequest?, response: ServletResponse?, chain: FilterChain) {
+    val authenticationOrNull = hmppsAuthenticationHolder!!.authenticationOrNull
+
     try {
-      if (currentUsername != null) {
-        MDC.put(USER_ID_HEADER, currentUsername)
+      if (authenticationOrNull != null) {
+        MDC.put(USER_ID_HEADER, authenticationOrNull.getPrincipal())
+        telemetryClient!!.getContext().getUser().setId(authenticationOrNull.getPrincipal())
       }
+
       chain.doFilter(request, response)
     } finally {
-      if (currentUsername != null) {
+      if (authenticationOrNull != null) {
         MDC.remove(USER_ID_HEADER)
       }
     }

@@ -12,20 +12,20 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserRoleDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserNotFoundException
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
+import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
 
 @RestController
 @Validated
 @RequestMapping("/me", produces = [MediaType.APPLICATION_JSON_VALUE])
 class MeResource(
   private val userService: UserService,
-  private val authenticationFacade: AuthenticationFacade,
+  private val hmppsAuthenticationHolder: HmppsAuthenticationHolder,
 ) {
 
   @GetMapping("")
@@ -54,8 +54,8 @@ class MeResource(
       ),
     ],
   )
-  fun getMyUserDetails(): UserDetail = authenticationFacade.currentUsername?.run {
-    return userService.findByUsername(this)
+  fun getMyUserDetails(): UserDetail = hmppsAuthenticationHolder.username?.run {
+    userService.findByUsername(this)
   } ?: throw UserNotFoundException("No user in context")
 
   @GetMapping("/caseloads")
@@ -100,11 +100,9 @@ class MeResource(
       ),
     ],
   )
-  fun getMyCaseloads(): UserCaseloadDetail {
-    authenticationFacade.currentUsername?.run {
-      return userService.getCaseloads(this)
-    } ?: throw UserNotFoundException("No user in context")
-  }
+  fun getMyCaseloads(): UserCaseloadDetail = hmppsAuthenticationHolder.username?.run {
+    userService.getCaseloads(this)
+  } ?: throw UserNotFoundException("No user in context")
 
   @GetMapping("/roles")
   @ResponseStatus(HttpStatus.OK)
@@ -162,9 +160,7 @@ class MeResource(
       defaultValue = "false",
     )
     includeNomisRoles: Boolean = false,
-  ): UserRoleDetail {
-    authenticationFacade.currentUsername?.run {
-      return userService.getUserRoles(this, includeNomisRoles)
-    } ?: throw UserNotFoundException("No user in context")
-  }
+  ): UserRoleDetail = hmppsAuthenticationHolder.username?.run {
+    userService.getUserRoles(this, includeNomisRoles)
+  } ?: throw UserNotFoundException("No user in context")
 }

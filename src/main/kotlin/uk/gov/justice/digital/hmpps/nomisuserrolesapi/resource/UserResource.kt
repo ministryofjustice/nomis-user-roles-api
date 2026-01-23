@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.GroupAdminSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
@@ -37,13 +36,14 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserAndEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.service.UserService
+import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
 
 @RestController
 @Validated
 @RequestMapping("/users", produces = [MediaType.APPLICATION_JSON_VALUE])
 class UserResource(
   private val userService: UserService,
-  private val authenticationFacade: AuthenticationFacade,
+  private val hmppsAuthenticationHolder: HmppsAuthenticationHolder,
 ) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -517,7 +517,7 @@ class UserResource(
   )
   fun getLastNameAllUsers(): List<UserLastName> = userService.getLastNameAllUsers()
 
-  fun localAdministratorUsernameWhenNotCentralAdministrator(): String? = if (AuthenticationFacade.hasRoles("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN", "ROLE_NOMIS_MANAGE_USERS__USER_ACCOUNTS__RO")) null else authenticationFacade.currentUsername
+  fun localAdministratorUsernameWhenNotCentralAdministrator(): String? = if (HmppsAuthenticationHolder.hasRoles("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN", "ROLE_NOMIS_MANAGE_USERS__USER_ACCOUNTS__RO")) null else hmppsAuthenticationHolder.username
 }
 
 private fun String?.nonBlank() = if (this.isNullOrBlank()) null else this

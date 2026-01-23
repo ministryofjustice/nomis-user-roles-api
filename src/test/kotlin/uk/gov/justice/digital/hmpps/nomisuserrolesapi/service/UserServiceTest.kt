@@ -14,7 +14,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.springframework.security.crypto.password.PasswordEncoder
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserBasicDetails
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountProfile
@@ -33,6 +32,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserBasicPe
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserLastNameRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPasswordRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
+import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
 import java.time.LocalDateTime
 import java.util.Optional
 
@@ -43,7 +43,7 @@ internal class UserServiceTest {
   private val staffRepository: StaffRepository = mock()
   private val roleRepository: RoleRepository = mock()
   private val telemetryClient: TelemetryClient = mock()
-  private val authenticationFacade: AuthenticationFacade = mock()
+  private val hmppsAuthenticationHolder: HmppsAuthenticationHolder = mock()
   private val passwordEncoder: PasswordEncoder = mock()
   private val userPasswordRepository: UserPasswordRepository = mock()
   private val userBasicDetailsRepository: UserBasicDetailsRepository = mock()
@@ -55,7 +55,7 @@ internal class UserServiceTest {
     staffRepository,
     roleRepository,
     telemetryClient,
-    authenticationFacade,
+    hmppsAuthenticationHolder,
     passwordEncoder,
     userPasswordRepository,
     userBasicDetailsRepository,
