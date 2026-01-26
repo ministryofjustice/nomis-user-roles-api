@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
-import org.hamcrest.BaseMatcher
-import org.hamcrest.Description
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -14,8 +13,8 @@ import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.orm.jpa.JpaSystemException
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.PASSWORD_HAS_BEEN_USED_BEFORE
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.PASSWORD_NOT_ACCEPTABLE
@@ -34,10 +33,10 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
   @Autowired
   private lateinit var dataBuilder: DataBuilder
 
-  @SpyBean
+  @MockitoSpyBean
   private lateinit var userPersonDetailRepository: UserPersonDetailRepository
 
-  @SpyBean
+  @MockitoSpyBean
   private lateinit var userPasswordRepository: UserPasswordRepository
 
   @Nested
@@ -84,7 +83,12 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("lastLogonDate").value(IsCloseTo(LocalDateTime.now()))
+        .jsonPath("lastLogonDate").value<String> { actual ->
+          assertThat(LocalDateTime.parse(actual)).isBetween(
+            LocalDateTime.now().minusMinutes(1),
+            LocalDateTime.now().plusMinutes(1),
+          )
+        }
     }
   }
 
@@ -616,21 +620,6 @@ class UserManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
       verify(userPasswordRepository).findById("MARCOROSSI")
-    }
-  }
-
-  class IsCloseTo(
-    private val expected: LocalDateTime,
-  ) : BaseMatcher<LocalDateTime>() {
-    override fun describeTo(description: Description?) {
-      description?.appendValue(expected)
-    }
-
-    override fun matches(actual: Any?): Boolean {
-      val actualTime = LocalDateTime.parse(actual.toString())
-      val justBefore = expected.minusMinutes(1)
-      val justAfter = expected.plusMinutes(1)
-      return justBefore.isBefore(actualTime) && justAfter.isAfter(actualTime)
     }
   }
 }

@@ -62,8 +62,8 @@ class MeResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("AUTH_ADM")
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "CREATE_CATEGORISATION").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "GLOBAL_SEARCH").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'CREATE_CATEGORISATION')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'GLOBAL_SEARCH')]").exists()
     }
 
     @Test
@@ -82,10 +82,10 @@ class MeResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("AUTH_ADM")
-        .jsonPath("$.nomisRoles[?(@.caseload.id == '%s')].roles[?(@.code == '%s')]", "BXI", "200").exists()
-        .jsonPath("$.nomisRoles[?(@.caseload.id == '%s')].roles[?(@.code == '%s')]", "WWI", "200").exists()
-        .jsonPath("$.nomisRoles[?(@.caseload.id == '%s')].roles[?(@.code == '%s')]", "BXI", "300").exists()
-        .jsonPath("$.nomisRoles[?(@.caseload.id == '%s')].roles[?(@.code == '%s')]", "WWI", "300").exists()
+        .jsonPath("$.nomisRoles[?(@.caseload.id == 'BXI')].roles[?(@.code == '200')]").exists()
+        .jsonPath("$.nomisRoles[?(@.caseload.id == 'WWI')].roles[?(@.code == '200')]").exists()
+        .jsonPath("$.nomisRoles[?(@.caseload.id == 'BXI')].roles[?(@.code == '300')]").exists()
+        .jsonPath("$.nomisRoles[?(@.caseload.id == 'WWI')].roles[?(@.code == '300')]").exists()
     }
 
     @Test
@@ -97,9 +97,9 @@ class MeResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("username").isEqualTo("AUTH_ADM")
         .jsonPath("activeCaseload.id").isEqualTo("BXI")
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "NWEB").doesNotExist()
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "WWI").exists()
+        .jsonPath("$.caseloads[?(@.id == 'NWEB')]").doesNotExist()
+        .jsonPath("$.caseloads[?(@.id == 'BXI')]").exists()
+        .jsonPath("$.caseloads[?(@.id == 'WWI')]").exists()
     }
 
     @Test

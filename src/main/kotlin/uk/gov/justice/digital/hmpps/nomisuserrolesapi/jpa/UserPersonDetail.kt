@@ -19,7 +19,7 @@ import jakarta.persistence.SecondaryTable
 import jakarta.persistence.Table
 import org.hibernate.Hibernate
 import org.hibernate.annotations.BatchSize
-import org.hibernate.annotations.Where
+import org.hibernate.annotations.SQLRestriction
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.GroupAdminSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.PrisonCaseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserGroupDetail
@@ -110,7 +110,7 @@ data class UserPersonDetail(
 
   @OneToMany(fetch = FetchType.LAZY)
   @JoinColumn(name = "USERNAME", updatable = false, insertable = false, nullable = false)
-  @Where(clause = "CASELOAD_ID = '$DPS_CASELOAD'")
+  @SQLRestriction("CASELOAD_ID = '$DPS_CASELOAD'")
   @BatchSize(size = 1000)
   val dpsRoles: List<UserCaseloadRole> = listOf(),
 
@@ -122,14 +122,14 @@ data class UserPersonDetail(
   val activeAndInactiveMemberOfUserGroups: MutableList<UserGroupMember> = mutableListOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-  @Where(clause = "ACTIVE_FLAG = 'Y'")
+  @SQLRestriction("ACTIVE_FLAG = 'Y'")
   val memberOfUserGroups: List<UserGroupMember> = listOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   val activeAndInactiveAdministratorOfUserGroups: MutableList<UserGroupAdministrator> = mutableListOf(),
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-  @Where(clause = "ACTIVE_FLAG = 'Y'")
+  @SQLRestriction("ACTIVE_FLAG = 'Y'")
   @BatchSize(size = 1000)
   val administratorOfUserGroups: List<UserGroupAdministrator> = listOf(),
 

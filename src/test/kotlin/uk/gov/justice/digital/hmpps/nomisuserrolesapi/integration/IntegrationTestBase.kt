@@ -2,10 +2,10 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration
 
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
@@ -20,11 +20,11 @@ import java.time.Clock
 import java.time.LocalDate
 import java.time.ZoneId
 
+@AutoConfigureWebTestClient
 @ExtendWith(HmppsAuthApiExtension::class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
 @Import(FixedClockConfig::class)
-@AutoConfigureWebTestClient
 abstract class IntegrationTestBase {
 
   @Autowired

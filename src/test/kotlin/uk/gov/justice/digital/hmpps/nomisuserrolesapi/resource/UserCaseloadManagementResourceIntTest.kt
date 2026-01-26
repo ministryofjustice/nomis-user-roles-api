@@ -72,9 +72,9 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("username").isEqualTo("CASELOAD_USER1")
         .jsonPath("activeCaseload.id").isEqualTo("BXI")
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "NWEB").doesNotExist()
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "WWI").exists()
+        .jsonPath("$.caseloads[?(@.id == 'NWEB')]").doesNotExist()
+        .jsonPath("$.caseloads[?(@.id == 'BXI')]").exists()
+        .jsonPath("$.caseloads[?(@.id == 'WWI')]").exists()
 
       webTestClient.get().uri("/users/CASELOAD_USER1/caseloads")
         .headers(setAuthorisation(roles = listOf("ROLE_VIEW_NOMIS_STAFF_DETAILS")))
@@ -83,9 +83,9 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("username").isEqualTo("CASELOAD_USER1")
         .jsonPath("activeCaseload.id").isEqualTo("BXI")
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "NWEB").doesNotExist()
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "WWI").exists()
+        .jsonPath("$.caseloads[?(@.id 'NWEB')]").doesNotExist()
+        .jsonPath("$.caseloads[?(@.id 'BXI')]").exists()
+        .jsonPath("$.caseloads[?(@.id 'WWI')]").exists()
     }
   }
 
@@ -146,8 +146,8 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("CASELOAD_USER1")
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "LEI").doesNotExist()
+        .jsonPath("$.caseloads[?(@.id == 'BXI')]").exists()
+        .jsonPath("$.caseloads[?(@.id == 'LEI')]").doesNotExist()
 
       webTestClient.post().uri("/users/CASELOAD_USER1/caseloads/LEI")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
@@ -156,9 +156,9 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("username").isEqualTo("CASELOAD_USER1")
         .jsonPath("activeCaseload.id").isEqualTo("BXI")
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "LEI").exists()
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "NWEB").exists()
+        .jsonPath("$.caseloads[?(@.id == ''BXI')]").exists()
+        .jsonPath("$.caseloads[?(@.id == ''LEI')]").exists()
+        .jsonPath("$.caseloads[?(@.id == ''NWEB')]").exists()
 
       webTestClient.get().uri("/users/CASELOAD_USER1/caseloads")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
@@ -166,8 +166,8 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("CASELOAD_USER1")
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "LEI").exists()
+        .jsonPath("$.caseloads[?(@.id == 'BXI')]").exists()
+        .jsonPath("$.caseloads[?(@.id == 'LEI')]").exists()
 
       webTestClient.delete().uri("/users/CASELOAD_USER1/caseloads/LEI")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
@@ -176,8 +176,8 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("username").isEqualTo("CASELOAD_USER1")
         .jsonPath("activeCaseload.id").isEqualTo("BXI")
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "LEI").doesNotExist()
+        .jsonPath("$.caseloads[?(@.id == 'BXI')]").exists()
+        .jsonPath("$.caseloads[?(@.id == 'LEI')]").doesNotExist()
 
       webTestClient.post().uri("/users/CASELOAD_USER1/caseloads/LEI")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
@@ -186,9 +186,9 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("username").isEqualTo("CASELOAD_USER1")
         .jsonPath("activeCaseload.id").isEqualTo("BXI")
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "LEI").exists()
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "NWEB").exists()
+        .jsonPath("$.caseloads[?(@.id == 'BXI')]").exists()
+        .jsonPath("$.caseloads[?(@.id == 'LEI')]").exists()
+        .jsonPath("$.caseloads[?(@.id == 'NWEB')]").exists()
 
       webTestClient.get().uri("/users/CASELOAD_USER1/caseloads")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
@@ -196,8 +196,8 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("CASELOAD_USER1")
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "LEI").exists()
+        .jsonPath("$.caseloads[?(@.id == 'BXI')]").exists()
+        .jsonPath("$.caseloads[?(@.id == 'LEI')]").exists()
     }
 
     @Test
@@ -281,9 +281,9 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("CASELOAD_USER1")
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "MDI").doesNotExist()
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "LEI").doesNotExist()
+        .jsonPath("$.caseloads[?(@.id == 'BXI')]").exists()
+        .jsonPath("$.caseloads[?(@.id == 'MDI')]").doesNotExist()
+        .jsonPath("$.caseloads[?(@.id == 'LEI')]").doesNotExist()
 
       webTestClient.post().uri("/users/CASELOAD_USER1/caseloads")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
@@ -292,9 +292,9 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isCreated
         .expectBody()
         .jsonPath("username").isEqualTo("CASELOAD_USER1")
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "MDI").exists()
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "LEI").exists()
+        .jsonPath("$.caseloads[?(@.id == 'BXI')]").exists()
+        .jsonPath("$.caseloads[?(@.id == 'MDI')]").exists()
+        .jsonPath("$.caseloads[?(@.id == 'LEI')]").exists()
     }
 
     @Test
@@ -460,8 +460,8 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("username").isEqualTo("CASELOAD_USER1")
         .jsonPath("activeCaseload.id").isEqualTo("BXI")
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "BXI").exists()
-        .jsonPath("$.caseloads[?(@.id == '%s')]", "WWI").doesNotExist()
+        .jsonPath("$.caseloads[?(@.id == 'BXI')]").exists()
+        .jsonPath("$.caseloads[?(@.id == 'WWI')]").doesNotExist()
     }
 
     @Test

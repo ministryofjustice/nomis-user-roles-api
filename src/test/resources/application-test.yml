@@ -25,3 +25,9 @@ spring:
       replace: none
 
 feature.record-logon-date: true
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

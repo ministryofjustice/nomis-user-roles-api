@@ -26,12 +26,12 @@ class OracleSha1PasswordEncoder : PasswordEncoder {
    * @param rawPassword The plain text password
    * @return Hex string of password digest
    */
-  override fun encode(rawPassword: CharSequence): String {
+  override fun encode(rawPassword: CharSequence?): String? {
     val salt = saltGenerator.generateKey()
     return digest(salt, rawPassword)
   }
 
-  private fun digest(salt: String, rawPassword: CharSequence): String {
+  private fun digest(salt: String, rawPassword: CharSequence?): String {
     val saltedPassword = Bytes.concat(rawPassword.toString().toByteArray(), Hex.decode(salt))
     return "S:" + DigestUtils.sha1Hex(saltedPassword).uppercase() + salt
   }
@@ -44,7 +44,7 @@ class OracleSha1PasswordEncoder : PasswordEncoder {
    * @param encodedPassword previously encoded password
    * @return true or false
    */
-  override fun matches(rawPassword: CharSequence, encodedPassword: String?): Boolean {
+  override fun matches(rawPassword: CharSequence?, encodedPassword: String?): Boolean {
     val salt = extractSalt(encodedPassword)
     val rawPasswordEncoded = digest(salt, rawPassword)
     return PasswordEncoderUtils.equals(encodedPassword, rawPasswordEncoded)

@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateGeneralUserRequ
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
+import kotlin.text.get
 
 class UserResourceIntTest : IntegrationTestBase() {
   @Autowired
@@ -199,7 +200,6 @@ class UserResourceIntTest : IntegrationTestBase() {
   @DisplayName("GET /users/user?email={emailAddress}")
   @Nested
   inner class GetUserByEmailAddress {
-    private val matchByUserName = "$[?(@.username == '%s')]"
 
     @BeforeEach
     internal fun createUsers() {
@@ -289,7 +289,7 @@ class UserResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("$").isArray
-        .jsonPath(matchByUserName, "marco.rossi").exists()
+        .jsonPath("username").isEqualTo("marco.rossi")
     }
 
     @Test
@@ -303,7 +303,7 @@ class UserResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("$").isArray
-        .jsonPath(matchByUserName, "abe.tozzi").exists()
+        .jsonPath("$[?(@.username == 'abe.tozzi')]").exists()
     }
 
     @Test
@@ -317,8 +317,8 @@ class UserResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("$").isArray
-        .jsonPath(matchByUserName, "fred.smith").exists()
-        .jsonPath(matchByUserName, "frederica.jones").exists()
+        .jsonPath("$[?(@.username == 'fred.smith')]").exists()
+        .jsonPath("$[?(@.username == 'frederica.jones')]").exists()
     }
   }
 
@@ -628,10 +628,10 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectStatus().isOk
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(4)
-          .jsonPath(matchByUserName, "marco.rossi").exists()
-          .jsonPath(matchByUserName, "abella.moulin").exists()
-          .jsonPath(matchByUserName, "mark.bowlan").exists()
-          .jsonPath(matchByUserName, "ella.dribble").exists()
+          .jsonPath("$[?(@.username == 'marco.rossi')]").exists()
+          .jsonPath("$[?(@.username == 'abella.moulin')]").exists()
+          .jsonPath("$[?(@.username == 'mark.bowlan')]").exists()
+          .jsonPath("$[?(@.username == 'ella.dribble')]").exists()
       }
 
       @Test
@@ -642,10 +642,10 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectStatus().isOk
           .expectBody()
           .jsonPath("$.totalElements").isEqualTo(4)
-          .jsonPath(matchByUserName + "dpsRoleCount", "marco.rossi").isEqualTo(2)
-          .jsonPath(matchByUserName + "dpsRoleCount", "abella.moulin").isEqualTo(2)
-          .jsonPath(matchByUserName + "dpsRoleCount", "mark.bowlan").isEqualTo(3)
-          .jsonPath(matchByUserName + "dpsRoleCount", "ella.dribble").isEqualTo(0)
+          .jsonPath("$[?(@.username == 'marco.rossi')].dpsRoleCount").isEqualTo(2)
+          .jsonPath("$[?(@.username == 'abella.moulin')].dpsRoleCount").isEqualTo(2)
+          .jsonPath("$[?(@.username == 'mark.bowlan')].dpsRoleCount").isEqualTo(3)
+          .jsonPath("$[?(@.username == 'ella.dribble')].dpsRoleCount").isEqualTo(0)
       }
 
       @Test
@@ -656,10 +656,10 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectStatus().isOk
           .expectBody()
           .jsonPath("$.totalElements").isEqualTo(4)
-          .jsonPath(matchByUserName + "email", "marco.rossi").isEqualTo("marco@justice.gov.uk")
-          .jsonPath(matchByUserName + "email", "abella.moulin").isEqualTo("abella@justice.gov.uk")
-          .jsonPath(matchByUserName + "email", "mark.bowlan").isEqualTo("mark@justice.gov.uk")
-          .jsonPath(matchByUserName + "email", "ella.dribble").isEqualTo(null)
+          .jsonPath("$[?(@.username == 'marco.rossi')].email").isEqualTo("marco@justice.gov.uk")
+          .jsonPath("$[?(@.username == 'abella.moulin')].email").isEqualTo("abella@justice.gov.uk")
+          .jsonPath("$[?(@.username == 'mark.bowlan')].email").isEqualTo("mark@justice.gov.uk")
+          .jsonPath("$[?(@.username == 'ella.dribble')].email").isEqualTo(null)
       }
 
       @Test
@@ -677,10 +677,10 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectStatus().isOk
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(4)
-          .jsonPath(matchByUserName, "marco.rossi").exists()
-          .jsonPath(matchByUserName, "abella.moulin").exists()
-          .jsonPath(matchByUserName, "mark.bowlan").exists()
-          .jsonPath(matchByUserName, "ella.dribble").exists()
+          .jsonPath("$[?(@.username == 'marco.rossi')]").exists()
+          .jsonPath("$[?(@.username == 'abella.moulin')]").exists()
+          .jsonPath("$[?(@.username == 'mark.bowlan')]").exists()
+          .jsonPath("$[?(@.username == 'ella.dribble')]").exists()
       }
 
       @Test
@@ -691,8 +691,8 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectStatus().isOk
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(2)
-          .jsonPath(matchByUserName, "marco.rossi").exists()
-          .jsonPath(matchByUserName, "mark.bowlan").exists()
+          .jsonPath("$[?(@.username == 'marco.rossi')]").exists()
+          .jsonPath("$[?(@.username == 'mark.bowlan')]").exists()
       }
 
       @Test
@@ -703,8 +703,8 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectStatus().isOk
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(2)
-          .jsonPath(matchByUserName, "abella.moulin").exists()
-          .jsonPath(matchByUserName, "mark.bowlan").exists()
+          .jsonPath("$[?(@.username == 'abella.moulin')]").exists()
+          .jsonPath("$[?(@.username == 'mark.bowlan')]").exists()
       }
 
       @Test
@@ -723,8 +723,8 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectStatus().isOk
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(2)
-          .jsonPath(matchByUserName, "marco.rossi").exists()
-          .jsonPath(matchByUserName, "abella.moulin").exists()
+          .jsonPath("$[?(@.username == 'marco.rossi')]").exists()
+          .jsonPath("$[?(@.username == 'abella.moulin')]").exists()
       }
 
       @Test
@@ -735,9 +735,9 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectStatus().isOk
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(3)
-          .jsonPath(matchByUserName, "marco.rossi").exists()
-          .jsonPath(matchByUserName, "abella.moulin").exists()
-          .jsonPath(matchByUserName, "ella.dribble").exists()
+          .jsonPath("$[?(@.username == 'marco.rossi')]").exists()
+          .jsonPath("$[?(@.username == 'abella.moulin')]").exists()
+          .jsonPath("$[?(@.username == 'ella.dribble')]").exists()
       }
 
       @Test
@@ -753,8 +753,8 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectStatus().isOk
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(2)
-          .jsonPath(matchByUserName, "mark.bowlan").exists()
-          .jsonPath(matchByUserName, "abella.moulin").exists()
+          .jsonPath("$[?(@.username == 'mark.bowlan')]").exists()
+          .jsonPath("$[?(@.username == 'abella.moulin')]").exists()
       }
 
       @Test
@@ -771,9 +771,9 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectStatus().isOk
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(3)
-          .jsonPath(matchByUserName, "mark.bowlan").exists()
-          .jsonPath(matchByUserName, "abella.moulin").exists()
-          .jsonPath(matchByUserName, "marco.rossi").exists()
+          .jsonPath("$[?(@.username == 'mark.bowlan')]").exists()
+          .jsonPath("$[?(@.username == 'abella.moulin')]").exists()
+          .jsonPath("$[?(@.username == 'marco.rossi')]").exists()
       }
     }
 
@@ -813,7 +813,7 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectStatus().isOk
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(1)
-          .jsonPath(matchByUserName, "dave.rossi").exists()
+          .jsonPath("$[?(@.username == 'dave.rossi')]").exists()
       }
 
       @Test
@@ -824,16 +824,16 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectStatus().isOk
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(4)
-          .jsonPath(matchByUserName, "marco.rossi").exists()
-          .jsonPath(matchByUserName, "dave.rossi").exists()
-          .jsonPath(matchByUserName, "abella.moulin").exists()
-          .jsonPath(matchByUserName, "ella.dribble").exists()
-          .jsonPath(matchByUserName + "active", "abella.moulin").isEqualTo(true)
-          .jsonPath(matchByUserName + "firstName", "abella.moulin").isEqualTo("Abella")
-          .jsonPath(matchByUserName + "lastName", "abella.moulin").isEqualTo("Moulin")
-          .jsonPath(matchByUserName + "staffId", "abella.moulin").exists()
-          .jsonPath(matchByUserName + "activeCaseload.id", "abella.moulin").isEqualTo("WWI")
-          .jsonPath(matchByUserName + "activeCaseload.name", "abella.moulin").isEqualTo("Wandsworth (HMP)")
+          .jsonPath("$[?(@.username == 'marco.rossi')]").exists()
+          .jsonPath("$[?(@.username == 'dave.rossi')]").exists()
+          .jsonPath("$[?(@.username == 'abella.moulin')]").exists()
+          .jsonPath("$[?(@.username == 'ella.dribble')]").exists()
+          .jsonPath("$[?(@.username == 'abella.moulin')].active").isEqualTo(true)
+          .jsonPath("$[?(@.username == 'abella.moulin')].firstName").isEqualTo("Abella")
+          .jsonPath("$[?(@.username == 'abella.moulin')].lastName").isEqualTo("Moulin")
+          .jsonPath("$[?(@.username == 'abella.moulin')].staffId").exists()
+          .jsonPath("$[?(@.username == 'abella.moulin')].activeCaseload.id").isEqualTo("WWI")
+          .jsonPath("$[?(@.username == 'abella.moulin')].activeCaseload.name").isEqualTo("Wandsworth (HMP)")
       }
 
       @Test
@@ -844,16 +844,16 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectStatus().isOk
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(4)
-          .jsonPath(matchByUserName, "marco.rossi").exists()
-          .jsonPath(matchByUserName, "dave.rossi").exists()
-          .jsonPath(matchByUserName, "abella.moulin").exists()
-          .jsonPath(matchByUserName, "ella.dribble").exists()
-          .jsonPath(matchByUserName + "active", "abella.moulin").isEqualTo(true)
-          .jsonPath(matchByUserName + "firstName", "abella.moulin").isEqualTo("Abella")
-          .jsonPath(matchByUserName + "lastName", "abella.moulin").isEqualTo("Moulin")
-          .jsonPath(matchByUserName + "staffId", "abella.moulin").exists()
-          .jsonPath(matchByUserName + "activeCaseload.id", "abella.moulin").isEqualTo("WWI")
-          .jsonPath(matchByUserName + "activeCaseload.name", "abella.moulin").isEqualTo("Wandsworth (HMP)")
+          .jsonPath("$[?(@.username == 'marco.rossi')]").exists()
+          .jsonPath("$[?(@.username == 'dave.rossi')]").exists()
+          .jsonPath("$[?(@.username == 'abella.moulin')]").exists()
+          .jsonPath("$[?(@.username == 'ella.dribble')]").exists()
+          .jsonPath("$[?(@.username == 'abella.moulin')].active").isEqualTo(true)
+          .jsonPath("$[?(@.username == 'abella.moulin')].firstName").isEqualTo("Abella")
+          .jsonPath("$[?(@.username == 'abella.moulin')].lastName").isEqualTo("Moulin")
+          .jsonPath("$[?(@.username == 'abella.moulin')].staffId").exists()
+          .jsonPath("$[?(@.username == 'abella.moulin')].activeCaseload.id").isEqualTo("WWI")
+          .jsonPath("$[?(@.username == 'abella.moulin')].activeCaseload.name").isEqualTo("Wandsworth (HMP)")
       }
 
       @Test
@@ -869,13 +869,13 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectStatus().isOk
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(7)
-          .jsonPath(matchByUserName, "marco.rossi").exists()
-          .jsonPath(matchByUserName, "dave.rossi").exists()
-          .jsonPath(matchByUserName, "abella.moulin").exists()
-          .jsonPath(matchByUserName, "mark.bowlan").exists()
-          .jsonPath(matchByUserName, "jane.lsa.wwi").exists()
-          .jsonPath(matchByUserName, "ella.dribble").exists()
-          .jsonPath(matchByUserName, "torvald.lsa.multi").exists()
+          .jsonPath("$[?(@.username == 'marco.rossi')]").exists()
+          .jsonPath("$[?(@.username == 'dave.rossi')]").exists()
+          .jsonPath("$[?(@.username == 'abella.moulin')]").exists()
+          .jsonPath("$[?(@.username == 'mark.bowlan')]").exists()
+          .jsonPath("$[?(@.username == 'jane.lsa.wwi')]").exists()
+          .jsonPath("$[?(@.username == 'ella.dribble')]").exists()
+          .jsonPath("$[?(@.username == 'torvald.lsa.multi')]").exists()
       }
 
       @Test
@@ -886,7 +886,7 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectStatus().isOk
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(1)
-          .jsonPath(matchByUserName, "marco.rossi").exists()
+          .jsonPath("$[?(@.username == 'marco.rossi')]").exists()
       }
 
       @Test
@@ -922,7 +922,7 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectStatus().isOk
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(2)
-          .jsonPath(matchByUserName, "abella.moulin").exists()
+          .jsonPath("$[?(@.username == 'abella.moulin')]").exists()
       }
 
       @Test
@@ -933,8 +933,8 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectStatus().isOk
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(2)
-          .jsonPath(matchByUserName, "marco.rossi").exists()
-          .jsonPath(matchByUserName, "dave.rossi").exists()
+          .jsonPath("$[?(@.username == 'marco.rossi')]").exists()
+          .jsonPath("$[?(@.username == 'dave.rossi')]").exists()
       }
 
       @Test
@@ -945,9 +945,9 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectStatus().isOk
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(3)
-          .jsonPath(matchByUserName, "marco.rossi").exists()
-          .jsonPath(matchByUserName, "dave.rossi").exists()
-          .jsonPath(matchByUserName, "ella.dribble").exists()
+          .jsonPath("$[?(@.username == 'marco.rossi')]").exists()
+          .jsonPath("$[?(@.username == 'dave.rossi')]").exists()
+          .jsonPath("$[?(@.username == 'ella.dribble')]").exists()
       }
 
       @Test
@@ -958,8 +958,8 @@ class UserResourceIntTest : IntegrationTestBase() {
           .expectStatus().isOk
           .expectBody()
           .jsonPath("$.numberOfElements").isEqualTo(2)
-          .jsonPath(matchByUserName, "torvald.lsa.multi").exists()
-          .jsonPath(matchByUserName, "jane.lsa.wwi").exists()
+          .jsonPath("$[?(@.username == 'torvald.lsa.multi')]").exists()
+          .jsonPath("$[?(@.username == 'jane.lsa.wwi')]").exists()
       }
 
       @Test
