@@ -397,9 +397,9 @@ internal class UserServiceTest {
   }
 
   @Nested
-  internal inner class GetUserBasicDetails {
+  internal inner class FindUserBasicDetails {
     @Test
-    fun getUserBasicDetails() {
+    fun findUserBasicDetails() {
       val userBasicPersonalDetail =
         UserBasicPersonalDetail(
           username = "joe",
@@ -408,7 +408,6 @@ internal class UserServiceTest {
           firstName = "JOE",
           lastName = "SMITH",
           staffId = 1,
-
         )
 
       val expectedUserBasicDetail =
@@ -420,11 +419,79 @@ internal class UserServiceTest {
           lastName = "Smith",
           staffId = 1,
           enabled = true,
-
         )
       whenever(userBasicDetailsRepository.find(anyString())).thenReturn(Optional.of(userBasicPersonalDetail))
       val userBasicDetails = userService.findUserBasicDetails("joe")
       assertThat(userBasicDetails).isEqualTo(expectedUserBasicDetail)
+    }
+  }
+
+  @Nested
+  internal inner class FindUserBasicDetailsByUsernames {
+    private val userBasicPersonalDetail =
+      UserBasicPersonalDetail(
+        username = "joe",
+        accountStatus = "EXPIRED(GRACE)",
+        activeCaseloadId = "MKI",
+        firstName = "JOE",
+        lastName = "SMITH",
+        staffId = 1,
+      )
+
+    @Test
+    fun `0 usernames returns 0 users`() {
+      val fixtureUsernames = listOf<String>()
+
+      whenever(userBasicDetailsRepository.find(fixtureUsernames)).thenReturn(listOf())
+
+      val users = userService.findUserBasicDetails(fixtureUsernames)
+
+      assertThat(users).isEmpty()
+    }
+
+    @Test
+    fun `1 username returns 1 user`() {
+      val usernames = listOf("user1")
+      val usersInRepo = usernames.map { username -> userBasicPersonalDetail.copy(username = username) }
+      testFindUserBasicDetailsReturnsExpectedUserDetails(usernames, usersInRepo, 1)
+    }
+
+    @Test
+    fun `1 username returns 0 users, if the username does not exist`() {
+      val usernames = mutableListOf("user_does_not_exist_in_repo")
+      val usersInRepo = listOf<UserBasicPersonalDetail>()
+      usernames += "user_does_not_exist_in_repo"
+      testFindUserBasicDetailsReturnsExpectedUserDetails(usernames, usersInRepo, 0)
+    }
+
+    @Test
+    fun `2 usernames returns 2 users`() {
+      val usernames = listOf("user1", "user2")
+      val usersInRepo = usernames.map { username -> userBasicPersonalDetail.copy(username = username) }
+      testFindUserBasicDetailsReturnsExpectedUserDetails(usernames, usersInRepo, 2)
+    }
+
+    @Test
+    fun `2 usernames returns 1 user, if one username does not exist`() {
+      val usernames = mutableListOf("user1")
+      val usersInRepo = usernames.map { username -> userBasicPersonalDetail.copy(username = username) }
+      usernames += "user_does_not_exist_in_repo"
+      testFindUserBasicDetailsReturnsExpectedUserDetails(usernames, usersInRepo, 1)
+    }
+
+    private fun testFindUserBasicDetailsReturnsExpectedUserDetails(
+      usernames: List<String>,
+      usersInRepo: List<UserBasicPersonalDetail>,
+      expectedUserDetailsCount: Int,
+    ) {
+      whenever(userBasicDetailsRepository.find(usernames)).thenReturn(usersInRepo)
+
+      val users = userService.findUserBasicDetails(usernames)
+
+      assertThat(users).hasSize(expectedUserDetailsCount)
+      usersInRepo.forEach { userInRepo ->
+        assertThat(users[userInRepo.username]).isEqualTo(UserBasicDetails(userInRepo))
+      }
     }
   }
 }
