@@ -15,8 +15,8 @@ dependencies {
 
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-  implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.8.2")
   implementation("org.apache.commons:commons-lang3:3.20.0")
   implementation("org.apache.commons:commons-text:1.15.0")
   implementation("commons-codec:commons-codec:1.20.0")
@@ -30,6 +30,7 @@ dependencies {
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.8.2")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.13.0")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
   testImplementation("org.wiremock:wiremock-standalone:3.13.2")
@@ -38,8 +39,11 @@ dependencies {
   testRuntimeOnly("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 }
 
-java {
-  toolchain.languageVersion.set(JavaLanguageVersion.of(25))
+kotlin {
+  jvmToolchain(25)
+  compilerOptions {
+    freeCompilerArgs.addAll("-Xwhen-guards", "-Xannotation-default-target=param-property")
+  }
 }
 
 tasks {

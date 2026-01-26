@@ -5,8 +5,9 @@ info.app:
 spring:
   application:
     name: nomis-user-roles-api
-  codec:
-    max-in-memory-size: 10MB
+  http:
+    codecs:
+      max-in-memory-size: 10MB
 
   security:
     oauth2:

@@ -12,6 +12,7 @@ import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.RoleAssignmentsSpecification
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.IntegrationTestBase
+import kotlin.text.get
 
 class UserRoleManagementResourceIntTest : IntegrationTestBase() {
   @Autowired
@@ -76,8 +77,8 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("ROLE_USER1")
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'VIEW_PRISONER_DATA')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'POM')]").exists()
     }
 
     @Test

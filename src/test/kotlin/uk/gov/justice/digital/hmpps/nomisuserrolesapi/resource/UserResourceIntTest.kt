@@ -808,7 +808,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       fun `they can filter by user name with multiple emails`() {
         webTestClient.get()
           .uri { it.path("/users").queryParam("status", "ALL").queryParam("nameFilter", "dav").build() }
-          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), username = "jane.lsa.wwi"))
           .exchange()
           .expectStatus().isOk
           .expectBody()
@@ -819,7 +819,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       fun `they can call the endpoint with the ROLE_MAINTAIN_ACCESS_ROLES role`() {
         webTestClient.get().uri("/users")
-          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), username = "jane.lsa.wwi"))
           .exchange()
           .expectStatus().isOk
           .expectBody()
@@ -839,7 +839,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       fun `they can call the endpoint with the ROLE_VIEW_NOMIS_STAFF_DETAILS role`() {
         webTestClient.get().uri("/users")
-          .headers(setAuthorisation(roles = listOf("ROLE_VIEW_NOMIS_STAFF_DETAILS"), user = "jane.lsa.wwi"))
+          .headers(setAuthorisation(roles = listOf("ROLE_VIEW_NOMIS_STAFF_DETAILS"), username = "jane.lsa.wwi"))
           .exchange()
           .expectStatus().isOk
           .expectBody()
@@ -862,7 +862,7 @@ class UserResourceIntTest : IntegrationTestBase() {
           .headers(
             setAuthorisation(
               roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN"),
-              user = "jane.lsa.wwi",
+              username = "jane.lsa.wwi",
             ),
           )
           .exchange()
@@ -881,7 +881,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       fun `they can filter by user name`() {
         webTestClient.get().uri { it.path("/users").queryParam("nameFilter", "mar").build() }
-          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), username = "jane.lsa.wwi"))
           .exchange()
           .expectStatus().isOk
           .expectBody()
@@ -892,7 +892,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       fun `they can download with filter by user name`() {
         webTestClient.get().uri { it.path("/users/download").queryParam("nameFilter", "mar").build() }
-          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), username = "jane.lsa.wwi"))
           .exchange()
           .expectStatus().isOk
           .expectBody().json(
@@ -917,7 +917,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       fun `they can filter by account status`() {
         webTestClient.get().uri { it.path("/users").queryParam("status", "ACTIVE").build() }
-          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), username = "jane.lsa.wwi"))
           .exchange()
           .expectStatus().isOk
           .expectBody()
@@ -928,7 +928,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       fun `they can filter by active caseload`() {
         webTestClient.get().uri { it.path("/users").queryParam("activeCaseload", "BXI").build() }
-          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), username = "jane.lsa.wwi"))
           .exchange()
           .expectStatus().isOk
           .expectBody()
@@ -940,7 +940,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       fun `they can filter by caseload`() {
         webTestClient.get().uri { it.path("/users").queryParam("caseload", "BXI").build() }
-          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), user = "jane.lsa.wwi"))
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES"), username = "jane.lsa.wwi"))
           .exchange()
           .expectStatus().isOk
           .expectBody()
@@ -953,7 +953,7 @@ class UserResourceIntTest : IntegrationTestBase() {
       @Test
       fun `they can filter by type`() {
         webTestClient.get().uri { it.path("/users").queryParam("userType", "admin").build() }
-          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN"), user = "jane.lsa.wwi"))
+          .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN"), username = "jane.lsa.wwi"))
           .exchange()
           .expectStatus().isOk
           .expectBody()
