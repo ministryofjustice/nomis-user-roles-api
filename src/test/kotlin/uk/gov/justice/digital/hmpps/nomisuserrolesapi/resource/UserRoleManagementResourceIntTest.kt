@@ -189,7 +189,7 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("username").isEqualTo("ROLE_USER1")
         .jsonPath("$.dpsRoles[?(@.code == 'POM')]").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'VIEW_PRISONER_DATA')]").exists()
         .jsonPath("$.dpsRoles[?(@.code == 'GLOBAL_SEARCH')]").doesNotExist()
 
       webTestClient.post().uri("/users/role_user1/roles/GLOBAL_SEARCH")

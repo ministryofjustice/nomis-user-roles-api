@@ -26,12 +26,12 @@ dependencies {
   implementation("commons-codec:commons-codec:1.20.0")
   implementation("com.google.guava:guava:33.5.0-jre")
 
-  // runtimeOnly("org.flywaydb:flyway-core")
-  runtimeOnly("io.hypersistence:hypersistence-utils-hibernate-60:3.9.4")
+  runtimeOnly("org.flywaydb:flyway-core")
+  implementation("io.hypersistence:hypersistence-utils-hibernate-71:3.14.1")
   implementation("org.hibernate.orm:hibernate-community-dialects:7.2.0.Final")
   runtimeOnly("com.h2database:h2:2.4.240")
   val oracleVersion = "21.20.0.0"
-  runtimeOnly("com.oracle.database.jdbc:ojdbc11:$oracleVersion")
+  implementation("com.oracle.database.jdbc:ojdbc11:$oracleVersion")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
@@ -46,6 +46,9 @@ dependencies {
   testImplementation("org.springframework.boot:spring-boot-webtestclient")
   testImplementation("org.wiremock:wiremock-standalone:3.13.2")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.53.0")
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.37") {
+    exclude(group = "io.swagger.core.v3")
+  }
 
   testRuntimeOnly("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 }

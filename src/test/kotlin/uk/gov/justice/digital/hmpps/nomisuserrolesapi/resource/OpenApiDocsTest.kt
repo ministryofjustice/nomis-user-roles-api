@@ -1,27 +1,22 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
+import io.swagger.v3.parser.OpenAPIV3Parser
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.MediaType
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.IntegrationTestBase
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-@Suppress("SpringJavaInjectionPointsAutowiringInspection")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-class OpenApiDocsTest {
-
-  @Autowired
-  lateinit var webTestClient: WebTestClient
+class OpenApiDocsTest : IntegrationTestBase() {
+  @LocalServerPort
+  private val port: Int = 0
 
   @Test
   fun `open api docs are available`() {
     webTestClient.get()
-      .uri("/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config")
+      .uri("/swagger-ui/index.html?configUrl=/v3/api-docs")
       .accept(MediaType.APPLICATION_JSON)
       .exchange()
       .expectStatus().isOk
@@ -38,23 +33,31 @@ class OpenApiDocsTest {
   }
 
   @Test
-  fun `the swagger json is valid`() {
+  fun `the open api json contains documentation`() {
     webTestClient.get()
       .uri("/v3/api-docs")
       .accept(MediaType.APPLICATION_JSON)
       .exchange()
       .expectStatus().isOk
-      .expectBody().jsonPath("messages").doesNotExist()
+      .expectBody()
+      .jsonPath("paths").isNotEmpty
   }
 
   @Test
-  fun `the swagger json contains the version number`() {
+  fun `the open api json contains the version number`() {
     webTestClient.get()
       .uri("/v3/api-docs")
       .accept(MediaType.APPLICATION_JSON)
       .exchange()
       .expectStatus().isOk
-      .expectBody().jsonPath("info.version")
-      .value { it: Any -> assertThat((it as String).contains(DateTimeFormatter.ISO_DATE.format(LocalDate.now()))) }
+      .expectBody().jsonPath("info.version").value<String> {
+        assertThat(it).startsWith(DateTimeFormatter.ISO_DATE.format(LocalDate.now()))
+      }
+  }
+
+  @Test
+  fun `the open api json is valid`() {
+    val result = OpenAPIV3Parser().readLocation("http://localhost:$port/v3/api-docs", null, null)
+    assertThat(result.messages).isEmpty()
   }
 }
