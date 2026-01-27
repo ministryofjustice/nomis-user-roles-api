@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.prison.web.filter
+package uk.gov.justice.digital.hmpps.nomisuserrolesapi.utils
 
 import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.servlet.Filter
