@@ -12,7 +12,7 @@ import jakarta.persistence.Table
 import org.apache.commons.text.WordUtils
 import org.hibernate.Hibernate
 import org.hibernate.annotations.BatchSize
-import org.hibernate.annotations.Where
+import org.hibernate.annotations.SQLRestriction
 
 @Entity
 @Table(name = "STAFF_MEMBERS")
@@ -36,7 +36,7 @@ data class Staff(
   var users: List<UserPersonDetail> = listOf(),
 
   @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-  @Where(clause = "OWNER_CLASS = 'STF' AND INTERNET_ADDRESS_CLASS = 'EMAIL'")
+  @SQLRestriction("OWNER_CLASS = 'STF' AND INTERNET_ADDRESS_CLASS = 'EMAIL'")
   @BatchSize(size = 1000)
   val emails: MutableSet<EmailAddress> = mutableSetOf(),
 ) {

@@ -203,7 +203,7 @@ class UserAccountResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("$.numberOfElements").isEqualTo(1)
-        .jsonPath("$.content[?(@.username == '%s')]", "GENERALUSER1").exists()
+        .jsonPath("$.content[?(@.username == 'GENERALUSER1')]").exists()
     }
 
     @Test

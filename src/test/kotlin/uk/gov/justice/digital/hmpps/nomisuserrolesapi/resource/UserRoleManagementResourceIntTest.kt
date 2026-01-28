@@ -89,10 +89,10 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("ROLE_USER1")
-        .jsonPath("$.nomisRoles[?(@.caseload.id == '%s')].roles[?(@.code == '%s')]", "BXI", "200").exists()
-        .jsonPath("$.nomisRoles[?(@.caseload.id == '%s')].roles[?(@.code == '%s')]", "WWI", "200").exists()
-        .jsonPath("$.nomisRoles[?(@.caseload.id == '%s')].roles[?(@.code == '%s')]", "BXI", "300").exists()
-        .jsonPath("$.nomisRoles[?(@.caseload.id == '%s')].roles[?(@.code == '%s')]", "WWI", "300").exists()
+        .jsonPath("$.nomisRoles[?(@.caseload.id == 'BXI')].roles[?(@.code == '200')]").exists()
+        .jsonPath("$.nomisRoles[?(@.caseload.id == 'WWI')].roles[?(@.code == '200')]").exists()
+        .jsonPath("$.nomisRoles[?(@.caseload.id == 'BXI')].roles[?(@.code == '300')]").exists()
+        .jsonPath("$.nomisRoles[?(@.caseload.id == 'WWI')].roles[?(@.code == '300')]").exists()
     }
   }
 
@@ -155,9 +155,9 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("ROLE_USER1")
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "GLOBAL_SEARCH").doesNotExist()
+        .jsonPath("$.dpsRoles[?(@.code == 'POM')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'VIEW_PRISONER_DATA')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'GLOBAL_SEARCH')]").doesNotExist()
 
       webTestClient.post().uri("/users/ROLE_USER1/roles/GLOBAL_SEARCH")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
@@ -165,9 +165,9 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isCreated
         .expectBody()
         .jsonPath("username").isEqualTo("ROLE_USER1")
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "GLOBAL_SEARCH").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'POM')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'VIEW_PRISONER_DATA')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'GLOBAL_SEARCH')]").exists()
 
       webTestClient.get().uri("/users/ROLE_USER1/roles")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
@@ -175,9 +175,9 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("ROLE_USER1")
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "GLOBAL_SEARCH").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'POM')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'VIEW_PRISONER_DATA')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'GLOBAL_SEARCH')]").exists()
     }
 
     @Test
@@ -188,9 +188,9 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("ROLE_USER1")
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "GLOBAL_SEARCH").doesNotExist()
+        .jsonPath("$.dpsRoles[?(@.code == 'POM')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'VIEW_PRISONER_DATA')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'GLOBAL_SEARCH')]").doesNotExist()
 
       webTestClient.post().uri("/users/role_user1/roles/GLOBAL_SEARCH")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
@@ -198,9 +198,9 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isCreated
         .expectBody()
         .jsonPath("username").isEqualTo("ROLE_USER1")
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "GLOBAL_SEARCH").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'POM')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'VIEW_PRISONER_DATA')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'GLOBAL_SEARCH')]").exists()
 
       webTestClient.get().uri("/users/ROLE_USER1/roles")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
@@ -208,9 +208,9 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("ROLE_USER1")
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "GLOBAL_SEARCH").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'POM')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'VIEW_PRISONER_DATA')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'GLOBAL_SEARCH')]").exists()
     }
 
     @Test
@@ -252,7 +252,7 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("ROLE_USER1")
-        .jsonPath("$.nomisRoles[?(@.caseload.id == '%s')].roles[?(@.code == '%s')]", "BXI", "300").doesNotExist()
+        .jsonPath("$.nomisRoles[?(@.caseload.id == 'BXI')].roles[?(@.code == '300')]").doesNotExist()
 
       webTestClient.post().uri("/users/ROLE_USER1/roles/300?caseloadId=BXI")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
@@ -265,7 +265,7 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("ROLE_USER1")
-        .jsonPath("$.nomisRoles[?(@.caseload.id == '%s')].roles[?(@.code == '%s')]", "BXI", "300").exists()
+        .jsonPath("$.nomisRoles[?(@.caseload.id == 'BXI')].roles[?(@.code == '300')]").exists()
     }
 
     @Test
@@ -297,9 +297,9 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("ROLE_USER1")
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "GLOBAL_SEARCH").doesNotExist()
+        .jsonPath("$.dpsRoles[?(@.code == 'POM')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'VIEW_PRISONER_DATA')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'OAUTH_ADMIN')]").doesNotExist()
 
       webTestClient.post().uri("/users/ROLE_USER1/roles/OAUTH_ADMIN")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN", "ROLE_OAUTH_ADMIN")))
@@ -307,9 +307,9 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isCreated
         .expectBody()
         .jsonPath("username").isEqualTo("ROLE_USER1")
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "OAUTH_ADMIN").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'POM')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'VIEW_PRISONER_DATA')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'OAUTH_ADMIN')]").exists()
 
       webTestClient.get().uri("/users/ROLE_USER1/roles")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN", "ROLE_OAUTH_ADMIN")))
@@ -317,9 +317,9 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("ROLE_USER1")
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "OAUTH_ADMIN").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'POM')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'VIEW_PRISONER_DATA')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'OAUTH_ADMIN')]").exists()
     }
 
     @Test
@@ -394,9 +394,9 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isCreated
         .expectBody()
         .jsonPath("username").isEqualTo("ROLE_USER1")
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "POM").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "GLOBAL_SEARCH").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'POM')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'VIEW_PRISONER_DATA')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'GLOBAL_SEARCH')]").exists()
     }
 
     @Test
@@ -448,7 +448,7 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("ROLE_USER1")
-        .jsonPath("$.nomisRoles[?(@.caseload.id == '%s')].roles[?(@.code == '%s')]", "BXI", "300").exists()
+        .jsonPath("$.nomisRoles[?(@.caseload.id == 'BXI')].roles[?(@.code == '300')]").exists()
     }
 
     @Test
@@ -483,9 +483,9 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isCreated
         .expectBody()
         .jsonPath("username").isEqualTo("ROLE_USER1")
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "OAUTH_ADMIN").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "VIEW_PRISONER_DATA").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "GLOBAL_SEARCH").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'OAUTH_ADMIN')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'VIEW_PRISONER_DATA')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'GLOBAL_SEARCH')]").exists()
     }
 
     @Test
@@ -558,9 +558,9 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectBody()
         .jsonPath("username").isEqualTo("ROLE_USER1")
         .jsonPath("activeCaseload.id").isEqualTo("BXI")
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "CREATE_CATEGORISATION").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "GLOBAL_SEARCH").exists()
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "APPROVE_CATEGORISATION").doesNotExist()
+        .jsonPath("$.dpsRoles[?(@.code == 'CREATE_CATEGORISATION')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'GLOBAL_SEARCH')]").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'APPROVE_CATEGORISATION')]").doesNotExist()
     }
 
     @Test
@@ -651,14 +651,14 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath(matchByUserNameAndRole, "ROLE_USER1", "CREATE_CATEGORISATION").exists()
-        .jsonPath(matchByUserNameAndRole, "ROLE_USER1", "GLOBAL_SEARCH").exists()
-        .jsonPath(matchByUserNameAndRole, "ROLE_USER1", "APPROVE_CATEGORISATION").doesNotExist()
-        .jsonPath(matchByUserNameAndRole, "ROLE_USER2", "CREATE_CATEGORISATION").exists()
-        .jsonPath(matchByUserNameAndRole, "ROLE_USER2", "GLOBAL_SEARCH").exists()
-        .jsonPath(matchByUserNameAndRole, "ROLE_USER2", "APPROVE_CATEGORISATION").doesNotExist()
-        .jsonPath(matchByUserNameAndRole, "ROLE_USER3", "CREATE_CATEGORISATION").exists()
-        .jsonPath(matchByUserNameAndRole, "ROLE_USER3", "APPROVE_CATEGORISATION").doesNotExist()
+        .jsonPath("$[?(@.username == 'ROLE_USER1')].dpsRoles[?(@.code == 'CREATE_CATEGORISATION')]").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER1')].dpsRoles[?(@.code == 'GLOBAL_SEARCH')]").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER1')].dpsRoles[?(@.code == 'APPROVE_CATEGORISATION')]").doesNotExist()
+        .jsonPath("$[?(@.username == 'ROLE_USER2')].dpsRoles[?(@.code == 'CREATE_CATEGORISATION')]").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER2')].dpsRoles[?(@.code == 'GLOBAL_SEARCH')]").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER2')].dpsRoles[?(@.code == 'APPROVE_CATEGORISATION')]").doesNotExist()
+        .jsonPath("$[?(@.username == 'ROLE_USER3')].dpsRoles[?(@.code == 'CREATE_CATEGORISATION')]").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER3')].dpsRoles[?(@.code == 'APPROVE_CATEGORISATION')]").doesNotExist()
     }
 
     @Test
@@ -669,14 +669,14 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath(matchByUserNameAndRole, "ROLE_USER1", "CREATE_CATEGORISATION").exists()
-        .jsonPath(matchByUserNameAndRole, "ROLE_USER1", "GLOBAL_SEARCH").doesNotExist()
-        .jsonPath(matchByUserNameAndRole, "ROLE_USER1", "APPROVE_CATEGORISATION").exists()
-        .jsonPath(matchByUserNameAndRole, "ROLE_USER2", "CREATE_CATEGORISATION").exists()
-        .jsonPath(matchByUserNameAndRole, "ROLE_USER2", "GLOBAL_SEARCH").doesNotExist()
-        .jsonPath(matchByUserNameAndRole, "ROLE_USER2", "APPROVE_CATEGORISATION").exists()
-        .jsonPath(matchByUserNameAndRole, "ROLE_USER3", "CREATE_CATEGORISATION").exists()
-        .jsonPath(matchByUserNameAndRole, "ROLE_USER3", "APPROVE_CATEGORISATION").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER1')].dpsRoles[?(@.code == 'CREATE_CATEGORISATION')]").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER1')].dpsRoles[?(@.code == 'GLOBAL_SEARCH')]").doesNotExist()
+        .jsonPath("$[?(@.username == 'ROLE_USER1')].dpsRoles[?(@.code == 'APPROVE_CATEGORISATION')]").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER2')].dpsRoles[?(@.code == 'CREATE_CATEGORISATION')]").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER2')].dpsRoles[?(@.code == 'GLOBAL_SEARCH')]").doesNotExist()
+        .jsonPath("$[?(@.username == 'ROLE_USER2')].dpsRoles[?(@.code == 'APPROVE_CATEGORISATION')]").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER3')].dpsRoles[?(@.code == 'CREATE_CATEGORISATION')]").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER3')].dpsRoles[?(@.code == 'APPROVE_CATEGORISATION')]").exists()
     }
 
     @Test
@@ -687,9 +687,9 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath(matchByUserName, "ROLE_USER1").exists()
-        .jsonPath(matchByUserName, "ROLE_USER2").exists()
-        .jsonPath(matchByUserName, "ROLE_USER4").doesNotExist()
+        .jsonPath("$[?(@.username == 'ROLE_USER1')]").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER2')]").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER4')]").doesNotExist()
     }
 
     @Test
@@ -708,17 +708,15 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath(matchByUserName, "ROLE_USER1").exists()
-        .jsonPath(matchByUserName, "ROLE_USER2").exists()
-        .jsonPath(matchByUserName, "ROLE_USER3").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER1')]").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER2')]").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER3')]").exists()
     }
   }
 
   @DisplayName("POST /users/add-roles/{roleCode}")
   @Nested
   inner class BulkAddRoleByUsernames {
-    private val matchByUserName = "$[?(@.username == '%s')]"
-    private val allRoleCodesForUserName = "$matchByUserName.dpsRoles[*].code"
 
     @BeforeEach
     internal fun createUsers() {
@@ -791,13 +789,13 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath(allRoleCodesForUserName, "ROLE_USER1").value<JSONArray> {
+        .jsonPath("$[?(@.username == 'ROLE_USER1')].dpsRoles[*].code").value<JSONArray> {
           assertThat(it).containsExactlyInAnyOrder("APPROVE_CATEGORISATION", "CREATE_CATEGORISATION", "GLOBAL_SEARCH")
         }
-        .jsonPath(allRoleCodesForUserName, "ROLE_USER2").value<JSONArray> {
+        .jsonPath("$[?(@.username == 'ROLE_USER2')].dpsRoles[*].code").value<JSONArray> {
           assertThat(it).containsExactlyInAnyOrder("APPROVE_CATEGORISATION", "CREATE_CATEGORISATION", "GLOBAL_SEARCH")
         }
-        .jsonPath(allRoleCodesForUserName, "ROLE_USER3").value<JSONArray> {
+        .jsonPath("$[?(@.username == 'ROLE_USER3')].dpsRoles[*].code").value<JSONArray> {
           assertThat(it).containsExactlyInAnyOrder("APPROVE_CATEGORISATION", "CREATE_CATEGORISATION")
         }
     }
@@ -810,13 +808,13 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath(allRoleCodesForUserName, "ROLE_USER1").value<JSONArray> {
+        .jsonPath("$[?(@.username == 'ROLE_USER1')].dpsRoles[*].code").value<JSONArray> {
           assertThat(it).containsExactlyInAnyOrder("CREATE_CATEGORISATION", "GLOBAL_SEARCH")
         }
-        .jsonPath(allRoleCodesForUserName, "ROLE_USER2").value<JSONArray> {
+        .jsonPath("$[?(@.username == 'ROLE_USER2')].dpsRoles[*].code").value<JSONArray> {
           assertThat(it).containsExactlyInAnyOrder("CREATE_CATEGORISATION", "GLOBAL_SEARCH")
         }
-        .jsonPath(allRoleCodesForUserName, "ROLE_USER3").value<JSONArray> {
+        .jsonPath("$[?(@.username == 'ROLE_USER3')].dpsRoles[*].code").value<JSONArray> {
           assertThat(it).containsExactlyInAnyOrder("CREATE_CATEGORISATION")
         }
     }
@@ -829,9 +827,9 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath(matchByUserName, "ROLE_USER1").exists()
-        .jsonPath(matchByUserName, "ROLE_USER2").exists()
-        .jsonPath(matchByUserName, "ROLE_USER4").doesNotExist()
+        .jsonPath("$[?(@.username == 'ROLE_USER1')]").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER2')]").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER3')]").doesNotExist()
     }
 
     @Test
@@ -850,9 +848,9 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath(matchByUserName, "ROLE_USER1").exists()
-        .jsonPath(matchByUserName, "ROLE_USER2").exists()
-        .jsonPath(matchByUserName, "ROLE_USER3").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER1')]").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER2')]").exists()
+        .jsonPath("$[?(@.username == 'ROLE_USER3')]").exists()
     }
   }
 
@@ -982,9 +980,9 @@ class UserRoleManagementResourceIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("username").isEqualTo("ROLE_USER1")
-        .jsonPath("$.dpsRoles[?(@.code == '%s')]", "ADJUDICATIONS_REVIEWER").exists()
-        .jsonPath("$.nomisRoles[?(@.caseload.id == '%s')].roles[?(@.code == '%s')]", "WWI", "200").doesNotExist()
-        .jsonPath("$.nomisRoles[?(@.caseload.id == '%s')].roles[?(@.code == '%s')]", "WWI", "201").exists()
+        .jsonPath("$.dpsRoles[?(@.code == 'ADJUDICATIONS_REVIEWER')]").exists()
+        .jsonPath("$.nomisRoles[?(@.caseload.id == 'WWI')].roles[?(@.code == '200')]").doesNotExist()
+        .jsonPath("$.nomisRoles[?(@.caseload.id == 'WWI')].roles[?(@.code == '201')]").exists()
     }
   }
 }

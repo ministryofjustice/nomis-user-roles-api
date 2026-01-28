@@ -10,7 +10,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import org.hibernate.Hibernate
 import org.hibernate.annotations.BatchSize
-import org.hibernate.annotations.Where
+import org.hibernate.annotations.SQLRestriction
 import org.hibernate.type.YesNoConverter
 import java.time.LocalDate
 
@@ -45,12 +45,12 @@ data class UserGroup(
 
   @OneToMany(fetch = FetchType.LAZY)
   @JoinColumn(name = "LOCAL_AUTHORITY_CODE")
-  @Where(clause = "ACTIVE_FLAG = 'Y'")
+  @SQLRestriction("ACTIVE_FLAG = 'Y'")
   val members: List<UserGroupMember> = listOf(),
 
   @OneToMany(fetch = FetchType.LAZY)
   @JoinColumn(name = "LOCAL_AUTHORITY_CODE")
-  @Where(clause = "ACTIVE_FLAG = 'Y'")
+  @SQLRestriction("ACTIVE_FLAG = 'Y'")
   val administrators: List<UserGroupAdministrator> = listOf(),
 
   @OneToMany(fetch = FetchType.LAZY)

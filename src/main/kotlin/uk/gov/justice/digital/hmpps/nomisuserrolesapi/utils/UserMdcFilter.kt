@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.prison.web.filter
+package uk.gov.justice.digital.hmpps.nomisuserrolesapi.utils
 
 import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.servlet.Filter
@@ -25,7 +25,7 @@ class UserMdcFilter : Filter {
 
   @Throws(IOException::class, ServletException::class)
   override fun doFilter(request: ServletRequest?, response: ServletResponse?, chain: FilterChain) {
-    val authenticationOrNull = hmppsAuthenticationHolder!!.authenticationOrNull
+    val authenticationOrNull = hmppsAuthenticationHolder?.authenticationOrNull
 
     try {
       if (authenticationOrNull != null) {

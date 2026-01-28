@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
-import org.hamcrest.Matchers.greaterThan
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -41,7 +41,7 @@ class ReferenceDataResourceIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("$.length()").value(greaterThan(158))
+        .jsonPath("$.length()").value<Int> { assertThat(it > 158) }
         .jsonPath("$[?(@.id == 'AKI')]").exists()
         .jsonPath("$[0].name").isEqualTo("Acklington (HMP)")
         .jsonPath("$[0].id").isEqualTo("AKI")

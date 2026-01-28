@@ -15,7 +15,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import org.hibernate.Hibernate
-import org.hibernate.annotations.Where
+import org.hibernate.annotations.SQLRestriction
 import org.hibernate.type.YesNoConverter
 import java.io.Serializable
 
@@ -61,7 +61,7 @@ data class Role(
   val childRoles: List<Role> = listOf(),
 
   @OneToMany(mappedBy = "role", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-  @Where(clause = "LOCAL_AUTHORITY_CODE = '$DPS_CASELOAD'")
+  @SQLRestriction("LOCAL_AUTHORITY_CODE = '$DPS_CASELOAD'")
   val allowedCaseloads: List<RoleCaseload> = listOf(),
 
 ) : Serializable {

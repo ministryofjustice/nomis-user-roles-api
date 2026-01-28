@@ -79,7 +79,10 @@ interface UserPersonDetailRepository :
   fun lockUser(@Param("username") username: String?)
 
   @EntityGraph(value = "user-person-detail-download-graph", type = EntityGraph.EntityGraphType.LOAD)
-  override fun findAll(speci: Specification<UserPersonDetail>?): List<UserPersonDetail>
+  override fun findAll(spec: Specification<UserPersonDetail>): List<UserPersonDetail>
+
+  @EntityGraph(value = "user-person-detail-graph", type = EntityGraph.EntityGraphType.FETCH)
+  override fun findAll(spec: Specification<UserPersonDetail>, pageable: Pageable): Page<UserPersonDetail>
 
   @Query(
     """
@@ -98,9 +101,6 @@ interface UserPersonDetailRepository :
     firstName: String,
     lastName: String,
   ): List<UserPersonDetail>
-
-  @EntityGraph(value = "user-person-detail-graph", type = EntityGraph.EntityGraphType.FETCH)
-  override fun findAll(spec: Specification<UserPersonDetail>?, pageable: Pageable?): Page<UserPersonDetail>
 
   @Suppress("FunctionName")
   @EntityGraph(value = "user-person-detail-graph", type = EntityGraph.EntityGraphType.FETCH)

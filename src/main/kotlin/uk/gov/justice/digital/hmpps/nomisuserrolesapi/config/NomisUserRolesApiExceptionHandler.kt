@@ -52,7 +52,7 @@ class NomisUserRolesApiExceptionHandler {
       log.error("Unexpected server exception", e)
     }
     return ResponseEntity
-      .status(e.rawStatusCode)
+      .status(e.statusCode)
       .body(e.responseBodyAsByteArray)
   }
 
@@ -105,7 +105,7 @@ class NomisUserRolesApiExceptionHandler {
     )
 
   @ExceptionHandler(UserNotFoundException::class)
-  fun handleUserNotFoundException(e: UserNotFoundException): ResponseEntity<ErrorResponse?>? {
+  fun handleUserNotFoundException(e: UserNotFoundException): ResponseEntity<ErrorResponse> {
     log.debug("User not found exception caught: {}", e.message)
     return ResponseEntity
       .status(NOT_FOUND)
@@ -119,7 +119,7 @@ class NomisUserRolesApiExceptionHandler {
   }
 
   @ExceptionHandler(StaffNotFoundException::class)
-  fun handleStaffNotFoundException(e: StaffNotFoundException): ResponseEntity<ErrorResponse?>? {
+  fun handleStaffNotFoundException(e: StaffNotFoundException): ResponseEntity<ErrorResponse> {
     log.debug("Staff not found exception caught: {}", e.message)
     return ResponseEntity
       .status(NOT_FOUND)
@@ -133,7 +133,7 @@ class NomisUserRolesApiExceptionHandler {
   }
 
   @ExceptionHandler(UserAlreadyExistsException::class)
-  fun handleUserAlreadyExistsException(e: UserAlreadyExistsException): ResponseEntity<ErrorResponse?>? {
+  fun handleUserAlreadyExistsException(e: UserAlreadyExistsException): ResponseEntity<ErrorResponse> {
     log.debug("User already exists exception caught: {}", e.message)
     return ResponseEntity
       .status(CONFLICT)
@@ -147,7 +147,7 @@ class NomisUserRolesApiExceptionHandler {
   }
 
   @ExceptionHandler(UserRoleNotFoundException::class)
-  fun handleUserRoleNotFoundException(e: UserRoleNotFoundException): ResponseEntity<ErrorResponse?>? {
+  fun handleUserRoleNotFoundException(e: UserRoleNotFoundException): ResponseEntity<ErrorResponse> {
     log.debug("Role not found exception caught: {}", e.message)
     return ResponseEntity
       .status(NOT_FOUND)
@@ -161,7 +161,7 @@ class NomisUserRolesApiExceptionHandler {
   }
 
   @ExceptionHandler(InvalidRoleAssignmentException::class)
-  fun handleInvalidRoleAssignmentException(e: InvalidRoleAssignmentException): ResponseEntity<ErrorResponse?>? {
+  fun handleInvalidRoleAssignmentException(e: InvalidRoleAssignmentException): ResponseEntity<ErrorResponse> {
     log.debug("Invalid Role assignment: {}", e.message)
     return ResponseEntity
       .status(BAD_REQUEST)
@@ -175,7 +175,7 @@ class NomisUserRolesApiExceptionHandler {
   }
 
   @ExceptionHandler(ForbiddenRoleAssignmentException::class)
-  fun handleForbiddenRoleAssignmentException(e: ForbiddenRoleAssignmentException): ResponseEntity<ErrorResponse?>? {
+  fun handleForbiddenRoleAssignmentException(e: ForbiddenRoleAssignmentException): ResponseEntity<ErrorResponse> {
     log.debug("Forbidden Role assignment: {}", e.message)
     return ResponseEntity
       .status(FORBIDDEN)
@@ -189,7 +189,7 @@ class NomisUserRolesApiExceptionHandler {
   }
 
   @ExceptionHandler(UserRoleAlreadyExistsException::class)
-  fun handleUserRoleAlreadyExistsException(e: UserRoleAlreadyExistsException): ResponseEntity<ErrorResponse?>? {
+  fun handleUserRoleAlreadyExistsException(e: UserRoleAlreadyExistsException): ResponseEntity<ErrorResponse> {
     log.debug("Role already exists exception caught: {}", e.message)
     return ResponseEntity
       .status(CONFLICT)
@@ -203,7 +203,7 @@ class NomisUserRolesApiExceptionHandler {
   }
 
   @ExceptionHandler(CaseloadNotFoundException::class)
-  fun handleCaseloadNotFoundException(e: CaseloadNotFoundException): ResponseEntity<ErrorResponse?>? {
+  fun handleCaseloadNotFoundException(e: CaseloadNotFoundException): ResponseEntity<ErrorResponse> {
     log.debug("Caseload not found exception caught: {}", e.message)
     return ResponseEntity
       .status(NOT_FOUND)
@@ -217,7 +217,7 @@ class NomisUserRolesApiExceptionHandler {
   }
 
   @ExceptionHandler(CaseloadAlreadyExistsException::class)
-  fun handleCaseloadAlreadyExistsException(e: CaseloadAlreadyExistsException): ResponseEntity<ErrorResponse?>? {
+  fun handleCaseloadAlreadyExistsException(e: CaseloadAlreadyExistsException): ResponseEntity<ErrorResponse> {
     log.debug("Caseload already exists exception caught: {}", e.message)
     return ResponseEntity
       .status(CONFLICT)
@@ -322,7 +322,7 @@ class NomisUserRolesApiExceptionHandler {
   }
 
   @ExceptionHandler(java.lang.Exception::class)
-  fun handleException(e: java.lang.Exception): ResponseEntity<ErrorResponse?>? {
+  fun handleException(e: java.lang.Exception): ResponseEntity<ErrorResponse> {
     log.error("Unexpected exception", e)
     return ResponseEntity
       .status(INTERNAL_SERVER_ERROR)
