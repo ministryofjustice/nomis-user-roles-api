@@ -65,4 +65,4 @@ class OpenApiDocsTest : IntegrationTestBase() {
 
 // Same tests for "dev" profile
 @ActiveProfiles("dev", inheritProfiles = false)
-class OpenApiDocsDevProfileTest: OpenApiDocsTest() {}
+class OpenApiDocsDevProfileTest : OpenApiDocsTest()
