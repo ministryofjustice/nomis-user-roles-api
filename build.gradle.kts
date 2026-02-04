@@ -25,6 +25,7 @@ dependencies {
   implementation("org.apache.commons:commons-text:1.15.0")
   implementation("commons-codec:commons-codec:1.20.0")
   implementation("com.google.guava:guava:33.5.0-jre")
+  implementation("org.springframework.boot:spring-boot-starter-batch")
 
   runtimeOnly("org.flywaydb:flyway-core")
   implementation("io.hypersistence:hypersistence-utils-hibernate-71:3.14.1")
