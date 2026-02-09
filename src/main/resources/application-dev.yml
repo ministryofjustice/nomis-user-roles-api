@@ -9,9 +9,15 @@ management.endpoint:
 api:
   base:
     url:
-      oauth: http://localhost:9090/auth
+      #oauth: http://localhost:9090/auth
+      oauth: https://sign-in-dev.hmpps.service.justice.gov.uk/auth
+
 
 spring:
+  batch:
+    jdbc:
+      initialize-schema: never
+
   flyway:
     enabled: true
     locations: classpath:db/migration,classpath:db/dev
@@ -20,13 +26,18 @@ spring:
     add-properties: true
 
   datasource:
-    url: 'jdbc:h2:mem:nomis-db;MODE=Oracle'
+#    url: 'jdbc:h2:mem:nomis-db;MODE=Oracle'
+    url: jdbc:h2:file:./data/testdb;MODE=Oracle;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
 
   jpa:
+    hibernate:
+      ddl-auto: none
     show-sql: true
     properties:
-      hibernate:
-        format_sql: true
+      format_sql: true
 
   h2:
     console:

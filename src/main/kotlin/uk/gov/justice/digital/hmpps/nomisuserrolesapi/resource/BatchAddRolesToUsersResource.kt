@@ -23,44 +23,61 @@ import java.util.UUID
 class BatchAddRolesToUsersResource(
   private val jobOperator: JobOperator,
   private val jobRepository: JobRepository,
-  @Qualifier("batchAddRolesToUsersJob") private val job: Job,
+  @Qualifier("batchAddRolesToUsersJob") private val job2: Job,
 ) {
 
-  data class AddRolesToUsersInstance(val jobName: String, val status: String, val params: JobParameters)
+  data class AddRolesToUsersInstance(
+    val jobName: String,
+    val jobId: Long,
+    val status: String,
+    val rolesList: List<String>,
+  )
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
-  @GetMapping("/instances")
+  @GetMapping("/list-jobs")
   fun getAddRolesToUsersJobs(): ResponseEntity<List<AddRolesToUsersInstance>> {
     val results: MutableList<AddRolesToUsersInstance> = mutableListOf()
 
-    jobRepository.getJobInstances("batchAddRolesToUsersJob", 0, 20).forEach { instance ->
-      results.addAll(
-        instance.jobExecutions.map { execution ->
-          AddRolesToUsersInstance(instance.jobName, execution.status.name, execution.jobParameters)
-        },
-      )
-    }
+    jobRepository.getJobInstances("batchAddRolesToUsersJob", 0, 100)
+      .forEach { inst ->
+        results.addAll(
+          jobRepository.getJobExecutions(inst).map { execution ->
+            AddRolesToUsersInstance(
+              inst.jobName,
+              inst.instanceId,
+              execution.status.name,
+              execution.jobParameters.getRolesList(),
+            )
+          },
+        )
+      }
 
     return ResponseEntity.status(200).body(results)
   }
 
+  data class Body(val userIds: List<String>?, val roles: List<String>)
+
   @PostMapping
-  fun bulkAddRolesToUsers(
-    @RequestBody roles: List<String>,
+  fun bob(
+    @RequestBody body: Body,
   ): ResponseEntity<String> {
-    log.info("Bulk add roles to users: {}", roles)
 
-    val params = JobParametersBuilder()
-      .addString("roles", roles.joinToString(","))
-      .addString("internal-uuid", UUID.randomUUID().toString())
-      .toJobParameters()
-
-    val execution = jobOperator.start(job, params)
-    log.info("Bulk add roles to users job started with ID: {}", execution.id)
-
+    val execution = jobOperator.start(
+      job2,
+      JobParametersBuilder()
+        .addString("rolesList", body.roles.joinToString(","))
+        .addString("uuid", UUID.randomUUID().toString())
+        .toJobParameters(),
+    )
+    log.info("Bulk add roles to users job started with ID: {},{},{}", execution.id, execution.status, execution.endTime)
     return ResponseEntity.status(200).body("Bulk add roles to users job started with ID: ${execution.id}")
   }
+
+  fun JobParameters.getRolesList(): List<String> = this.getParameter("rolesList")
+    ?.takeIf { it.type == String::class.java }
+    ?.let { list -> list.value.toString().split(",").map { it.trim() } }
+    ?: emptyList()
 }
