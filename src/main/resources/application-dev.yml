@@ -20,7 +20,8 @@ spring:
     add-properties: true
 
   datasource:
-    url: 'jdbc:h2:mem:nomis-db;MODE=Oracle'
+    # ./nomis-db means create a file-based db in the directory the app started in
+    url: 'jdbc:h2:tcp://localhost/./nomis-db;MODE=Oracle;USER=sa'
 
   jpa:
     show-sql: true
