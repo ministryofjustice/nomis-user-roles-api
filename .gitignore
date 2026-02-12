@@ -70,3 +70,6 @@ ecr.repo
 #Helm
 **/Chart.lock
 helm_deploy/nomis-user-roles-api/charts/
+
+# local H2 database
+nomis-db.mv.db
