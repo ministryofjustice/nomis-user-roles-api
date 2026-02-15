@@ -64,5 +64,5 @@ class OpenApiDocsTest : IntegrationTestBase() {
 }
 
 // Same tests for "dev" profile
-@ActiveProfiles("dev", inheritProfiles = false)
+@ActiveProfiles("dev", "flyway-disabled", inheritProfiles = false)
 class OpenApiDocsDevProfileTest : OpenApiDocsTest()

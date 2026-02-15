@@ -9,23 +9,28 @@ import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
 import org.springdoc.core.customizers.OpenApiCustomizer
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.info.BuildProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.env.Environment
 
 @Configuration
 class OpenApiConfiguration(buildProperties: BuildProperties) {
   private val version: String = buildProperties.version!!
 
   @Bean
-  fun customOpenAPI(): OpenAPI = OpenAPI()
+  fun customOpenAPI(@Autowired env: Environment): OpenAPI = OpenAPI()
     .servers(
       listOf(
         Server().url("https://nomis-user.roles-api.prison.service.justice.gov.uk").description("Prod"),
         Server().url("https://nomis-user-roles-api-preprod.prison.service.justice.gov.uk").description("PreProd"),
         Server().url("https://nomis-user-roles-api-dev.prison.service.justice.gov.uk")
           .description("Development"),
-        Server().url("http://localhost:8080").description("Local"),
+        Server().url(when (env.matchesProfiles("dev")) {
+          true -> "http://localhost:8082"
+          else -> "http://localhost:8080"
+        }).description("Local"),
       ),
     )
     .info(
