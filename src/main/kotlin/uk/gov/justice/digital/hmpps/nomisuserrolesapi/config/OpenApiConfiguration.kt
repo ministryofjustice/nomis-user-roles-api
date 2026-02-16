@@ -26,7 +26,7 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
         Server().url("https://nomis-user-roles-api-preprod.prison.service.justice.gov.uk").description("PreProd"),
         Server().url("https://nomis-user-roles-api-dev.prison.service.justice.gov.uk")
           .description("Development"),
-        Server().url("http://localhost:${env.getProperty("server.port")}").description("Local"),
+        Server().url("http://localhost:8080").description("Local"),
       ),
     )
     .info(
