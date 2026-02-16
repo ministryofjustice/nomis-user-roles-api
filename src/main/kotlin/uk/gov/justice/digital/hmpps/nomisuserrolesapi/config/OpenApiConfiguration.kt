@@ -12,14 +12,13 @@ import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springframework.boot.info.BuildProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.env.Environment
 
 @Configuration
 class OpenApiConfiguration(buildProperties: BuildProperties) {
   private val version: String = buildProperties.version!!
 
   @Bean
-  fun customOpenAPI(env: Environment): OpenAPI = OpenAPI()
+  fun customOpenAPI(): OpenAPI = OpenAPI()
     .servers(
       listOf(
         Server().url("https://nomis-user.roles-api.prison.service.justice.gov.uk").description("Prod"),
