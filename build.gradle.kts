@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.0.2"
-  kotlin("plugin.spring") version "2.3.0"
-  kotlin("plugin.jpa") version "2.3.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.0.4"
+  kotlin("plugin.spring") version "2.3.10"
+  kotlin("plugin.jpa") version "2.3.10"
   idea
 }
 
@@ -13,7 +13,7 @@ configurations {
 
 dependencies {
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:2.0.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:2.0.1")
   implementation("org.springframework.boot:spring-boot-starter-webclient")
   implementation("org.springframework.boot:spring-boot-starter-jdbc")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -23,14 +23,14 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1")
   implementation("org.apache.commons:commons-lang3:3.20.0")
   implementation("org.apache.commons:commons-text:1.15.0")
-  implementation("commons-codec:commons-codec:1.20.0")
+  implementation("commons-codec:commons-codec:1.21.0")
   implementation("com.google.guava:guava:33.5.0-jre")
 
   runtimeOnly("org.flywaydb:flyway-core")
-  implementation("io.hypersistence:hypersistence-utils-hibernate-71:3.14.1")
-  implementation("org.hibernate.orm:hibernate-community-dialects:7.2.0.Final")
+  implementation("io.hypersistence:hypersistence-utils-hibernate-71:3.15.2")
+  implementation("org.hibernate.orm:hibernate-community-dialects:7.2.5.Final")
   runtimeOnly("com.h2database:h2:2.4.240")
-  val oracleVersion = "21.20.0.0"
+  val oracleVersion = "23.26.1.0.0"
   implementation("com.oracle.database.jdbc:ojdbc11:$oracleVersion")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
