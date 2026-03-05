@@ -144,8 +144,8 @@ class UserService(
       pageRequest.withSort(::mapUserSummarySortProperties)
     }
     val userSpecification =
-      userPersonDetailRepository.findAll(UserSpecification(filter), updatePageRequest)
-    return PageImpl(userSpecification.content.distinct(), pageRequest, userSpecification.totalElements)
+      userPersonDetailRepository.findAll(UserSpecification(filter, true), updatePageRequest)
+    return PageImpl(userSpecification.content, pageRequest, userSpecification.totalElements)
       .map {
         it.toUserSummaryWithEmail()
       }
