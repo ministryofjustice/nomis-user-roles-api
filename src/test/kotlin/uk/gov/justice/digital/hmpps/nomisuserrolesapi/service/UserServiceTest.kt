@@ -23,6 +23,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPassword
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.entitygraph.UserPersonDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.CaseloadRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.RoleRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.StaffRepository
@@ -31,7 +32,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.Us
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.UserBasicPersonalDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.UserLastNameRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.UserPasswordRepository
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.entitygraph.UserPersonDetailRepository
 import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
 import java.time.LocalDateTime
 import java.util.Optional

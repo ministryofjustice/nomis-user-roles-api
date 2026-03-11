@@ -18,10 +18,10 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupAdministrator
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupMember
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupMemberPk
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.entitygraph.UserPersonDetailRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.CaseloadRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.GroupCaseloadRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.RoleRepository
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.entitygraph.UserPersonDetailRepository
 import java.time.LocalDate
 
 class GeneralUserBuilder(

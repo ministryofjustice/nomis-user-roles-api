@@ -10,14 +10,15 @@ import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.transaction.TestTransaction
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.RepositoryConfiguration
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPassword
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.UserPasswordRepository
 
 @DataJpaTest
-@Import(value = [
-  RepositoryConfiguration.StandardRepositoryConfiguration::class,
-])
+@Import(
+  value = [
+    RepositoryConfiguration.StandardRepositoryConfiguration::class,
+  ],
+)
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = NONE)
 class UserPasswordRepositoryTest {

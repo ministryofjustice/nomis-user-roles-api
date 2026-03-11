@@ -5,5 +5,5 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.StaffLocationRole
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.StaffLocationRoleId
 
 interface StaffLocationRoleRepository : CrudRepository<StaffLocationRole, StaffLocationRoleId> {
-    fun findAllByAgencyIdAndStaffIdAndRole(agencyId: String, staffId: Long, role: String): List<StaffLocationRole>
+  fun findAllByAgencyIdAndStaffIdAndRole(agencyId: String, staffId: Long, role: String): List<StaffLocationRole>
 }

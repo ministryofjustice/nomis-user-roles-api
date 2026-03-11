@@ -40,6 +40,8 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.capitalizeFully
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.getUsageType
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.entitygraph.UserPersonDetailRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.entitygraph.changePasswordWithValidation
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.CaseloadRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.RoleRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.StaffRepository
@@ -49,8 +51,6 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.Us
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.UserBasicPersonalDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.UserLastNameRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.UserPasswordRepository
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.entitygraph.UserPersonDetailRepository
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.entitygraph.changePasswordWithValidation
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.toGroupAdminSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.toUserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.toUserSummaryWithEmail
@@ -148,7 +148,8 @@ class UserService(
       userPersonDetailRepository.findAll(
         UserSpecification(filter),
         updatePageRequest,
-        NamedEntityGraph.fetching("user-person-detail-graph"))
+        NamedEntityGraph.fetching("user-person-detail-graph"),
+      )
     return PageImpl(userSpecification.content.distinct(), pageRequest, userSpecification.totalElements)
       .map {
         it.toUserSummaryWithEmail()

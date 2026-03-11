@@ -5,7 +5,6 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.IdClass
 import jakarta.persistence.Table
-import org.springframework.data.repository.CrudRepository
 import java.io.Serializable
 import java.math.BigDecimal
 import java.time.LocalDate
