@@ -25,6 +25,7 @@ dependencies {
   implementation("org.apache.commons:commons-text:1.15.0")
   implementation("commons-codec:commons-codec:1.21.0")
   implementation("com.google.guava:guava:33.5.0-jre")
+  implementation("com.cosium.spring.data:spring-data-jpa-entity-graph:4.0.2")
 
   runtimeOnly("org.flywaydb:flyway-core")
   implementation("io.hypersistence:hypersistence-utils-hibernate-71:3.15.2")

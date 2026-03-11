@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.PrisonCaseload
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload.Companion.GENERAL_CASELOAD
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Caseload.Companion.INSTITUTION_CASELOAD
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.CaseloadRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.CaseloadRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.transformer.toPrisonCaseload
 
 @Service

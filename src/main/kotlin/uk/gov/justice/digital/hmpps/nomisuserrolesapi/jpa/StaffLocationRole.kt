@@ -65,7 +65,3 @@ data class StaffLocationRoleId(
   val position: String? = null,
   val fromDate: LocalDate? = null,
 ) : Serializable
-
-interface StaffLocationRoleRepository : CrudRepository<StaffLocationRole, StaffLocationRoleId> {
-  fun findAllByAgencyIdAndStaffIdAndRole(agencyId: String, staffId: Long, role: String): List<StaffLocationRole>
-}

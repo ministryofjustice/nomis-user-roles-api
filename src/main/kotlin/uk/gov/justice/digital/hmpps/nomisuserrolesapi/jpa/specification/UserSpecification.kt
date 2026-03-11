@@ -28,13 +28,12 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupMember
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import kotlin.reflect.KProperty1
 
-class UserSpecification(private val filter: UserFilter, private val distinctResultsOnly: Boolean = false) : Specification<UserPersonDetail> {
+class UserSpecification(private val filter: UserFilter) : Specification<UserPersonDetail> {
   override fun toPredicate(
     root: Root<UserPersonDetail>,
     query: CriteriaQuery<*>,
     criteriaBuilder: CriteriaBuilder,
   ): Predicate? {
-    query.distinct(distinctResultsOnly)
     val predicates = mutableListOf<Predicate>()
 
     // these allow a fluent version based on the types being passed and rely on closure for criteria and root

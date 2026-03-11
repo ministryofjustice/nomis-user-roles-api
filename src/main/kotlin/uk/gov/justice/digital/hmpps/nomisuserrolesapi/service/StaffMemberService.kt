@@ -11,14 +11,14 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.ReferenceData
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.ReferenceDataDomain.SCHEDULE_TYP
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.ReferenceDataDomain.STAFF_POS
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.ReferenceDataDomain.STAFF_ROLE
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.ReferenceDataRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.StaffLocationRole
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.StaffLocationRoleId
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.StaffLocationRoleRepository
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.findByKeyIn
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.of
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.ReferenceDataRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.StaffLocationRoleRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.StaffRepository
 import java.time.format.DateTimeFormatter.ISO_DATE
 
 @Transactional
