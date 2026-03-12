@@ -8,8 +8,8 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.RoleAssignmentStats
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.RoleAssignmentsSpecification
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.DPS_CASELOAD
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Role
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.RoleRepository
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.UserCaseloadRoleRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserCaseloadRoleRepository
 
 @Service
 @Transactional

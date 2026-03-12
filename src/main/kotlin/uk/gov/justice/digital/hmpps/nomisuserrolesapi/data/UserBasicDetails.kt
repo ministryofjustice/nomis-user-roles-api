@@ -3,7 +3,7 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.data
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.capitalizeFully
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.UserBasicPersonalDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserBasicPersonalDetail
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "Basic User Information")

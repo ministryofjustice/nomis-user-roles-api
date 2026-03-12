@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.service
 
 import UserSpecification
-import com.cosium.spring.data.jpa.entity.graph.domain2.NamedEntityGraph
 import com.microsoft.applicationinsights.TelemetryClient
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -40,17 +39,17 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.Staff
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.capitalizeFully
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.getUsageType
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.entitygraph.UserPersonDetailRepository
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.entitygraph.changePasswordWithValidation
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.CaseloadRepository
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.RoleRepository
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.StaffRepository
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.UserAndEmail
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.UserAndEmailRepository
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.UserBasicDetailsRepository
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.UserBasicPersonalDetail
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.UserLastNameRepository
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.UserPasswordRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.CaseloadRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.RoleRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.StaffRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserAndEmail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserAndEmailRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserBasicDetailsRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserBasicPersonalDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserLastNameRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPasswordRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.changePasswordWithValidation
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.toGroupAdminSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.toUserSummary
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.toUserSummaryWithEmail
@@ -145,11 +144,7 @@ class UserService(
       pageRequest.withSort(::mapUserSummarySortProperties)
     }
     val userSpecification =
-      userPersonDetailRepository.findAll(
-        UserSpecification(filter),
-        updatePageRequest,
-        NamedEntityGraph.fetching("user-person-detail-graph"),
-      )
+      userPersonDetailRepository.findAll(UserSpecification(filter), updatePageRequest)
     return PageImpl(userSpecification.content.distinct(), pageRequest, userSpecification.totalElements)
       .map {
         it.toUserSummaryWithEmail()
@@ -169,7 +164,7 @@ class UserService(
   }
 
   private fun getUserDetailsAndDpsRoleCounts(filter: UserFilter): Pair<List<UserPersonDetail>, Map<String, Long>> {
-    val userPersonDetailList = userPersonDetailRepository.findAll(UserSpecification(filter), NamedEntityGraph.loading("user-person-detail-download-graph"))
+    val userPersonDetailList = userPersonDetailRepository.findAll(UserSpecification(filter))
     // Fetch the role count explicitly here instead of individually fetching roles in the summary mapping in order to improve performance
     val dpsRoleCountMap =
       userPersonDetailRepository.findUserDpsRolesCountByUsernames(userPersonDetailList.map { it.username })

@@ -6,19 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase.Replace.NONE
-import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.transaction.TestTransaction
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.RepositoryConfiguration
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPassword
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.UserPasswordRepository
 
 @DataJpaTest
-@Import(
-  value = [
-    RepositoryConfiguration.StandardRepositoryConfiguration::class,
-  ],
-)
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = NONE)
 class UserPasswordRepositoryTest {

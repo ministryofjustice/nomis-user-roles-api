@@ -1,8 +1,11 @@
-package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.entitygraph
+package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository
 
-import com.cosium.spring.data.jpa.entity.graph.repository.EntityGraphJpaRepository
-import com.cosium.spring.data.jpa.entity.graph.repository.EntityGraphJpaSpecificationExecutor
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.EntityGraph
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
@@ -19,8 +22,8 @@ import java.util.Optional
 @Suppress("SqlResolve")
 @Repository
 interface UserPersonDetailRepository :
-  EntityGraphJpaRepository<UserPersonDetail, String>,
-  EntityGraphJpaSpecificationExecutor<UserPersonDetail> {
+  JpaRepository<UserPersonDetail, String>,
+  JpaSpecificationExecutor<UserPersonDetail> {
 
   @Modifying
   @Query(
@@ -75,6 +78,12 @@ interface UserPersonDetailRepository :
   )
   fun lockUser(@Param("username") username: String?)
 
+  @EntityGraph(value = "user-person-detail-download-graph", type = EntityGraph.EntityGraphType.LOAD)
+  override fun findAll(spec: Specification<UserPersonDetail>): List<UserPersonDetail>
+
+  @EntityGraph(value = "user-person-detail-graph", type = EntityGraph.EntityGraphType.FETCH)
+  override fun findAll(spec: Specification<UserPersonDetail>, pageable: Pageable): Page<UserPersonDetail>
+
   @Query(
     """
     SELECT new uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDpsRoleCount(ucr.id.username, COUNT(ucr))
@@ -93,6 +102,7 @@ interface UserPersonDetailRepository :
     lastName: String,
   ): List<UserPersonDetail>
 
+  @Suppress("FunctionName")
   @EntityGraph(value = "user-person-detail-graph", type = EntityGraph.EntityGraphType.FETCH)
   override fun findById(username: String): Optional<UserPersonDetail>
 
