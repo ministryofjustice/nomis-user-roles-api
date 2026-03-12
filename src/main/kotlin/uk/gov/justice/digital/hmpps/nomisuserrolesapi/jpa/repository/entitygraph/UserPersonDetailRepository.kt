@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.entitygrap
 
 import com.cosium.spring.data.jpa.entity.graph.repository.EntityGraphJpaRepository
 import com.cosium.spring.data.jpa.entity.graph.repository.EntityGraphJpaSpecificationExecutor
-import com.cosium.spring.data.jpa.entity.graph.repository.EntityGraphPagingAndSortingRepository
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -21,7 +20,6 @@ import java.util.Optional
 @Repository
 interface UserPersonDetailRepository :
   EntityGraphJpaRepository<UserPersonDetail, String>,
-  EntityGraphPagingAndSortingRepository<UserPersonDetail, String>,
   EntityGraphJpaSpecificationExecutor<UserPersonDetail> {
 
   @Modifying
@@ -95,7 +93,6 @@ interface UserPersonDetailRepository :
     lastName: String,
   ): List<UserPersonDetail>
 
-  @Suppress("FunctionName")
   @EntityGraph(value = "user-person-detail-graph", type = EntityGraph.EntityGraphType.FETCH)
   override fun findById(username: String): Optional<UserPersonDetail>
 
