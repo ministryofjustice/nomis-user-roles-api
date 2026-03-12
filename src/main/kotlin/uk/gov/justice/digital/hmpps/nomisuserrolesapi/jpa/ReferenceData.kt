@@ -10,7 +10,7 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.Table
 import org.hibernate.annotations.Immutable
 import org.hibernate.type.YesNoConverter
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.ReferenceDataRepository
+import org.springframework.data.repository.CrudRepository
 
 @Entity
 @Table(name = "REFERENCE_CODES")
@@ -43,6 +43,10 @@ data class ReferenceDataKey(
   override val domain: ReferenceDataDomain,
   override val code: String,
 ) : CodedReference
+
+interface ReferenceDataRepository : CrudRepository<ReferenceData, ReferenceDataKey> {
+  fun findAllByKeyIn(keys: List<ReferenceDataKey>): List<ReferenceData>
+}
 
 fun ReferenceDataRepository.findByKeyIn(vararg keys: ReferenceDataKey) = findAllByKeyIn(keys.asList())
 infix fun ReferenceDataDomain.of(code: String) = ReferenceDataKey(this, code)
