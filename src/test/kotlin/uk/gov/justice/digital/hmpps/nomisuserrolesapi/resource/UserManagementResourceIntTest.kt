@@ -22,8 +22,8 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateGeneralUserRequ
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPassword
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPasswordRepository
-import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.UserPersonDetailRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.entitygraph.UserPersonDetailRepository
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard.UserPasswordRepository
 import java.sql.SQLException
 import java.time.LocalDateTime
 import java.util.Optional

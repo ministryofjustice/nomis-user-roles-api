@@ -5,7 +5,6 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.IdClass
 import jakarta.persistence.Table
-import org.springframework.data.repository.CrudRepository
 import java.io.Serializable
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -65,7 +64,3 @@ data class StaffLocationRoleId(
   val position: String? = null,
   val fromDate: LocalDate? = null,
 ) : Serializable
-
-interface StaffLocationRoleRepository : CrudRepository<StaffLocationRole, StaffLocationRoleId> {
-  fun findAllByAgencyIdAndStaffIdAndRole(agencyId: String, staffId: Long, role: String): List<StaffLocationRole>
-}

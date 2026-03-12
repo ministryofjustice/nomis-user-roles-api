@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository
+package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.standard
 
 import jakarta.persistence.Entity
 import jakarta.persistence.Id

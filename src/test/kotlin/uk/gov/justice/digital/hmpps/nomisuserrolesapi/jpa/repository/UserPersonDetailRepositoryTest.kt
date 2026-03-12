@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository
 
 import UserSpecification
+import com.cosium.spring.data.jpa.entity.graph.domain2.NamedEntityGraph
 import jakarta.persistence.EntityManager
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.context.ActiveProfiles
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.RepositoryConfiguration
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.filter.UserFilter
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
@@ -21,10 +23,17 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UsageType
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupAdministrator
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupMember
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.repository.entitygraph.UserPersonDetailRepository
 import java.time.LocalDate
 
 @DataJpaTest
-@Import(value = [DataBuilder::class])
+@Import(
+  value = [
+    DataBuilder::class,
+    RepositoryConfiguration.EntityGraphRepositoryConfiguration::class,
+    RepositoryConfiguration.StandardRepositoryConfiguration::class,
+  ],
+)
 @ActiveProfiles("test")
 class UserPersonDetailRepositoryTest {
   @Autowired
@@ -214,7 +223,7 @@ class UserPersonDetailRepositoryTest {
     inner class LSASpecification {
       @Test
       internal fun `will return all users for a page when local administrator username not supplied`() {
-        val users = repository.findAll(UserSpecification(UserFilter()), PageRequest.of(0, 10))
+        val users = repository.findAll(UserSpecification(UserFilter()), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(users.content).hasSize(5)
       }
 
@@ -231,10 +240,10 @@ class UserPersonDetailRepositoryTest {
           .buildAndSave()
 
         val janeBubblesAdministeredUsers =
-          repository.findAll(UserSpecification(UserFilter("jane.bubbles.wwi")), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter("jane.bubbles.wwi")), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(janeBubblesAdministeredUsers.content).hasSize(3)
         val jimHongAdministeredUsers =
-          repository.findAll(UserSpecification(UserFilter("jim.hong.bxi")), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter("jim.hong.bxi")), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(jimHongAdministeredUsers.content).hasSize(2)
       }
     }
@@ -309,13 +318,17 @@ class UserPersonDetailRepositoryTest {
       @Test
       internal fun `will partial match on first name case insensitive`() {
         val usersMatchingIbragi =
-          repository.findAll(UserSpecification(UserFilter(name = "IBraGI")), PageRequest.of(0, 10))
+          repository.findAll(
+            UserSpecification(UserFilter(name = "IBraGI")),
+            PageRequest.of(0, 10),
+            NamedEntityGraph.fetching("user-person-detail-graph"),
+          )
         assertThat(usersMatchingIbragi.content).extracting<String>(UserPersonDetail::username).containsExactly(
           "IBRAGIM.MIHAIL",
         )
 
         val usersMatchingSawyl =
-          repository.findAll(UserSpecification(UserFilter(name = "sawyl")), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(name = "sawyl")), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(usersMatchingSawyl.content).extracting<String>(UserPersonDetail::username).containsExactly(
           "SAWYL.ALYCIA",
           "SAWYL.ELBERT",
@@ -324,12 +337,12 @@ class UserPersonDetailRepositoryTest {
 
       @Test
       internal fun `will partial match on last name case insensitive`() {
-        val usersMatchingMiha = repository.findAll(UserSpecification(UserFilter(name = "Miha")), PageRequest.of(0, 10))
+        val usersMatchingMiha = repository.findAll(UserSpecification(UserFilter(name = "Miha")), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(usersMatchingMiha.content).extracting<String>(UserPersonDetail::username).containsExactly(
           "IBRAGIM.MIHAIL",
         )
 
-        val usersMatchingChes = repository.findAll(UserSpecification(UserFilter(name = "ches")), PageRequest.of(0, 10))
+        val usersMatchingChes = repository.findAll(UserSpecification(UserFilter(name = "ches")), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(usersMatchingChes.content).extracting<String>(UserPersonDetail::username).containsExactly(
           "MARIAN.CHESED",
           "LEOPOLDO.CHESED",
@@ -339,7 +352,7 @@ class UserPersonDetailRepositoryTest {
       @Test
       internal fun `will match both first and last name`() {
         val users =
-          repository.findAll(UserSpecification(UserFilter(name = "Marian")), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(name = "Marian")), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactly(
           "MARIAN.CHESED",
           "ALEXANDER.MARIAN",
@@ -349,7 +362,7 @@ class UserPersonDetailRepositoryTest {
       @Test
       internal fun `will match partial username`() {
         val users =
-          repository.findAll(UserSpecification(UserFilter(name = "john.sm")), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(name = "john.sm")), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactly(
           "JOHN.SMITH",
         )
@@ -358,13 +371,13 @@ class UserPersonDetailRepositoryTest {
       @Test
       internal fun `will match partial email address case insensitive`() {
         val usersMatchingSawylAlycia =
-          repository.findAll(UserSpecification(UserFilter(name = "sawyl-alycia")), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(name = "sawyl-alycia")), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(usersMatchingSawylAlycia.content).extracting<String>(UserPersonDetail::username).containsExactly(
           "SAWYL.ALYCIA",
         )
 
         val usersMatchingJoeBloggs =
-          repository.findAll(UserSpecification(UserFilter(name = "jOe.bLoGGs@digital")), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(name = "jOe.bLoGGs@digital")), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(usersMatchingJoeBloggs.content).extracting<String>(UserPersonDetail::username).containsExactly(
           "JOEBLOGGS",
         )
@@ -373,19 +386,19 @@ class UserPersonDetailRepositoryTest {
       @Test
       internal fun `will match both names both way around when full name detected`() {
         val usersFirstNameFirst =
-          repository.findAll(UserSpecification(UserFilter(name = "Saw Alyc")), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(name = "Saw Alyc")), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(usersFirstNameFirst.content).extracting<String>(UserPersonDetail::username).containsExactly(
           "SAWYL.ALYCIA",
         )
 
         val usersLastNameFirst =
-          repository.findAll(UserSpecification(UserFilter(name = "Alyc Saw")), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(name = "Alyc Saw")), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(usersLastNameFirst.content).extracting<String>(UserPersonDetail::username).containsExactly(
           "SAWYL.ALYCIA",
         )
 
         val userCommaSeparatedName =
-          repository.findAll(UserSpecification(UserFilter(name = "ALYCIA,sawyl")), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(name = "ALYCIA,sawyl")), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(userCommaSeparatedName.content).extracting<String>(UserPersonDetail::username).containsExactly(
           "SAWYL.ALYCIA",
         )
@@ -394,7 +407,7 @@ class UserPersonDetailRepositoryTest {
       @Test
       internal fun `can combine name and LSA filter`() {
         val usersMatchingSaw =
-          repository.findAll(UserSpecification(UserFilter(name = "Saw")), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(name = "Saw")), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(usersMatchingSaw.content).extracting<String>(UserPersonDetail::username).containsExactly(
           "SAWYL.ALYCIA",
           "SAWYL.ELBERT",
@@ -411,6 +424,7 @@ class UserPersonDetailRepositoryTest {
               ),
             ),
             PageRequest.of(0, 10),
+            NamedEntityGraph.fetching("user-person-detail-graph"),
           )
         assertThat(usersMatchingSawForLSAAtWandsworth.content).extracting<String>(UserPersonDetail::username)
           .containsExactly(
@@ -427,6 +441,7 @@ class UserPersonDetailRepositoryTest {
               ),
             ),
             PageRequest.of(0, 10),
+            NamedEntityGraph.fetching("user-person-detail-graph"),
           )
         assertThat(usersMatchingSawForLSAAtBrixton.content).extracting<String>(UserPersonDetail::username)
           .containsExactly(
@@ -443,6 +458,7 @@ class UserPersonDetailRepositoryTest {
               ),
             ),
             PageRequest.of(0, 10),
+            NamedEntityGraph.fetching("user-person-detail-graph"),
           )
         assertThat(usersMatchingSawForLSAAtBrixtonAndWandsworth.content).extracting<String>(UserPersonDetail::username)
           .containsExactly(
@@ -491,7 +507,7 @@ class UserPersonDetailRepositoryTest {
       @Test
       internal fun `will match all users regardless status not supplied`() {
         val users =
-          repository.findAll(UserSpecification(UserFilter(status = null)), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(status = null)), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "IBRAGIM.MIHAIL",
           "MARIAN.CHESED",
@@ -507,7 +523,7 @@ class UserPersonDetailRepositoryTest {
       @Test
       internal fun `will match all users regardless status when filter is ALL`() {
         val users =
-          repository.findAll(UserSpecification(UserFilter(status = UserStatus.ALL)), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(status = UserStatus.ALL)), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "IBRAGIM.MIHAIL",
           "MARIAN.CHESED",
@@ -523,7 +539,7 @@ class UserPersonDetailRepositoryTest {
       @Test
       internal fun `will match only active when filter is ACTIVE`() {
         val users =
-          repository.findAll(UserSpecification(UserFilter(status = UserStatus.ACTIVE)), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(status = UserStatus.ACTIVE)), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "IBRAGIM.MIHAIL",
           "MARIAN.CHESED",
@@ -535,7 +551,7 @@ class UserPersonDetailRepositoryTest {
       @Test
       internal fun `will match only inactive when filter is INACTIVE`() {
         val users =
-          repository.findAll(UserSpecification(UserFilter(status = UserStatus.INACTIVE)), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(status = UserStatus.INACTIVE)), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "LEOPOLDO.CHESED",
           "SAWYL.ALYCIA",
@@ -555,6 +571,7 @@ class UserPersonDetailRepositoryTest {
               ),
             ),
             PageRequest.of(0, 10),
+            NamedEntityGraph.fetching("user-person-detail-graph"),
           )
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "IBRAGIM.MIHAIL",
@@ -583,20 +600,20 @@ class UserPersonDetailRepositoryTest {
 
       @Test
       internal fun `will match all users when type not supplied`() {
-        val users = repository.findAll(UserSpecification(UserFilter(userType = null)), PageRequest.of(0, 10))
+        val users = repository.findAll(UserSpecification(UserFilter(userType = null)), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(users.content).extracting<String>(UserPersonDetail::username)
           .containsExactlyInAnyOrder(generalUsername, adminUsername)
       }
 
       @Test
       internal fun `will match only admin when filter is ADMIN`() {
-        val users = repository.findAll(UserSpecification(UserFilter(userType = UsageType.ADMIN)), PageRequest.of(0, 10))
+        val users = repository.findAll(UserSpecification(UserFilter(userType = UsageType.ADMIN)), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactly(adminUsername)
       }
 
       @Test
       internal fun `will match only general when filter is GENERAL`() {
-        val users = repository.findAll(UserSpecification(UserFilter(userType = UsageType.GENERAL)), PageRequest.of(0, 10))
+        val users = repository.findAll(UserSpecification(UserFilter(userType = UsageType.GENERAL)), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactly(generalUsername)
       }
     }
@@ -635,7 +652,7 @@ class UserPersonDetailRepositoryTest {
       @Test
       internal fun `will match all users regardless of active caseload when not supplied`() {
         val users =
-          repository.findAll(UserSpecification(UserFilter(activeCaseloadId = null)), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(activeCaseloadId = null)), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "IBRAGIM.MIHAIL",
           "MARIAN.CHESED",
@@ -651,7 +668,7 @@ class UserPersonDetailRepositoryTest {
       @Test
       internal fun `will match only users that match the active caseload`() {
         val users =
-          repository.findAll(UserSpecification(UserFilter(activeCaseloadId = "BXI")), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(activeCaseloadId = "BXI")), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "SAWYL.ALYCIA",
           "SAWYL.ELBERT",
@@ -669,6 +686,7 @@ class UserPersonDetailRepositoryTest {
               ),
             ),
             PageRequest.of(0, 10),
+            NamedEntityGraph.fetching("user-person-detail-graph"),
           )
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "SAWYL.ALYCIA",
@@ -709,7 +727,7 @@ class UserPersonDetailRepositoryTest {
       @Test
       internal fun `will match all users regardless of caseload when not supplied`() {
         val users =
-          repository.findAll(UserSpecification(UserFilter(caseloadId = null)), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(caseloadId = null)), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "IBRAGIM.MIHAIL",
           "MARIAN.CHESED",
@@ -725,7 +743,7 @@ class UserPersonDetailRepositoryTest {
       @Test
       internal fun `will match only users that match the caseload`() {
         val users =
-          repository.findAll(UserSpecification(UserFilter(caseloadId = "BXI")), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(caseloadId = "BXI")), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "SAWYL.ALYCIA",
           "SAWYL.ELBERT",
@@ -744,6 +762,7 @@ class UserPersonDetailRepositoryTest {
               ),
             ),
             PageRequest.of(0, 10),
+            NamedEntityGraph.fetching("user-person-detail-graph"),
           )
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "SAWYL.ALYCIA",
@@ -809,7 +828,7 @@ class UserPersonDetailRepositoryTest {
       @Test
       internal fun `will match all users regardless of role when not supplied`() {
         val users =
-          repository.findAll(UserSpecification(UserFilter(roleCodes = listOf())), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(roleCodes = listOf())), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "IBRAGIM.MIHAIL",
           "MARIAN.CHESED",
@@ -825,7 +844,7 @@ class UserPersonDetailRepositoryTest {
       @Test
       internal fun `will match only users that match the role belonging to DPS`() {
         val users =
-          repository.findAll(UserSpecification(UserFilter(roleCodes = listOf("GLOBAL_SEARCH"))), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(roleCodes = listOf("GLOBAL_SEARCH"))), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "SAWYL.ALYCIA",
           "IBRAGIM.MIHAIL",
@@ -839,6 +858,7 @@ class UserPersonDetailRepositoryTest {
           repository.findAll(
             UserSpecification(UserFilter(nomisRoleCode = "GLOBAL_SEARCH", caseloadId = "MDI")),
             PageRequest.of(0, 10),
+            NamedEntityGraph.fetching("user-person-detail-graph"),
           )
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "SAW.MICKEN",
@@ -851,6 +871,7 @@ class UserPersonDetailRepositoryTest {
           repository.findAll(
             UserSpecification(UserFilter(nomisRoleCode = "300", caseloadId = "BXI")),
             PageRequest.of(0, 10),
+            NamedEntityGraph.fetching("user-person-detail-graph"),
           )
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "LEOPOLDO.CHESED",
@@ -861,7 +882,7 @@ class UserPersonDetailRepositoryTest {
       @Test
       internal fun `will match only users that match the role belonging to NOMIS for user regardless of caseload`() {
         val users =
-          repository.findAll(UserSpecification(UserFilter(nomisRoleCode = "300")), PageRequest.of(0, 10))
+          repository.findAll(UserSpecification(UserFilter(nomisRoleCode = "300")), PageRequest.of(0, 10), NamedEntityGraph.fetching("user-person-detail-graph"))
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "IBRAGIM.MIHAIL",
           "MARIAN.CHESED",
@@ -885,6 +906,7 @@ class UserPersonDetailRepositoryTest {
               ),
             ),
             PageRequest.of(0, 10),
+            NamedEntityGraph.fetching("user-person-detail-graph"),
           )
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "SAWYL.ALYCIA",
@@ -903,6 +925,7 @@ class UserPersonDetailRepositoryTest {
               ),
             ),
             PageRequest.of(0, 10),
+            NamedEntityGraph.fetching("user-person-detail-graph"),
           )
         assertThat(users.content).extracting<String>(UserPersonDetail::username).containsExactlyInAnyOrder(
           "IBRAGIM.MIHAIL",
