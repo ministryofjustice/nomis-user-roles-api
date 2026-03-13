@@ -6,5 +6,5 @@ import org.springframework.data.jpa.domain.Specification
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserPersonDetail
 
 interface UserPersonDetailPageRepository {
-    fun findPageOfIds(spec: Specification<UserPersonDetail>?, pageable: Pageable): Page<String>
+  fun findPageOfIds(spec: Specification<UserPersonDetail>?, pageable: Pageable): Page<String>
 }
