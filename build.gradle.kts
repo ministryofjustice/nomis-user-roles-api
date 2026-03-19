@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.0.5"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.0.6"
   kotlin("plugin.spring") version "2.3.10"
   kotlin("plugin.jpa") version "2.3.10"
   idea
@@ -28,7 +28,7 @@ dependencies {
 
   runtimeOnly("org.flywaydb:flyway-core")
   implementation("io.hypersistence:hypersistence-utils-hibernate-71:3.15.2")
-  implementation("org.hibernate.orm:hibernate-community-dialects:7.2.6.Final")
+  implementation("org.hibernate.orm:hibernate-community-dialects:7.3.0.Final")
   runtimeOnly("com.h2database:h2:2.4.240")
   val oracleVersion = "23.26.1.0.0"
   implementation("com.oracle.database.jdbc:ojdbc11:$oracleVersion")
