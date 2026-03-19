@@ -143,12 +143,21 @@ class UserService(
     } else {
       pageRequest.withSort(::mapUserSummarySortProperties)
     }
-    val userSpecification =
-      userPersonDetailRepository.findAll(UserSpecification(filter), updatePageRequest)
-    return PageImpl(userSpecification.content.distinct(), pageRequest, userSpecification.totalElements)
-      .map {
-        it.toUserSummaryWithEmail()
-      }
+
+    val idPage: Page<String> = userPersonDetailRepository.findPageOfIds(UserSpecification(filter), updatePageRequest)
+
+    if (idPage.isEmpty) {
+      return PageImpl(emptyList(), updatePageRequest, 0)
+    }
+
+    val entities: List<UserPersonDetail> = userPersonDetailRepository.findAllByUsernameIn(idPage.content)
+
+    val byId = entities.associateBy { it.username }
+    val orderedEntities = idPage.content.mapNotNull { byId[it] }
+
+    return PageImpl(orderedEntities, updatePageRequest, idPage.totalElements).map {
+      it.toUserSummaryWithEmail()
+    }
   }
 
   @Transactional(readOnly = true)

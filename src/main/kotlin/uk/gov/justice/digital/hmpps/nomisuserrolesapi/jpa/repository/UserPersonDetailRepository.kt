@@ -23,7 +23,8 @@ import java.util.Optional
 @Repository
 interface UserPersonDetailRepository :
   JpaRepository<UserPersonDetail, String>,
-  JpaSpecificationExecutor<UserPersonDetail> {
+  JpaSpecificationExecutor<UserPersonDetail>,
+  UserPersonDetailPageRepository {
 
   @Modifying
   @Query(
@@ -83,6 +84,9 @@ interface UserPersonDetailRepository :
 
   @EntityGraph(value = "user-person-detail-graph", type = EntityGraph.EntityGraphType.FETCH)
   override fun findAll(spec: Specification<UserPersonDetail>, pageable: Pageable): Page<UserPersonDetail>
+
+  @EntityGraph(value = "user-person-detail-graph", type = EntityGraph.EntityGraphType.FETCH)
+  fun findAllByUsernameIn(usernames: List<String>): List<UserPersonDetail>
 
   @Query(
     """
