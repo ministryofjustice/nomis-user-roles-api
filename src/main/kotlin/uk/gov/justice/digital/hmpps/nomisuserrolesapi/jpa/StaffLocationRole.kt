@@ -36,15 +36,12 @@ class StaffLocationRole(
 ) {
   @Column(name = "TO_DATE")
   var toDate: LocalDate? = null
-    private set
 
   @Column(name = "SCHEDULE_TYPE")
   var scheduleType: String = ""
-    private set
 
   @Column(name = "HOURS_PER_WEEK")
   var hoursPerWeek: BigDecimal = BigDecimal.ZERO
-    private set
 
   fun modify(toDate: LocalDate?, scheduleType: ReferenceData, hoursPerWeek: BigDecimal): Boolean {
     val changeDetected =

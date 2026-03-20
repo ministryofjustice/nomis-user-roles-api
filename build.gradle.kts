@@ -28,7 +28,7 @@ dependencies {
 
   runtimeOnly("org.flywaydb:flyway-core")
   implementation("io.hypersistence:hypersistence-utils-hibernate-71:3.15.2")
-  implementation("org.hibernate.orm:hibernate-community-dialects:7.3.0.Final")
+  implementation("org.hibernate.orm:hibernate-community-dialects")
   runtimeOnly("com.h2database:h2:2.4.240")
   val oracleVersion = "23.26.1.0.0"
   implementation("com.oracle.database.jdbc:ojdbc11:$oracleVersion")
