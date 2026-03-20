@@ -26,18 +26,18 @@ data class AccountDetail(
 
   fun isAccountNonLocked(): Boolean = !isLocked()
 
-  fun isLocked(): Boolean = AccountStatus.values().filter { it.isLocked }.contains(status)
+  fun isLocked(): Boolean = AccountStatus.entries.filter { it.isLocked }.contains(status)
 
   fun isCredentialsNonExpired(): Boolean {
     val statusNonExpired =
       !EnumSet.of(AccountStatus.EXPIRED, AccountStatus.EXPIRED_LOCKED, AccountStatus.EXPIRED_LOCKED_TIMED)
         .contains(status)
-    return statusNonExpired && (passwordExpiry == null || passwordExpiry.isAfter(LocalDateTime.now()))
+    return statusNonExpired && (passwordExpiry == null || passwordExpiry?.isAfter(LocalDateTime.now()) == true)
   }
 
   fun isEnabled(): Boolean = isAccountNonLocked()
 
-  fun isExpired(): Boolean = AccountStatus.values().filter { it.isExpired }.contains(status)
+  fun isExpired(): Boolean = AccountStatus.entries.filter { it.isExpired }.contains(status)
 
   fun isActive(): Boolean = AccountStatus.activeStatuses().contains(status)
 
