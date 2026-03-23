@@ -33,8 +33,6 @@ dependencies {
   val oracleVersion = "23.26.1.0.0"
   implementation("com.oracle.database.jdbc:ojdbc11:$oracleVersion")
 
-  developmentOnly("org.springframework.boot:spring-boot-devtools")
-
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:2.0.0")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.13.0")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
