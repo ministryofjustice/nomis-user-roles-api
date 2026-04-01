@@ -5,6 +5,9 @@ info.app:
 spring:
   application:
     name: nomis-user-roles-api
+  batch:
+    job:
+      enabled: false
   http:
     codecs:
       max-in-memory-size: 10MB
