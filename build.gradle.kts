@@ -21,7 +21,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-flyway")
   implementation("org.springframework.boot:spring-boot-jackson2")
   // Temporarily pin spring doc at 3.0.2 whilst waiting for 3.0.4 upgrade
-  val springDocVersion = "3.0.3"
+  val springDocVersion = "3.0.2"
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion")
 
   constraints {
