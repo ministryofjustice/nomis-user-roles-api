@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.3.1"
-  kotlin("plugin.spring") version "2.3.21"
-  kotlin("plugin.jpa") version "2.3.21"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.5.3"
+  kotlin("plugin.spring") version "2.4.0"
+  kotlin("plugin.jpa") version "2.4.0"
   idea
 }
 
@@ -13,14 +13,17 @@ configurations {
 
 dependencies {
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:2.2.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:2.5.0")
   implementation("org.springframework.boot:spring-boot-starter-webclient")
   implementation("org.springframework.boot:spring-boot-starter-jdbc")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-flyway")
   implementation("org.springframework.boot:spring-boot-jackson2")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2")
+  // Temporarily pin spring doc at 3.0.2 whilst waiting for 3.0.4 upgrade
+  val springDocVersion = "3.0.2"
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion")
+
   constraints {
     implementation("org.webjars:swagger-ui:5.32.2")
   }
@@ -30,10 +33,10 @@ dependencies {
   implementation("com.google.guava:guava:33.6.0-jre")
 
   runtimeOnly("org.flywaydb:flyway-core")
-  implementation("io.hypersistence:hypersistence-utils-hibernate-71:3.15.2")
+  implementation("io.hypersistence:hypersistence-utils-hibernate-71:3.15.3")
   implementation("org.hibernate.orm:hibernate-community-dialects")
   runtimeOnly("com.h2database:h2:2.4.240")
-  val oracleVersion = "23.26.1.0.0"
+  val oracleVersion = "23.26.2.0.0"
   implementation("com.oracle.database.jdbc:ojdbc11:$oracleVersion")
 
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:2.0.0")
