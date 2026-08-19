@@ -36,8 +36,8 @@ dependencies {
   implementation("io.hypersistence:hypersistence-utils-hibernate-71:3.15.4")
   implementation("org.hibernate.orm:hibernate-community-dialects")
   runtimeOnly("com.h2database:h2:2.4.240")
-  val oracleVersion = "23.26.3.0.0"
-  implementation("com.oracle.database.jdbc:ojdbc11:$oracleVersion")
+  val oracleVersion = ":23.26.2.0.0"
+  implementation("com.oracle.database.jdbc:ojdbc11$oracleVersion")
 
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:3.0.0-beta2")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.13.0")
