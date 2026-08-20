@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.5"
   kotlin("plugin.spring") version "2.4.10"
   kotlin("plugin.jpa") version "2.4.10"
   idea
@@ -29,15 +29,15 @@ dependencies {
   }
   implementation("org.apache.commons:commons-lang3:3.20.0")
   implementation("org.apache.commons:commons-text:1.15.0")
-  implementation("commons-codec:commons-codec:1.22.0")
-  implementation("com.google.guava:guava:33.6.0-jre")
+  implementation("commons-codec:commons-codec:1.22.1")
+  implementation("com.google.guava:guava:33.7.1-jre")
 
   runtimeOnly("org.flywaydb:flyway-core")
   implementation("io.hypersistence:hypersistence-utils-hibernate-71:3.15.4")
   implementation("org.hibernate.orm:hibernate-community-dialects")
   runtimeOnly("com.h2database:h2:2.4.240")
-  val oracleVersion = "23.26.2.0.0"
-  implementation("com.oracle.database.jdbc:ojdbc11:$oracleVersion")
+  val oracleVersion = ":23.26.2.0.0"
+  implementation("com.oracle.database.jdbc:ojdbc11$oracleVersion")
 
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:3.0.0-beta2")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.13.0")
