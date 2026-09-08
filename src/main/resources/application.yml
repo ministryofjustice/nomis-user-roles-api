@@ -43,6 +43,7 @@ spring:
         max-page-size: 20000
   h2:
     console:
+      enabled: false
 
   jpa:
     database-platform: org.hibernate.community.dialect.OracleLegacyDialect
