@@ -43,7 +43,6 @@ spring:
         max-page-size: 20000
   h2:
     console:
-      enabled: false
 
   jpa:
     database-platform: org.hibernate.community.dialect.OracleLegacyDialect
@@ -71,10 +70,6 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
-    version: 5.32.11
-  model-converters:
-    kotlin-nullable-property-customizer:
-      enabled: false
 
 server:
   port: 8080
