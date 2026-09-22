@@ -1,6 +1,10 @@
 package uk.gov.justice.digital.hmpps.nomisuserrolesapi.resource
 
+import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -9,8 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.UserGroupMemberPk
 
 class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
+
+  @Autowired
+  private lateinit var userGroupMemberTestRepository: UserGroupMemberTestRepository
+
   @Autowired
   private lateinit var dataBuilder: DataBuilder
 
@@ -453,6 +462,12 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
 
     @Test
     fun `delete caseload from user`() {
+      var userGroupMember =
+        userGroupMemberTestRepository.findById(UserGroupMemberPk(userGroupCode = "WWI", username = "CASELOAD_USER1"))
+      assertTrue(userGroupMember.isPresent)
+      assertTrue(userGroupMember.get().active)
+      assertNull(userGroupMember.get().expiryDate)
+
       webTestClient.delete().uri("/users/CASELOAD_USER1/caseloads/WWI")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -462,6 +477,12 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
         .jsonPath("activeCaseload.id").isEqualTo("BXI")
         .jsonPath("$.caseloads[?(@.id == 'BXI')]").exists()
         .jsonPath("$.caseloads[?(@.id == 'WWI')]").doesNotExist()
+
+      userGroupMember =
+        userGroupMemberTestRepository.findById(UserGroupMemberPk(userGroupCode = "WWI", username = "CASELOAD_USER1"))
+      assertTrue(userGroupMember.isPresent)
+      assertFalse(userGroupMember.get().active)
+      assertThat(userGroupMember.get().expiryDate).isToday
     }
 
     @Test
