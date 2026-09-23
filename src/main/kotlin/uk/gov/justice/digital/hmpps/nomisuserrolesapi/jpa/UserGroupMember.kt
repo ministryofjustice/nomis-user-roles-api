@@ -32,13 +32,13 @@ data class UserGroupMember(
 
   @Column(name = "ACTIVE_FLAG")
   @Convert(converter = YesNoConverter::class)
-  val active: Boolean = true,
+  var active: Boolean = true,
 
   @Column(name = "START_DATE")
   val startDate: LocalDate = LocalDate.now(),
 
   @Column(name = "EXPIRY_DATE")
-  val expiryDate: LocalDate? = null,
+  var expiryDate: LocalDate? = null,
 
   @ManyToOne(optional = false, fetch = LAZY)
   @JoinColumn(name = "LOCAL_AUTHORITY_CODE", nullable = false, updatable = false, insertable = false)
