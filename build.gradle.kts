@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.8"
-  kotlin("plugin.spring") version "2.4.10"
-  kotlin("plugin.jpa") version "2.4.10"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.9"
+  kotlin("plugin.spring") version "2.4.20"
+  kotlin("plugin.jpa") version "2.4.20"
   idea
 }
 
@@ -13,7 +13,7 @@ configurations {
 
 dependencies {
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:3.0.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:3.0.2")
   implementation("org.springframework.boot:spring-boot-starter-webclient")
   implementation("org.springframework.boot:spring-boot-starter-jdbc")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -28,13 +28,13 @@ dependencies {
   implementation("com.google.guava:guava:33.7.1-jre")
 
   runtimeOnly("org.flywaydb:flyway-core")
-  implementation("io.hypersistence:hypersistence-utils-hibernate-71:3.15.5")
+  implementation("io.hypersistence:hypersistence-utils-hibernate-71:3.16.0")
   implementation("org.hibernate.orm:hibernate-community-dialects")
   runtimeOnly("com.h2database:h2:2.5.250")
   val oracleVersion = ":23.26.2.0.0"
   implementation("com.oracle.database.jdbc:ojdbc11$oracleVersion")
 
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:3.0.1")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:3.0.2")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.13.0")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
   testImplementation("org.springframework.boot:spring-boot-starter-webclient-test")
@@ -44,7 +44,7 @@ dependencies {
   testImplementation("org.springframework.boot:spring-boot-test-autoconfigure")
   testImplementation("org.wiremock:wiremock-standalone:3.13.2")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.53.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.46") {
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.48") {
     exclude(group = "io.swagger.core.v3")
   }
 
