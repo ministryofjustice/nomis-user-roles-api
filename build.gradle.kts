@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.9"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.10"
   kotlin("plugin.spring") version "2.4.20"
   kotlin("plugin.jpa") version "2.4.20"
   idea
@@ -43,7 +43,7 @@ dependencies {
   testImplementation("org.springframework.boot:spring-boot-starter-data-jdbc-test")
   testImplementation("org.springframework.boot:spring-boot-test-autoconfigure")
   testImplementation("org.wiremock:wiremock-standalone:3.13.2")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.53.0")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.66.0")
   testImplementation("io.swagger.parser.v3:swagger-parser:2.1.48") {
     exclude(group = "io.swagger.core.v3")
   }
