@@ -50,8 +50,9 @@ Always run the smallest relevant Gradle task(s) after making changes
 
 ## Conventions
 
-- Follow existing Kotlin style in the file you're editing; this repo uses the
-  conventions enforced by the HMPPS Gradle Spring Boot plugin (includes ktlint).
+- Follow existing Kotlin style in the file you're editing. Although the HMPPS
+  Gradle Spring Boot plugin includes ktlint, do not run any Gradle ktlint tasks
+  in this repository; skip ktlint validation and formatting.
 - Keep DTOs in `data/`, entities in `jpa/`, controllers in `resource/`, and
   business logic in `service/` — don't mix layers.
 - Add Flyway migrations for any schema change under the existing `db/` migration path;
