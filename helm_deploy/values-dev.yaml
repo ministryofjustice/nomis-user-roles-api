@@ -15,4 +15,3 @@ generic-service:
     SPRINGDOC_SWAGGER-UI_ENABLED: "true"
 
 generic-prometheus-alerts:
-  alertSeverity: hmpps_tech_non_prod

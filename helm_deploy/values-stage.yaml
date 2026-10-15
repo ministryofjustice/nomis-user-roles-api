@@ -13,4 +13,3 @@ generic-service:
     FEATURE_RECORD-LOGON-DATE: true
 
 generic-prometheus-alerts:
-  alertSeverity: hmpps_tech_non_prod
