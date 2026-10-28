@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateGeneralUserRequ
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.helper.DataBuilder
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.jpa.AccountStatus
+import java.time.LocalDate
 
 class UserResourceIntTest : IntegrationTestBase() {
   @Autowired
@@ -1568,6 +1569,126 @@ class UserResourceIntTest : IntegrationTestBase() {
         .jsonPath("$[5].groups").value<JSONArray> {
           assertThat(it.map { m -> (m as Map<*, *>)["id"] }).containsExactlyInAnyOrder("WWI", "LEI")
         }
+    }
+  }
+
+  @Nested
+  @DisplayName("GET /users/{username}/administered-by/{localAdministratorUsername}")
+  inner class IsUserAdministeredBy {
+    @BeforeEach
+    internal fun createUsers() {
+      with(dataBuilder) {
+        localAdministrator().username("JON_LSA").atPrisons("WWI").buildAndSave()
+
+        generalUser().username("mike.dean").atPrisons("WWI").buildAndSave()
+        generalUser().username("mark.brown").atPrisons("BXI").buildAndSave()
+      }
+    }
+
+    @AfterEach
+    internal fun deleteUsers() = dataBuilder.deleteAllUsers()
+
+    @Test
+    fun `access unauthorized when no authority`() {
+      webTestClient.get().uri("/users/mike.dean/administered-by/JON_LSA")
+        .exchange()
+        .expectStatus().isUnauthorized
+    }
+
+    @Test
+    fun `access unauthorized with wrong role`() {
+      webTestClient.get().uri("/users/mike.dean/administered-by/JON_LSA")
+        .headers(setAuthorisation(roles = listOf("ROLE_VIEW_NOMIS_STAFF_DETAILS")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
+    fun `true when the user is in a local admin authority the local administrator administers`() {
+      webTestClient.get().uri("/users/mike.dean/administered-by/JON_LSA")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN"), username = "JON_LSA"))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("username").isEqualTo("mike.dean")
+        .jsonPath("localAdministratorUsername").isEqualTo("JON_LSA")
+        .jsonPath("administered").isEqualTo(true)
+    }
+
+    @Test
+    fun `false when the user is only in another local admin authority`() {
+      webTestClient.get().uri("/users/mark.brown/administered-by/JON_LSA")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN"), username = "JON_LSA"))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("administered").isEqualTo(false)
+    }
+
+    @Test
+    fun `false when the user does not exist`() {
+      webTestClient.get().uri("/users/dummy/administered-by/JON_LSA")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("administered").isEqualTo(false)
+    }
+
+    @Test
+    fun `false when the local administrator does not exist`() {
+      webTestClient.get().uri("/users/mike.dean/administered-by/dummy")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("administered").isEqualTo(false)
+    }
+
+    @Test
+    fun `false when the user's membership of the authority is inactive`() {
+      dataBuilder.generalUser()
+        .username("sam.inactive")
+        .atPrisons("WWI")
+        .build()
+        .transform { user ->
+          user.copy(
+            activeAndInactiveMemberOfUserGroups = user.activeAndInactiveMemberOfUserGroups
+              .map { it.copy(active = false, expiryDate = LocalDate.now().minusDays(1)) }
+              .toMutableList(),
+          )
+        }
+        .save()
+
+      webTestClient.get().uri("/users/sam.inactive/administered-by/JON_LSA")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("administered").isEqualTo(false)
+    }
+
+    @Test
+    fun `false when the administrator's assignment to the authority is inactive`() {
+      dataBuilder.localAdministrator()
+        .username("OLD_LSA")
+        .atPrisons("WWI")
+        .build()
+        .transform { user ->
+          user.copy(
+            activeAndInactiveAdministratorOfUserGroups = user.activeAndInactiveAdministratorOfUserGroups
+              .map { it.copy(active = false, expiryDate = LocalDate.now().minusDays(1)) }
+              .toMutableList(),
+          )
+        }
+        .save()
+
+      webTestClient.get().uri("/users/mike.dean/administered-by/OLD_LSA")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("administered").isEqualTo(false)
     }
   }
 

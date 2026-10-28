@@ -99,6 +99,22 @@ interface UserPersonDetailRepository :
   )
   fun findUserDpsRolesCountByUsernames(@Param("usernames") usernames: List<String>): List<UserPersonDpsRoleCount>
 
+  @Query(
+    """
+    SELECT COUNT(groupMember)
+    FROM UserGroupMember groupMember, UserGroupAdministrator groupAdministrator
+    WHERE groupMember.id.userGroupCode = groupAdministrator.id.userGroupCode
+    AND groupMember.id.username = :username
+    AND groupMember.active = true
+    AND groupAdministrator.id.username = :localAdministratorUsername
+    AND groupAdministrator.active = true
+    """,
+  )
+  fun isAdministeredBy(
+    @Param("username") username: String,
+    @Param("localAdministratorUsername") localAdministratorUsername: String,
+  ): Long
+
   @Suppress("FunctionName")
   @EntityGraph(value = "user-person-detail-graph", type = EntityGraph.EntityGraphType.FETCH)
   fun findAllByStaff_FirstNameIgnoreCaseAndStaff_LastNameIgnoreCase(

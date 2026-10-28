@@ -24,6 +24,7 @@ import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLinkedLocalAdmi
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.CreateLocalAdminUserRequest
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.GroupAdminSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserAdministeredBy
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserBasicDetails
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserCaseloadDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
@@ -89,6 +90,13 @@ class UserService(
   fun findByUsername(username: String): UserDetail = userPersonDetailRepository.findById(username)
     .map(this::toUserDetail)
     .orElseThrow(UserNotFoundException("User $username not found"))
+
+  @Transactional(readOnly = true)
+  fun isAdministeredBy(username: String, localAdministratorUsername: String) = UserAdministeredBy(
+    username = username,
+    localAdministratorUsername = localAdministratorUsername,
+    administered = userPersonDetailRepository.isAdministeredBy(username, localAdministratorUsername) > 0,
+  )
 
   @Transactional(readOnly = true)
   fun findUsersByFirstAndLastNames(firstName: String, lastName: String): List<UserSummaryWithEmail> = userPersonDetailRepository.findAllByStaff_FirstNameIgnoreCaseAndStaff_LastNameIgnoreCase(firstName, lastName)
