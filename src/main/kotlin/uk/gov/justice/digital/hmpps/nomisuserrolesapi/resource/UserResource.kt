@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.GroupAdminSummaryWithEmail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.StaffDetail
+import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserAdministeredBy
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserDetail
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserLastName
 import uk.gov.justice.digital.hmpps.nomisuserrolesapi.data.UserStatus
@@ -120,6 +121,39 @@ class UserResource(
     log.info("Returning user details for : {}", username)
     return userDetail
   }
+
+  @PreAuthorize("hasAnyRole('ROLE_MAINTAIN_ACCESS_ROLES')")
+  @GetMapping("/{username}/administered-by/{localAdministratorUsername}")
+  @Operation(
+    summary = "Check if a local administrator looks after a user",
+    description = "Returns true if the user belongs to a local admin authority that the local administrator manages, otherwise false. " +
+      "Also returns false if either user doesn't exist. Requires role ROLE_MAINTAIN_ACCESS_ROLES",
+    security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN"), SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES")],
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Whether the user is administered by the local administrator",
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Missing the role needed to run this check",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun isUserAdministeredBy(
+    @Schema(description = "Username", example = "testuser1", required = true)
+    @PathVariable
+    username: String,
+    @Schema(description = "Local administrator's username", example = "testlsa1", required = true)
+    @PathVariable
+    localAdministratorUsername: String,
+  ): UserAdministeredBy = userService.isAdministeredBy(username, localAdministratorUsername)
 
   @PreAuthorize("hasAnyRole('ROLE_MAINTAIN_ACCESS_ROLES_ADMIN', 'ROLE_MAINTAIN_ACCESS_ROLES', 'ROLE_MANAGE_NOMIS_USER_ACCOUNT', 'ROLE_VIEW_NOMIS_STAFF_DETAILS')")
   @GetMapping("/basic/{username}")
