@@ -21,11 +21,15 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-flyway")
   implementation("org.springframework.boot:spring-boot-jackson2")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0")
+  // Temporarily pin swagger-ui for dompurify issues CVE-2026-11680(2-4)
+  constraints {
+    implementation("org.webjars:swagger-ui:5.34.1")
+  }
 
   implementation("org.apache.commons:commons-lang3:3.21.0")
   implementation("org.apache.commons:commons-text:1.15.0")
   implementation("commons-codec:commons-codec:1.23.0")
-  implementation("com.google.guava:guava:33.7.2-jre")
+  implementation("com.google.guava:guava:33.8.0-jre")
 
   runtimeOnly("org.flywaydb:flyway-core")
   implementation("io.hypersistence:hypersistence-utils-hibernate-71:3.16.0")
