@@ -206,10 +206,16 @@ data class UserPersonDetail(
           userGroupMember,
         )
       }
-      activeAndInactiveMemberOfUserGroups.removeAll(userGroupMembersAssociatedWithCaseload)
+      deactivateUserGroupMembers(userGroupMembersAssociatedWithCaseload)
     }
-
     caseloads.remove(userCaseload)
+  }
+
+  private fun deactivateUserGroupMembers(userGroupMembersAssociatedWithCaseload: List<UserGroupMember>) {
+    userGroupMembersAssociatedWithCaseload.filter { it.active }.forEach { userGroupMember ->
+      userGroupMember.active = false
+      userGroupMember.expiryDate = now()
+    }
   }
 
   private fun isUserGroupCaseload(caseload: Caseload) = (type == UsageType.GENERAL) && !caseload.isDpsCaseload()
