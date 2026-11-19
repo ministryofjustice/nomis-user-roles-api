@@ -23,6 +23,8 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
   @Autowired
   private lateinit var dataBuilder: DataBuilder
 
+  private fun leiMembership() = userGroupMemberTestRepository.findById(UserGroupMemberPk(userGroupCode = "LEI", username = "CASELOAD_USER1")).orElseThrow()
+
   @DisplayName("GET /users/{username}/caseloads")
   @Nested
   inner class GetCaseloadsByUsername {
@@ -148,7 +150,7 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `add caseload to user`() {
+    fun `add caseload to user and reactivate membership when re-added`() {
       webTestClient.get().uri("/users/CASELOAD_USER1/caseloads")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -188,6 +190,11 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
         .jsonPath("$.caseloads[?(@.id == 'BXI')]").exists()
         .jsonPath("$.caseloads[?(@.id == 'LEI')]").doesNotExist()
 
+      with(leiMembership()) {
+        assertThat(active).isFalse()
+        assertThat(expiryDate).isNotNull()
+      }
+
       webTestClient.post().uri("/users/CASELOAD_USER1/caseloads/LEI")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
         .exchange()
@@ -198,6 +205,11 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
         .jsonPath("$.caseloads[?(@.id == 'BXI')]").exists()
         .jsonPath("$.caseloads[?(@.id == 'LEI')]").exists()
         .jsonPath("$.caseloads[?(@.id == 'NWEB')]").exists()
+
+      with(leiMembership()) {
+        assertThat(active).isTrue()
+        assertThat(expiryDate).isNull()
+      }
 
       webTestClient.get().uri("/users/CASELOAD_USER1/caseloads")
         .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
@@ -304,6 +316,38 @@ class UserCaseloadManagementResourceIntTest : IntegrationTestBase() {
         .jsonPath("$.caseloads[?(@.id == 'BXI')]").exists()
         .jsonPath("$.caseloads[?(@.id == 'MDI')]").exists()
         .jsonPath("$.caseloads[?(@.id == 'LEI')]").exists()
+    }
+
+    @Test
+    fun `bulk add reactivates an inactive user group membership`() {
+      webTestClient.post().uri("/users/CASELOAD_USER1/caseloads/LEI")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isCreated
+
+      webTestClient.delete().uri("/users/CASELOAD_USER1/caseloads/LEI")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .exchange()
+        .expectStatus().isOk
+
+      with(leiMembership()) {
+        assertThat(active).isFalse()
+        assertThat(expiryDate).isNotNull()
+      }
+
+      webTestClient.post().uri("/users/CASELOAD_USER1/caseloads")
+        .headers(setAuthorisation(roles = listOf("ROLE_MAINTAIN_ACCESS_ROLES_ADMIN")))
+        .body(BodyInserters.fromValue(listOf("MDI", "LEI")))
+        .exchange()
+        .expectStatus().isCreated
+        .expectBody()
+        .jsonPath("$.caseloads[?(@.id == 'MDI')]").exists()
+        .jsonPath("$.caseloads[?(@.id == 'LEI')]").exists()
+
+      with(leiMembership()) {
+        assertThat(active).isTrue()
+        assertThat(expiryDate).isNull()
+      }
     }
 
     @Test
