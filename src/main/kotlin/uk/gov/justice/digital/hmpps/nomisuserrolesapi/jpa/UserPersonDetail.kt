@@ -206,10 +206,16 @@ data class UserPersonDetail(
           userGroupMember,
         )
       }
-      activeAndInactiveMemberOfUserGroups.removeAll(userGroupMembersAssociatedWithCaseload)
+      deactivateUserGroupMembers(userGroupMembersAssociatedWithCaseload)
     }
-
     caseloads.remove(userCaseload)
+  }
+
+  private fun deactivateUserGroupMembers(userGroupMembersAssociatedWithCaseload: List<UserGroupMember>) {
+    userGroupMembersAssociatedWithCaseload.filter { it.active }.forEach { userGroupMember ->
+      userGroupMember.active = false
+      userGroupMember.expiryDate = now()
+    }
   }
 
   private fun isUserGroupCaseload(caseload: Caseload) = (type == UsageType.GENERAL) && !caseload.isDpsCaseload()
@@ -217,15 +223,22 @@ data class UserPersonDetail(
   private fun isCaseloadForUserGroup(caseload: Caseload, userGroupMember: UserGroupMember): Boolean = caseload.userGroups.firstOrNull { groupCaseload -> groupCaseload.userGroup === userGroupMember.userGroup && userGroupMember.user === this } !== null
 
   private fun addUserGroup(userGroup: UserGroup) {
-    activeAndInactiveMemberOfUserGroups.firstOrNull { it.id.userGroupCode == userGroup.id && it.id.username == this.username }
-      ?: run {
-        val member = UserGroupMember(
-          id = UserGroupMemberPk(userGroupCode = userGroup.id, username = this.username),
-          user = this,
-          userGroup = userGroup,
-        )
-        activeAndInactiveMemberOfUserGroups.add(member)
+    val existingMember = activeAndInactiveMemberOfUserGroups.firstOrNull { it.id.userGroupCode == userGroup.id && it.id.username == this.username }
+    if (existingMember != null) {
+      if (!existingMember.active) {
+        existingMember.active = true
+        existingMember.expiryDate = null
       }
+      return
+    }
+
+    activeAndInactiveMemberOfUserGroups.add(
+      UserGroupMember(
+        id = UserGroupMemberPk(userGroupCode = userGroup.id, username = this.username),
+        user = this,
+        userGroup = userGroup,
+      ),
+    )
   }
 
   private fun addAdminUserGroup(userGroup: UserGroup) {

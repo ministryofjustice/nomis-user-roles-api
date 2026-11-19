@@ -86,7 +86,7 @@ class UserCaseloadManagementResource(
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(
     summary = "Add a caseload to the specified user account",
-    description = "Adds a caseload to a user, caseload must exist. Cannot add an existing caseload to the same user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
+    description = "Adds a caseload to a user, caseload must exist. Any inactive user group membership for the caseload is reactivated and its expiry date cleared. Cannot add an existing caseload to the same user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
@@ -145,7 +145,7 @@ class UserCaseloadManagementResource(
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(
     summary = "Add multiple caseloads to the specified user account",
-    description = "Adds caseloads to a user, caseloads must exist. Cannot add an existing caseload to the same user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
+    description = "Adds caseloads to a user, caseloads must exist. Any inactive user group memberships for the caseloads are reactivated and their expiry dates cleared. Cannot add an existing caseload to the same user. Requires role ROLE_MAINTAIN_ACCESS_ROLES_ADMIN",
     security = [SecurityRequirement(name = "MAINTAIN_ACCESS_ROLES_ADMIN")],
     responses = [
       ApiResponse(
